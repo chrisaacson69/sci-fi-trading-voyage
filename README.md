@@ -23,20 +23,31 @@ py -3 trade_routes.py --selftest               # values checked by hand
 ## Data
 
 - **`data/ports.csv`**, one row per stop: `planet,x,y,alarm`. This is the only place coordinates are stored. `alarm` is the game's port alarm level: Low, Medium, High or Extreme.
-- **`data/market.csv`**, one row per (stop, good): `planet,good,size,side,price`.
+- **`data/market/YYYY-MM-DD.csv`**: one price snapshot per **game day**, one row per (stop, good): `planet,good,size,side,price`. The calculator uses the latest file unless you pass `--date`.
 - **`data/routes.csv`**: routes you've opened, with their in-game `level` and `cp_cap` (the most CP you can bring). Upgrading a route raises the cap, and upgrades cost more on better routes. `upgrade_cost` is blank until recorded.
 - **`data/ships.csv`**: ship types from the game's ship list: `name,cost,limit,cp,cargo,dpm,hp,cruise_min,cruise_max,warp,notes`. `limit` is the build limit, a total across all your fleets, and `dpm` is damage per minute. In every row, `warp` is exactly 5 × `cruise_min`. `--ships` accepts these names, e.g. `ST59x3,FG300x2`, and then knows the fleet's CP, DPM, HP, cost and speed, and warns if you're over a build limit.
 - **`data/oracle.csv`**: the game's own $/hr figure for a fleet on a route (`date,route_a,route_b,fleet,game_per_hr,notes`, fleet written like `--ships`). `--oracle` compares each row against the model's open choices: separate vs pooled holds, and warp calibrated on FG300 vs warp read as Gm/hr.
 - **`data/encounters.csv`** logs pirate attacks, one line per trip or attack. Safe trips count too. Nothing reads it yet; it's the evidence a pirate model will be calibrated from.
 
-In `market.csv`:
+In the price files:
 
 - `side` **S** = the stop sells to you (buy here), **B** = the stop buys from you (sell here).
 - `size` = cargo space one unit takes; `price` is for one unit.
 - Distance is straight-line between the `ports.csv` coordinates, in Gm.
 
-Snapshot: all 25 stops, recorded 2026-10-06. **Prices change daily**, so re-enter them before you
-trust a ranking. That said, distance and choice of good have mattered more than the daily swings.
+### Daily update (the game day resets at 7 pm)
+
+Prices change at the reset; during this event they have been ramping up. Each day:
+
+1. Write the new prices to `data/market/<game-day>.csv`, same columns as before. Commas inside
+   numbers are fine (`18,424`). Planet names must match `data/ports.csv` exactly.
+2. `py -3 trade_routes.py --diff <previous-day> <game-day>` lists goods added or removed at each
+   stop, any size changes, and each good's median price change.
+3. Rerun the routes. `--oracle` and `--selftest` check each `oracle.csv` row against the prices
+   **for that row's own day**, so a new day never breaks an old check.
+
+This file is the interface for any tool that captures prices automatically: write one CSV per game
+day in this format and nothing else needs to change.
 
 `--audit` flags the two kinds of typo seen so far: a `size` that doesn't match the other rows for
 that good, and a per-cargo price more than 2× away from that good's median. A flagged price can be

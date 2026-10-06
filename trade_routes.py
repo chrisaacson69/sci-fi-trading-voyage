@@ -47,7 +47,23 @@ from dataclasses import dataclass, asdict, field
 from functools import reduce
 from pathlib import Path
 
-DEFAULT_DATA = Path(__file__).resolve().parent / "data" / "market.csv"
+MARKET_DIR = Path(__file__).resolve().parent / "data" / "market"   # one CSV per game day: YYYY-MM-DD.csv
+
+
+def market_snapshot(date: str | None = None) -> Path:
+    """The price file for a game day (YYYY-MM-DD), or the latest one."""
+    files = sorted(MARKET_DIR.glob("????-??-??.csv"))
+    if not files:
+        raise FileNotFoundError(f"no price snapshots in {MARKET_DIR}")
+    if date is None:
+        return files[-1]
+    f = MARKET_DIR / f"{date}.csv"
+    if not f.exists():
+        raise FileNotFoundError(f"no snapshot for {date}; have {', '.join(x.stem for x in files)}")
+    return f
+
+
+DEFAULT_DATA = None  # resolved to the latest snapshot at call time
 DEFAULT_PORTS = Path(__file__).resolve().parent / "data" / "ports.csv"
 DEFAULT_ROUTES = Path(__file__).resolve().parent / "data" / "routes.csv"
 DEFAULT_SHIPS = Path(__file__).resolve().parent / "data" / "ships.csv"
@@ -129,8 +145,9 @@ def load_ports(path: Path = DEFAULT_PORTS):
     return coords, alarms
 
 
-def load_market(path: Path = DEFAULT_DATA, ports: Path = DEFAULT_PORTS):
-    """Return (quotes, coords, alarms) from the market and ports CSVs."""
+def load_market(path: Path | None = None, ports: Path = DEFAULT_PORTS):
+    """Return (quotes, coords, alarms) from a price snapshot (default: latest) and the ports CSV."""
+    path = path or market_snapshot()
     coords, alarms = load_ports(ports)
     quotes = []
     with open(path, newline="") as f:
@@ -141,7 +158,8 @@ def load_market(path: Path = DEFAULT_DATA, ports: Path = DEFAULT_PORTS):
             side = r["side"].strip().upper()
             if side not in ("S", "B"):
                 raise ValueError(f"{p}/{r['good']}: side must be S or B, got {side!r}")
-            quotes.append(Quote(p, r["good"].strip(), int(r["size"]), side, int(r["price"])))
+            quotes.append(Quote(p, r["good"].strip(), int(r["size"].replace(",", "")), side,
+                                int(r["price"].replace(",", ""))))
     return quotes, coords, alarms
 
 
@@ -443,25 +461,51 @@ def print_table(trips, label, whole):
     print("\nprofit/hr counts travel time only; pirate attacks (time and losses) are not modelled yet")
 
 
+def diff_days(old: str, new: str, ports: Path = DEFAULT_PORTS):
+    """What changed between two game days: goods added/removed, sizes, and price moves."""
+    qa, _, _ = load_market(market_snapshot(old), ports)
+    qb, _, _ = load_market(market_snapshot(new), ports)
+    ka = {(q.planet, q.good, q.side): q for q in qa}
+    kb = {(q.planet, q.good, q.side): q for q in qb}
+    gone, added = sorted(set(ka) - set(kb)), sorted(set(kb) - set(ka))
+    print(f"{old} -> {new}: {len(ka)} -> {len(kb)} quotes")
+    for k in gone:
+        print(f"  REMOVED  {k[0]} {k[1]} ({k[2]})")
+    for k in added:
+        print(f"  ADDED    {k[0]} {k[1]} ({k[2]}) size {kb[k].size:,} price {kb[k].price:,}")
+    changes = defaultdict(list)
+    for k in sorted(set(ka) & set(kb)):
+        a, b = ka[k], kb[k]
+        if a.size != b.size:
+            print(f"  SIZE     {k[0]} {k[1]}: {a.size:,} -> {b.size:,}")
+        changes[k[1]].append((b.price / a.price - 1) * 100)
+    print("  price change by good (median % across stops, min..max):")
+    for good, ch in sorted(changes.items(), key=lambda kv: -statistics.median(kv[1])):
+        print(f"    {good:15} {statistics.median(ch):+7.2f}%   ({min(ch):+.2f} .. {max(ch):+.2f}, {len(ch)} quotes)")
+
+
 def oracle_report(quotes, coords, ship_types, path: Path = DEFAULT_ORACLE):
     """Compare each logged game $/hr figure against the model's open choices:
     separate vs pooled holds, and warp-relative-to-FG300 vs warp-as-Gm/hr speed."""
     if not path.exists():
         print(f"no {path}")
         return
-    sells, buys = book(quotes)
     with open(path, newline="") as f:
         rows = list(csv.DictReader(f))
     for r in rows:
+        snap = MARKET_DIR / f"{r['date'].strip()}.csv"
+        day_quotes = load_market(snap)[0] if snap.exists() else quotes
+        sells, buys = book(day_quotes)
         a, b, game = r["route_a"].strip(), r["route_b"].strip(), float(r["game_per_hr"])
         fleet = parse_ships(r["fleet"], ship_types)
         warps = [st.warp for st in fleet.ships if st]
-        print(f"{r['date']}  {a} <-> {b}  fleet {r['fleet']}  game says {game:,.0f}/hr")
+        print(f"{r['date']}  {a} <-> {b}  fleet {r['fleet']}  game says {game:,.0f}/hr"
+              f"  (prices: {snap.stem if snap.exists() else 'latest snapshot -- none for that day'})")
         if len(warps) != len(fleet.ships):
             print("   (a ship has no warp speed; skipped)")
             continue
-        speeds = {"calibrated (FG300 timing)": fleet.seconds_per_gm,
-                  "warp = Gm/hr": 3600 / min(warps)}
+        speeds = {"calibrated (FG300 timing)": SPEED_MODELS["timed"](min(warps)),
+                  "warp = Gm/hr": SPEED_MODELS["warp"](min(warps))}
         for hold_name, holds in (("separate holds", fleet.holds), ("pooled hold", [sum(fleet.holds)])):
             for sp_name, spg in speeds.items():
                 t = make_trip(a, b, sells, buys, coords, seconds_per_gm=spg, holds=holds)
@@ -471,7 +515,7 @@ def oracle_report(quotes, coords, ship_types, path: Path = DEFAULT_ORACLE):
 
 def selftest() -> int:
     """Check against values worked out by hand from the 2026-10-06 snapshot."""
-    quotes, coords, alarms = load_market()
+    quotes, coords, alarms = load_market(market_snapshot("2026-10-06"))
     trips = {(t.a, t.b): t for t in round_trips(quotes, coords, alarms=alarms)}
     checks = []
 
@@ -557,8 +601,12 @@ def selftest() -> int:
     if DEFAULT_ORACLE.exists():
         with open(DEFAULT_ORACLE, newline="") as f:
             for r in csv.DictReader(f):
+                snap = MARKET_DIR / f"{r['date'].strip()}.csv"
+                if not snap.exists():
+                    continue  # a game day we have no prices for can't be checked
+                osells, obuys = book(load_market(snap)[0])
                 fl = parse_ships(r["fleet"], types)
-                t = make_trip(r["route_a"], r["route_b"], sells, buys, coords,
+                t = make_trip(r["route_a"], r["route_b"], osells, obuys, coords,
                               seconds_per_gm=fl.seconds_per_gm, holds=fl.holds)
                 ratio = t.profit_per_hour / float(r["game_per_hr"])
                 check(f"oracle {r['route_a']}/{r['route_b']} {r['fleet']}: predicted {ratio:.2f}x game",
@@ -570,7 +618,9 @@ def selftest() -> int:
 
 def main(argv=None) -> int:
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
-    ap.add_argument("--data", type=Path, default=DEFAULT_DATA, help="market CSV (default data/market.csv)")
+    ap.add_argument("--data", type=Path, default=None, help="a price CSV (default: latest in data/market/)")
+    ap.add_argument("--date", help="use the price snapshot for this game day, YYYY-MM-DD")
+    ap.add_argument("--diff", nargs=2, metavar=("OLD", "NEW"), help="compare two game days' prices")
     ap.add_argument("--ports", type=Path, default=DEFAULT_PORTS, help="ports CSV (default data/ports.csv)")
     ap.add_argument("--cargo", type=float, default=1.0, help="cargo capacity (Size units)")
     ap.add_argument("--whole-units", action="store_true",
@@ -601,7 +651,13 @@ def main(argv=None) -> int:
         return selftest()
     global speed_model
     speed_model = args.speed_model
-    quotes, coords, alarms = load_market(args.data, args.ports)
+    if args.diff:
+        diff_days(*args.diff, ports=args.ports)
+        return 0
+    data = args.data or market_snapshot(args.date)
+    quotes, coords, alarms = load_market(data, args.ports)
+    if not args.json and not args.audit:
+        print(f"prices: {data.name}", file=sys.stderr)
     warnings = audit(quotes)
     if args.audit:
         print("\n".join(warnings) or "no warnings")
