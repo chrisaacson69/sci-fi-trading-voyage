@@ -53,13 +53,24 @@ DEFAULT_ROUTES = Path(__file__).resolve().parent / "data" / "routes.csv"
 DEFAULT_SHIPS = Path(__file__).resolve().parent / "data" / "ships.csv"
 DEFAULT_ORACLE = Path(__file__).resolve().parent / "data" / "oracle.csv"
 ALARMS = ["Low", "Medium", "High", "Extreme"]  # the game's port alarm levels, in order
-SECONDS_PER_GM = 2.0  # measured, first fleet (2x FG300: 3CP, 2000 cargo each)
-REF_WARP = 5000       # FG300's listed warp. Warp is NOT Gm/hr: FG300 measured 1800 Gm/hr.
-                      # So warp is used as RELATIVE speed: s/Gm = SECONDS_PER_GM * REF_WARP / warp.
+SECONDS_PER_GM = 2.0  # measured with a stopwatch, first fleet (2x FG300: 3CP, 2000 cargo each)
+REF_WARP = 5000       # FG300's listed warp
+
+# Two ways to turn warp into travel time. They disagree by 2.78x, and the evidence splits:
+#   "warp"  : warp is Gm/hr, so s/Gm = 3600 / warp. Matches the game's own $/hr figure
+#             (data/oracle.csv: 0.94x and 1.09x on two routes). DEFAULT.
+#   "timed" : calibrated on the FG300 stopwatch run (1700 Gm in 56:40 = 1800 Gm/hr, not 5000),
+#             s/Gm = 2.0 * 5000 / warp. Matches the stopwatch, but runs 0.34-0.39x the game's figure.
+# Both are proportional to 1/warp, so they rank ships and routes identically; only absolute $/hr differs.
+SPEED_MODELS = {
+    "warp": lambda warp: 3600 / warp,
+    "timed": lambda warp: SECONDS_PER_GM * REF_WARP / warp,
+}
+speed_model = "warp"
 
 
 def seconds_per_gm_for(warp: float) -> float:
-    return SECONDS_PER_GM * REF_WARP / warp
+    return SPEED_MODELS[speed_model](warp)
 
 
 @dataclass(frozen=True)
@@ -524,10 +535,16 @@ def selftest() -> int:
     fl = parse_ships("ST59x3", types)
     eq("  ...named ships carry CP", fl.cp, 84)
     eq("  ...and DPM", fl.dpm, 3 * 27373)
-    eq("FG300 (the timing fleet) runs at the measured 2.0 s/Gm", types["FG300"].seconds_per_gm, 2.0)
-    eq("ST59 (warp 2250) is 2.22x slower", types["ST59"].seconds_per_gm, 2.0 * 5000 / 2250)
+    global speed_model
+    saved, speed_model = speed_model, "timed"
+    eq("timed model: FG300 (the stopwatch fleet) runs at the measured 2.0 s/Gm",
+       types["FG300"].seconds_per_gm, 2.0)
+    eq("timed model: ST59 (warp 2250) is 2.22x slower", types["ST59"].seconds_per_gm, 2.0 * 5000 / 2250)
+    speed_model = "warp"
+    eq("warp model: FG300 at 3600/5000 s/Gm", types["FG300"].seconds_per_gm, 0.72)
     eq("mixed fleet moves at its slowest ship", parse_ships("FG300x2,ST59", types).seconds_per_gm,
-       2.0 * 5000 / 2250)
+       3600 / 2250)
+    speed_model = saved
     check("build limit is flagged", parse_ships("FG300x16", types).over_limit() != [])
     routes = load_routes()
     check("routes.csv: Free Port/Ares is level 4, 160 CP either way round",
@@ -535,6 +552,18 @@ def selftest() -> int:
     sells, buys = book(quotes)
     rows = fill_cap("Free Port", "Ares", sells, buys, coords, 160, types, 2.0, 0.0)
     eq("160 CP would fit 20 AC721, but the build limit is 15", {r[1].name: r[2] for r in rows}["AC721"], 15)
+    # the game's own $/hr figures: default model must land within 15% of each
+    saved, speed_model = speed_model, "warp"
+    if DEFAULT_ORACLE.exists():
+        with open(DEFAULT_ORACLE, newline="") as f:
+            for r in csv.DictReader(f):
+                fl = parse_ships(r["fleet"], types)
+                t = make_trip(r["route_a"], r["route_b"], sells, buys, coords,
+                              seconds_per_gm=fl.seconds_per_gm, holds=fl.holds)
+                ratio = t.profit_per_hour / float(r["game_per_hr"])
+                check(f"oracle {r['route_a']}/{r['route_b']} {r['fleet']}: predicted {ratio:.2f}x game",
+                      0.85 <= ratio <= 1.15)
+    speed_model = saved
     print("PASS" if all(checks) else "FAIL")
     return 0 if all(checks) else 1
 
@@ -554,7 +583,9 @@ def main(argv=None) -> int:
     ap.add_argument("--routes-file", type=Path, default=DEFAULT_ROUTES)
     ap.add_argument("--ships-file", type=Path, default=DEFAULT_SHIPS)
     ap.add_argument("--sec-per-gm", type=float, default=None,
-                    help="travel time per Gm (default: from the fleet's slowest warp, else 2.0)")
+                    help="travel time per Gm (default: from the fleet's slowest warp, else an FG300's)")
+    ap.add_argument("--speed-model", choices=sorted(SPEED_MODELS), default="warp",
+                    help="warp = Gm/hr (matches the game's $/hr; default) or timed (stopwatch, 2.78x slower)")
     ap.add_argument("--overhead", type=float, default=0.0, help="fixed seconds per leg (dock/launch)")
     ap.add_argument("--top", type=int, default=20)
     ap.add_argument("--from", dest="stop", help="only round trips that include this stop")
@@ -568,6 +599,8 @@ def main(argv=None) -> int:
 
     if args.selftest:
         return selftest()
+    global speed_model
+    speed_model = args.speed_model
     quotes, coords, alarms = load_market(args.data, args.ports)
     warnings = audit(quotes)
     if args.audit:
@@ -587,7 +620,7 @@ def main(argv=None) -> int:
         holds = None
         label = f"continuous loading, cargo {args.cargo:g}"
     if args.sec_per_gm is None:
-        args.sec_per_gm = (fleet.seconds_per_gm if fleet else None) or SECONDS_PER_GM
+        args.sec_per_gm = (fleet.seconds_per_gm if fleet else None) or seconds_per_gm_for(REF_WARP)
     if fleet and fleet.seconds_per_gm:
         label += f", {args.sec_per_gm:.2f} s/Gm (slowest ship)"
     if args.oracle:

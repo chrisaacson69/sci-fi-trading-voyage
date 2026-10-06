@@ -25,7 +25,7 @@ py -3 trade_routes.py --selftest               # values checked by hand
 - **`data/ports.csv`**, one row per stop: `planet,x,y,alarm`. This is the only place coordinates are stored. `alarm` is the game's port alarm level: Low, Medium, High or Extreme.
 - **`data/market.csv`**, one row per (stop, good): `planet,good,size,side,price`.
 - **`data/routes.csv`**: routes you've opened, with their in-game `level` and `cp_cap` (the most CP you can bring). Upgrading a route raises the cap, and upgrades cost more on better routes. `upgrade_cost` is blank until recorded.
-- **`data/ships.csv`**: ship types from the game's ship list: `name,cost,limit,cp,cargo,dpm,hp,cruise_min,cruise_max,warp,notes`. `limit` is the build limit and `dpm` is damage per minute. In every row, `warp` is exactly 5 × `cruise_min`. `--ships` accepts these names, e.g. `ST59x3,FG300x2`, and then knows the fleet's CP, DPM, HP, cost and speed, and warns if you're over a build limit.
+- **`data/ships.csv`**: ship types from the game's ship list: `name,cost,limit,cp,cargo,dpm,hp,cruise_min,cruise_max,warp,notes`. `limit` is the build limit, a total across all your fleets, and `dpm` is damage per minute. In every row, `warp` is exactly 5 × `cruise_min`. `--ships` accepts these names, e.g. `ST59x3,FG300x2`, and then knows the fleet's CP, DPM, HP, cost and speed, and warns if you're over a build limit.
 - **`data/oracle.csv`**: the game's own $/hr figure for a fleet on a route (`date,route_a,route_b,fleet,game_per_hr,notes`, fleet written like `--ships`). `--oracle` compares each row against the model's open choices: separate vs pooled holds, and warp calibrated on FG300 vs warp read as Gm/hr.
 - **`data/encounters.csv`** logs pirate attacks, one line per trip or attack. Safe trips count too. Nothing reads it yet; it's the evidence a pirate model will be calibrated from.
 
@@ -48,9 +48,9 @@ TycoLab Elec1, Troy Comm Comp.
 | Assumption | Basis |
 |---|---|
 | Leg time = `distance × s/Gm`, no fixed overhead | Two timing runs: 7 Gm took 14 s, 1700 Gm took 56:40. Solving those gives 2.000 s/Gm and 0 s overhead. Measured on the first fleet (2 × FG300). |
-| **Speed comes from warp, as a relative number** | The FG300 starters were the timing fleet: their warp is 5,000, but they flew 1,800 Gm/hr. So warp is not Gm/hr. Assumed: travel time ∝ 1/warp, so `s/Gm = 2.0 × 5000 / warp` (ST59, warp 2,250 → 4.44 s/Gm). A fleet moves at its slowest ship (assumed). Both need checking against the game's own $/hr figure. |
+| **Speed: warp read as Gm/hr** (`--speed-model warp`, default) | Matches the game's own $/hr figure on both routes logged in `oracle.csv` (0.94× and 1.09×); `--selftest` requires every oracle row to be within 15%. It *contradicts* the FG300 stopwatch run (warp 5,000, but 1,700 Gm took 56:40 = 1,800 Gm/hr). `--speed-model timed` uses the stopwatch instead (2.78× slower). Both are ∝ 1/warp, so they rank ships and routes the same; only absolute $/hr differs. Open: does real income arrive at the game's rate? A fleet moves at its slowest ship (assumed). |
 | Two-stop cycles only | Game rule: trade routes are cyclical between two stops. |
-| Goods are bought in **whole units** | Game rule. `--ships` packs each hold separately (an unbounded knapsack over that leg's goods), so a hold smaller than a good's size can't carry it. `--whole-units` treats `--cargo` as one pooled hold. **Not yet confirmed:** whether the game pools a fleet's holds. Test: two 2,000 holds trying to buy one RefOre1 (size 4,000). |
+| Goods are bought in **whole units**, **each ship's hold separately** | Game rule. `--ships` packs each hold separately (an unbounded knapsack over that leg's goods), so a hold smaller than a good's size can't carry it. The game's $/hr for 10 Reliiat T + 10 NOMA matches separate holds (0.94×), not pooled (1.84×). `--whole-units` still treats `--cargo` as one pooled hold if you need it. |
 | Unlimited cash | Chosen simplification; cargo space is what limits you. |
 | Prices don't move within a session | Observed; prices shift on a daily schedule. |
 
