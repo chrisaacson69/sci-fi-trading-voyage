@@ -14,6 +14,8 @@ py -3 trade_routes.py --max-alarm Medium       # both ports at most Medium alarm
 py -3 trade_routes.py --by-alarm --ships 130000x3   # best route under each alarm cap
 py -3 trade_routes.py --json > routes.json     # for other tools (e.g. a ship picker)
 py -3 trade_routes.py --audit                  # likely-typo warnings only
+py -3 trade_routes.py --route "Free Port" Ares --ships hauler-8cpx20   # score card for one route
+py -3 trade_routes.py --known-routes           # score every route in routes.csv
 py -3 trade_routes.py --selftest               # values checked by hand
 ```
 
@@ -21,6 +23,8 @@ py -3 trade_routes.py --selftest               # values checked by hand
 
 - **`data/ports.csv`**, one row per stop: `planet,x,y,alarm`. This is the only place coordinates are stored. `alarm` is the game's port alarm level: Low, Medium, High or Extreme.
 - **`data/market.csv`**, one row per (stop, good): `planet,good,size,side,price`.
+- **`data/routes.csv`**: routes you've opened, with their in-game `level` and `cp_cap` (the most CP you can bring). Upgrading a route raises the cap, and upgrades cost more on better routes. `upgrade_cost` is blank until recorded.
+- **`data/ships.csv`**: ship types you've seen (`name,cargo,cp`). `--ships` accepts these names, e.g. `hauler-28cpx3`, and then knows the fleet's CP.
 - **`data/encounters.csv`** logs pirate attacks, one line per trip or attack. Safe trips count too. Nothing reads it yet; it's the evidence a pirate model will be calibrated from.
 
 In `market.csv`:
@@ -77,6 +81,21 @@ holds only a ship with ≥100,000 cargo can carry it. At 2.0 s/Gm, whole units, 
 | 50 × 2,000 (combat-fleet scale) | – | 100,000 | BlackGoldStar ↔ Troy | 1.7 M |
 
 These all assume the measured 2.0 s/Gm. Bigger ships may be slower; pass `--sec-per-gm`.
+
+## Route cards — scoring a route
+
+`--route A B` prints:
+- distance, round-trip time, both alarms, and the level and CP cap if recorded
+- the profitable goods each way, with margin per unit and the smallest hold that can carry one
+- **SCORE**: credits per cargo unit per hour with fractional loading. This doesn't depend on the
+  ship, so it says which routes deserve your biggest holds.
+- if the cap is known: what each ship type in `ships.csv` earns if it fills the whole cap
+- with `--ships`, what that exact fleet earns, and whether it exceeds the cap
+
+`--known-routes` ranks every route in `routes.csv` by its best fill-the-cap figure.
+
+Fill-the-cap assumes a fleet made only of haulers, with no escorts. It shows what the cap is worth,
+not a fleet that will survive pirates.
 
 ## Pirates — the travel-only ranking is not the real ranking
 
