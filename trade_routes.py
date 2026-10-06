@@ -29,6 +29,7 @@ Usage:
   py -3 trade_routes.py --route "Free Port" Ares  # score one route (card)
   py -3 trade_routes.py --known-routes             # score every route in data/routes.csv
   py -3 trade_routes.py --ships hauler-28cpx3      # ship names from data/ships.csv work too
+  py -3 trade_routes.py --oracle                   # compare predictions with the game's own $/hr
   py -3 trade_routes.py --selftest
 """
 from __future__ import annotations
@@ -50,6 +51,7 @@ DEFAULT_DATA = Path(__file__).resolve().parent / "data" / "market.csv"
 DEFAULT_PORTS = Path(__file__).resolve().parent / "data" / "ports.csv"
 DEFAULT_ROUTES = Path(__file__).resolve().parent / "data" / "routes.csv"
 DEFAULT_SHIPS = Path(__file__).resolve().parent / "data" / "ships.csv"
+DEFAULT_ORACLE = Path(__file__).resolve().parent / "data" / "oracle.csv"
 ALARMS = ["Low", "Medium", "High", "Extreme"]  # the game's port alarm levels, in order
 SECONDS_PER_GM = 2.0  # measured, first fleet (2x FG300: 3CP, 2000 cargo each)
 REF_WARP = 5000       # FG300's listed warp. Warp is NOT Gm/hr: FG300 measured 1800 Gm/hr.
@@ -392,7 +394,7 @@ def route_card(a, b, quotes, coords, alarms, routes, ship_types, seconds_per_gm,
             print(f"      {n:3} x {st.name:14} {n * st.cp:4} CP {n * st.cargo:>10,} cargo {spd:>10} -> {pph:14,.0f}/hr"
                   f"   [{_fmt_leg(ft.out, True)} / {_fmt_leg(ft.back, True)}]")
     if fleet:
-        spg = fleet.seconds_per_gm or seconds_per_gm
+        spg = seconds_per_gm  # already resolved in main(): --sec-per-gm, else the fleet's slowest ship
         ft = make_trip(a, b, sells, buys, coords, seconds_per_gm=spg, overhead_s=overhead_s,
                        holds=fleet.holds)
         cp_txt = "" if fleet.cp is None else f", {fleet.cp} CP"
@@ -428,6 +430,32 @@ def print_table(trips, label, whole):
         print(f"{i:3} {t.profit_per_hour:14,.0f} {t.seconds / 60:8.1f}m {t.distance_gm:8.0f}  {al:9} "
               f"{t.a:15} {t.b:15} {_fmt_leg(t.out, whole):28} {_fmt_leg(t.back, whole)}")
     print("\nprofit/hr counts travel time only; pirate attacks (time and losses) are not modelled yet")
+
+
+def oracle_report(quotes, coords, ship_types, path: Path = DEFAULT_ORACLE):
+    """Compare each logged game $/hr figure against the model's open choices:
+    separate vs pooled holds, and warp-relative-to-FG300 vs warp-as-Gm/hr speed."""
+    if not path.exists():
+        print(f"no {path}")
+        return
+    sells, buys = book(quotes)
+    with open(path, newline="") as f:
+        rows = list(csv.DictReader(f))
+    for r in rows:
+        a, b, game = r["route_a"].strip(), r["route_b"].strip(), float(r["game_per_hr"])
+        fleet = parse_ships(r["fleet"], ship_types)
+        warps = [st.warp for st in fleet.ships if st]
+        print(f"{r['date']}  {a} <-> {b}  fleet {r['fleet']}  game says {game:,.0f}/hr")
+        if len(warps) != len(fleet.ships):
+            print("   (a ship has no warp speed; skipped)")
+            continue
+        speeds = {"calibrated (FG300 timing)": fleet.seconds_per_gm,
+                  "warp = Gm/hr": 3600 / min(warps)}
+        for hold_name, holds in (("separate holds", fleet.holds), ("pooled hold", [sum(fleet.holds)])):
+            for sp_name, spg in speeds.items():
+                t = make_trip(a, b, sells, buys, coords, seconds_per_gm=spg, holds=holds)
+                print(f"   {hold_name:15} {sp_name:26} {spg:5.2f} s/Gm -> {t.profit_per_hour:12,.0f}/hr"
+                      f"  ({t.profit_per_hour / game:5.2f}x game)")
 
 
 def selftest() -> int:
@@ -534,6 +562,7 @@ def main(argv=None) -> int:
     ap.add_argument("--by-alarm", action="store_true", help="best route under each alarm cap")
     ap.add_argument("--json", action="store_true", help="emit JSON instead of a table")
     ap.add_argument("--audit", action="store_true", help="only print likely-typo warnings")
+    ap.add_argument("--oracle", action="store_true", help="compare predictions with data/oracle.csv")
     ap.add_argument("--selftest", action="store_true")
     args = ap.parse_args(argv)
 
@@ -561,6 +590,9 @@ def main(argv=None) -> int:
         args.sec_per_gm = (fleet.seconds_per_gm if fleet else None) or SECONDS_PER_GM
     if fleet and fleet.seconds_per_gm:
         label += f", {args.sec_per_gm:.2f} s/Gm (slowest ship)"
+    if args.oracle:
+        oracle_report(quotes, coords, ship_types)
+        return 0
     for key in routes:
         for p in key:
             if p not in coords:

@@ -16,6 +16,7 @@ py -3 trade_routes.py --json > routes.json     # for other tools (e.g. a ship pi
 py -3 trade_routes.py --audit                  # likely-typo warnings only
 py -3 trade_routes.py --route "Free Port" Ares --ships hauler-8cpx20   # score card for one route
 py -3 trade_routes.py --known-routes           # score every route in routes.csv
+py -3 trade_routes.py --oracle                 # predictions vs the game's own $/hr
 py -3 trade_routes.py --selftest               # values checked by hand
 ```
 
@@ -25,6 +26,7 @@ py -3 trade_routes.py --selftest               # values checked by hand
 - **`data/market.csv`**, one row per (stop, good): `planet,good,size,side,price`.
 - **`data/routes.csv`**: routes you've opened, with their in-game `level` and `cp_cap` (the most CP you can bring). Upgrading a route raises the cap, and upgrades cost more on better routes. `upgrade_cost` is blank until recorded.
 - **`data/ships.csv`**: ship types from the game's ship list: `name,cost,limit,cp,cargo,dpm,hp,cruise_min,cruise_max,warp,notes`. `limit` is the build limit and `dpm` is damage per minute. In every row, `warp` is exactly 5 × `cruise_min`. `--ships` accepts these names, e.g. `ST59x3,FG300x2`, and then knows the fleet's CP, DPM, HP, cost and speed, and warns if you're over a build limit.
+- **`data/oracle.csv`**: the game's own $/hr figure for a fleet on a route (`date,route_a,route_b,fleet,game_per_hr,notes`, fleet written like `--ships`). `--oracle` compares each row against the model's open choices: separate vs pooled holds, and warp calibrated on FG300 vs warp read as Gm/hr.
 - **`data/encounters.csv`** logs pirate attacks, one line per trip or attack. Safe trips count too. Nothing reads it yet; it's the evidence a pirate model will be calibrated from.
 
 In `market.csv`:
