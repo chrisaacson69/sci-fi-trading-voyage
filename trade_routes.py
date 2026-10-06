@@ -2,21 +2,28 @@
 """Rank two-stop round-trip trades in Sci-Fi Trading Voyage by profit per hour.
 
 Model (see README.md for how each assumption was measured):
-  * A trip is a cycle between two stops, A -> B -> A. On each leg you fill the
-    hold with the single good that earns the most margin per cargo unit.
-  * Margin per cargo = (buy price at destination - sell price at origin) / size.
+  * A trip is a cycle between two stops, A -> B -> A.
+  * Margin per unit = buy price at destination - sell price at origin; a unit
+    takes `size` cargo space.
   * Leg time = overhead + distance * seconds_per_gm. Measured for the first fleet:
     2.0 s/Gm and 0 s overhead (7 Gm took 14 s; 1700 Gm took 56:40).
   * Cash is unlimited and prices don't move as you trade (they shift daily).
 
-The score that doesn't depend on the ship is margin per cargo per Gm flown. A
-ship's profit/hr = that score * cargo * 3600 / seconds_per_gm.
+Two loading modes:
+  * continuous (default): the hold fills with the best margin-per-cargo good, as if
+    fractional units could be bought. Gives a score per cargo unit that doesn't
+    depend on the ship, and an upper bound on whole-unit loading.
+  * whole units (--ships, or --cargo with --whole-units): goods are bought in whole
+    units only, and each hold is packed with the best mix of goods (an unbounded
+    knapsack). A hold smaller than a good's size can't carry that good at all.
 
 Usage:
-  py -3 trade_routes.py                       # top 20, 2.0 s/Gm, cargo 1
-  py -3 trade_routes.py --cargo 4000 --top 10
-  py -3 trade_routes.py --from Troy           # only round trips touching Troy
-  py -3 trade_routes.py --json > routes.json  # machine-readable, for ship pickers
+  py -3 trade_routes.py                            # per cargo unit, continuous
+  py -3 trade_routes.py --ships 25200x12           # twelve separate 25,200 holds
+  py -3 trade_routes.py --ships 130000x3,2000x2    # mixed fleet, separate holds
+  py -3 trade_routes.py --cargo 302400 --whole-units   # one pooled fleet hold
+  py -3 trade_routes.py --from Troy                # only round trips touching Troy
+  py -3 trade_routes.py --json > routes.json       # machine-readable, for ship pickers
   py -3 trade_routes.py --selftest
 """
 from __future__ import annotations
@@ -28,8 +35,9 @@ import json
 import math
 import statistics
 import sys
-from collections import defaultdict
-from dataclasses import dataclass, asdict
+from collections import Counter, defaultdict
+from dataclasses import dataclass, asdict, field
+from functools import reduce
 from pathlib import Path
 
 DEFAULT_DATA = Path(__file__).resolve().parent / "data" / "market.csv"
@@ -49,8 +57,10 @@ class Quote:
 class Leg:
     origin: str
     dest: str
-    good: str | None        # None = fly empty
-    margin_per_cargo: float  # credits per cargo unit carried
+    good: str | None         # best good by margin per cargo; None = nothing profitable
+    margin_per_cargo: float  # continuous model, credits per cargo unit
+    load: dict = field(default_factory=dict)  # whole-unit mode: {good: units} across the fleet
+    margin: float = 0.0      # credits for this leg: whole-unit packing, or margin_per_cargo * cargo
 
 
 @dataclass
@@ -60,10 +70,11 @@ class RoundTrip:
     distance_gm: float
     out: Leg
     back: Leg
-    margin_per_cargo: float      # whole cycle, per cargo unit
-    per_cargo_per_kgm: float     # ship-independent score: margin / 1000 Gm flown
+    margin_per_cargo: float      # continuous model, whole cycle, per cargo unit
+    per_cargo_per_kgm: float     # ship-independent score: margin per cargo / 1000 Gm flown
     seconds: float               # cycle time at the given speed/overhead
-    profit_per_hour: float       # for the given cargo
+    cycle_margin: float          # credits per cycle for the given cargo / fleet
+    profit_per_hour: float
 
 
 def load_market(path: Path = DEFAULT_DATA):
@@ -104,51 +115,112 @@ def audit(quotes, outlier_ratio: float = 2.0):
     return warnings
 
 
-def best_leg(origin, dest, sells, buys) -> Leg:
-    best = Leg(origin, dest, None, 0.0)
+def parse_ships(spec: str) -> list[int]:
+    """'25200x12,130000' -> twelve 25200 holds and one 130000 hold."""
+    holds = []
+    for part in spec.split(","):
+        cap, _, n = part.strip().lower().partition("x")
+        holds += [int(float(cap))] * (int(n) if n else 1)
+    if not holds or min(holds) <= 0:
+        raise ValueError(f"bad --ships spec {spec!r}")
+    return holds
+
+
+def leg_options(origin, dest, sells, buys):
+    """Profitable goods on this leg: [(good, size, margin per unit)]."""
+    opts = []
     for good, q in sells[origin].items():
         b = buys[dest].get(good)
         if b and b.price > q.price:
-            m = (b.price - q.price) / q.size
-            if m > best.margin_per_cargo:
-                best = Leg(origin, dest, good, m)
-    return best
+            opts.append((good, q.size, b.price - q.price))
+    return opts
+
+
+def fill_hold(capacity: int, options) -> tuple[float, dict]:
+    """Best whole-unit load for one hold: unbounded knapsack over the leg's goods."""
+    opts = [o for o in options if o[1] <= capacity]
+    if not opts:
+        return 0.0, {}
+    g = reduce(math.gcd, (o[1] for o in opts))
+    cap = capacity // g
+    sizes = [o[1] // g for o in opts]
+    best = [0.0] * (cap + 1)
+    pick = [-1] * (cap + 1)
+    for c in range(1, cap + 1):
+        best[c], pick[c] = best[c - 1], -1  # -1 = leave one cell empty
+        for i, s in enumerate(sizes):
+            if s <= c and best[c - s] + opts[i][2] > best[c]:
+                best[c], pick[c] = best[c - s] + opts[i][2], i
+    load, c = Counter(), cap
+    while c > 0:
+        if pick[c] < 0:
+            c -= 1
+        else:
+            load[opts[pick[c]][0]] += 1
+            c -= sizes[pick[c]]
+    return best[cap], dict(load)
+
+
+def make_leg(origin, dest, sells, buys, holds, cargo) -> Leg:
+    opts = leg_options(origin, dest, sells, buys)
+    good, mpc = None, 0.0
+    for gname, size, m in opts:
+        if m / size > mpc:
+            good, mpc = gname, m / size
+    leg = Leg(origin, dest, good, mpc)
+    if holds is None:
+        leg.margin = mpc * cargo
+        return leg
+    total, load = 0.0, Counter()
+    for cap, n in Counter(holds).items():   # identical ships pack identically
+        m, l = fill_hold(cap, opts)
+        total += m * n
+        for k, v in l.items():
+            load[k] += v * n
+    leg.margin, leg.load = total, dict(load)
+    return leg
 
 
 def round_trips(quotes, coords, cargo: float = 1.0, seconds_per_gm: float = SECONDS_PER_GM,
-                overhead_s: float = 0.0):
-    """Every unordered stop pair with any profit, best first."""
+                overhead_s: float = 0.0, holds: list[int] | None = None):
+    """Every unordered stop pair with any profit, best first.
+
+    holds=None -> continuous model scaled by `cargo`; otherwise whole units per hold.
+    """
     sells, buys = defaultdict(dict), defaultdict(dict)
     for q in quotes:
         (sells if q.side == "S" else buys)[q.planet][q.good] = q
     out = []
     for a, b in itertools.combinations(sorted(coords), 2):
-        f, r = best_leg(a, b, sells, buys), best_leg(b, a, sells, buys)
+        f = make_leg(a, b, sells, buys, holds, cargo)
+        r = make_leg(b, a, sells, buys, holds, cargo)
         m = f.margin_per_cargo + r.margin_per_cargo
-        if m <= 0:
+        cyc = f.margin + r.margin
+        if cyc <= 0:
             continue
         d = math.dist(coords[a], coords[b])
         secs = 2 * (overhead_s + d * seconds_per_gm)
         out.append(RoundTrip(a, b, d, f, r, m,
                              per_cargo_per_kgm=m / (2 * d) * 1000 if d else math.inf,
-                             seconds=secs,
-                             profit_per_hour=m * cargo * 3600 / secs if secs else math.inf))
+                             seconds=secs, cycle_margin=cyc,
+                             profit_per_hour=cyc * 3600 / secs if secs else math.inf))
     out.sort(key=lambda t: t.profit_per_hour, reverse=True)
     return out
 
 
-def _fmt_leg(leg: Leg) -> str:
+def _fmt_leg(leg: Leg, whole: bool) -> str:
+    if whole:
+        return " + ".join(f"{n} {g}" for g, n in sorted(leg.load.items())) or "(empty)"
     return f"{leg.good} {leg.margin_per_cargo:.2f}" if leg.good else "(empty)"
 
 
-def print_table(trips, cargo):
+def print_table(trips, label, whole):
+    print(f"{label}\n")
     print(f"{'#':>3} {'profit/hr':>14} {'cycle':>9} {'dist Gm':>8}  {'A':15} {'B':15} "
-          f"{'A -> B':24} B -> A")
+          f"{'A -> B':28} B -> A")
     for i, t in enumerate(trips, 1):
-        mins = t.seconds / 60
-        print(f"{i:3} {t.profit_per_hour:14,.0f} {mins:8.1f}m {t.distance_gm:8.0f}  "
-              f"{t.a:15} {t.b:15} {_fmt_leg(t.out):24} {_fmt_leg(t.back)}")
-    print(f"\n(profit/hr at cargo={cargo:g}; multiply by your ship's cargo if you left it at 1)")
+        print(f"{i:3} {t.profit_per_hour:14,.0f} {t.seconds / 60:8.1f}m {t.distance_gm:8.0f}  "
+              f"{t.a:15} {t.b:15} {_fmt_leg(t.out, whole):28} {_fmt_leg(t.back, whole)}")
 
 
 def selftest() -> int:
@@ -162,6 +234,10 @@ def selftest() -> int:
         checks.append(ok)
         print(f"  {'ok ' if ok else 'BAD'} {name}: {got:.4f} (want {want})")
 
+    def check(name, ok):
+        checks.append(bool(ok))
+        print(f"  {'ok ' if ok else 'BAD'} {name}")
+
     # Two timing runs: 7 Gm took 14 s and 1700 Gm took 3400 s, which gives 2.0 s/Gm and 0 s overhead
     spg = (3400 - 14) / (1700 - 7)
     eq("seconds per Gm from the two timings", spg, 2.0)
@@ -169,19 +245,38 @@ def selftest() -> int:
     t = trips[("AlphaCentA", "Proxima")]
     eq("Proxima->AlphaCentA ResearchData3 margin", t.back.margin_per_cargo,
        (3078000 - 2536500) / 100000)
-    eq("  ...profit/hr per cargo", t.profit_per_hour, 5.415 * 3600 / (4 * math.dist((1046, 1704), (1040, 1700))))
+    eq("  ...profit/hr per cargo", t.profit_per_hour,
+       5.415 * 3600 / (4 * math.dist((1046, 1704), (1040, 1700))))
     t = trips[("BlackGoldStar", "Troy")]
     eq("BlackGoldStar->Troy Comm Comp", t.out.margin_per_cargo, (58604 - 18032) / 2000)
     eq("Troy->BlackGoldStar TrojiteCry3", t.back.margin_per_cargo, (7348000 - 6145600) / 240000)
     t = trips[("Ares", "Free Port")]
     eq("Free Port->Ares Collect2", t.back.margin_per_cargo, (245600 - 74400) / 8000)
     ranked = round_trips(quotes, coords)
-    checks.append(ranked[0].a == "AlphaCentA" and ranked[1].a == "BlackGoldStar")
-    print(f"  {'ok ' if checks[-1] else 'BAD'} ranking: #1 {ranked[0].a}/{ranked[0].b}, "
-          f"#2 {ranked[1].a}/{ranked[1].b}")
-    w = audit(quotes)
-    checks.append(not any(x.startswith("SIZE") for x in w))
-    print(f"  {'ok ' if checks[-1] else 'BAD'} no size mismatches in the corrected snapshot")
+    check(f"ranking: #1 {ranked[0].a}/{ranked[0].b}, #2 {ranked[1].a}/{ranked[1].b}",
+          ranked[0].a == "AlphaCentA" and ranked[1].a == "BlackGoldStar")
+    check("no size mismatches in the corrected snapshot",
+          not any(x.startswith("SIZE") for x in audit(quotes)))
+
+    # Whole units: ResearchData3 is 100,000 per unit
+    whole = lambda holds: {(t.a, t.b): t for t in round_trips(quotes, coords, holds=holds)}
+    check("25,200 hold can't carry ResearchData3 -> Proxima route drops out",
+          ("AlphaCentA", "Proxima") not in whole([25200]))
+    t = whole([130000])[("AlphaCentA", "Proxima")]
+    eq("130,000 hold carries exactly 1 ResearchData3", t.back.load.get("ResearchData3", 0), 1)
+    eq("  ...margin for one unit", t.cycle_margin, 3078000 - 2536500)
+    t = whole([130000] * 3)[("AlphaCentA", "Proxima")]
+    eq("three separate 130,000 holds carry 3", t.back.load["ResearchData3"], 3)
+    t = round_trips(quotes, coords, holds=[390000])
+    t = {(x.a, x.b): x for x in t}[("AlphaCentA", "Proxima")]
+    eq("one pooled 390,000 hold also carries 3", t.back.load["ResearchData3"], 3)
+    # knapsack sanity: a 4,000 hold on BlackGoldStar->Troy takes 2 Comm Comp (size 2000)
+    t = whole([4000])[("BlackGoldStar", "Troy")]
+    eq("4,000 hold: 2 Comm Comp to Troy", t.out.load.get("Comm Comp", 0), 2)
+    eq("continuous model is an upper bound", float(
+        all(w.cycle_margin <= c.cycle_margin + 1e-6
+            for c in round_trips(quotes, coords, cargo=25200)
+            for w in round_trips(quotes, coords, holds=[25200]) if (w.a, w.b) == (c.a, c.b))), 1.0)
     print("PASS" if all(checks) else "FAIL")
     return 0 if all(checks) else 1
 
@@ -189,8 +284,11 @@ def selftest() -> int:
 def main(argv=None) -> int:
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("--data", type=Path, default=DEFAULT_DATA, help="market CSV (default data/market.csv)")
-    ap.add_argument("--cargo", type=float, default=1.0, help="ship cargo capacity (Size units)")
-    ap.add_argument("--sec-per-gm", type=float, default=SECONDS_PER_GM, help="ship travel time per Gm")
+    ap.add_argument("--cargo", type=float, default=1.0, help="cargo capacity (Size units)")
+    ap.add_argument("--whole-units", action="store_true",
+                    help="buy whole units only; --cargo is one pooled hold")
+    ap.add_argument("--ships", help="separate holds, whole units: e.g. 25200x12 or 130000x3,2000x2")
+    ap.add_argument("--sec-per-gm", type=float, default=SECONDS_PER_GM, help="fleet travel time per Gm")
     ap.add_argument("--overhead", type=float, default=0.0, help="fixed seconds per leg (dock/launch)")
     ap.add_argument("--top", type=int, default=20)
     ap.add_argument("--from", dest="stop", help="only round trips that include this stop")
@@ -206,20 +304,30 @@ def main(argv=None) -> int:
     if args.audit:
         print("\n".join(warnings) or "no warnings")
         return 0
-    trips = round_trips(quotes, coords, args.cargo, args.sec_per_gm, args.overhead)
+    if args.ships:
+        holds = parse_ships(args.ships)
+        label = f"whole units, {len(holds)} separate holds, {sum(holds):,} cargo total"
+    elif args.whole_units:
+        holds = [int(args.cargo)]
+        label = f"whole units, one pooled hold of {int(args.cargo):,}"
+    else:
+        holds = None
+        label = f"continuous loading, cargo {args.cargo:g}"
+    trips = round_trips(quotes, coords, args.cargo, args.sec_per_gm, args.overhead, holds)
     if args.stop:
         if args.stop not in coords:
             ap.error(f"unknown stop {args.stop!r}; known: {', '.join(sorted(coords))}")
         trips = [t for t in trips if args.stop in (t.a, t.b)]
     trips = trips[: args.top] if args.top > 0 else trips
     if args.json:
-        json.dump({"cargo": args.cargo, "seconds_per_gm": args.sec_per_gm, "overhead_s": args.overhead,
+        json.dump({"mode": label, "cargo": args.cargo, "holds": holds,
+                   "seconds_per_gm": args.sec_per_gm, "overhead_s": args.overhead,
                    "warnings": warnings, "round_trips": [asdict(t) for t in trips]}, sys.stdout, indent=1)
         print()
     else:
         for w in warnings:
             print("warning:", w, file=sys.stderr)
-        print_table(trips, args.cargo)
+        print_table(trips, label, holds is not None)
     return 0
 
 
