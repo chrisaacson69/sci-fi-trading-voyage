@@ -24,7 +24,7 @@ py -3 trade_routes.py --selftest               # values checked by hand
 - **`data/ports.csv`**, one row per stop: `planet,x,y,alarm`. This is the only place coordinates are stored. `alarm` is the game's port alarm level: Low, Medium, High or Extreme.
 - **`data/market.csv`**, one row per (stop, good): `planet,good,size,side,price`.
 - **`data/routes.csv`**: routes you've opened, with their in-game `level` and `cp_cap` (the most CP you can bring). Upgrading a route raises the cap, and upgrades cost more on better routes. `upgrade_cost` is blank until recorded.
-- **`data/ships.csv`**: ship types you've seen (`name,cargo,cp`). `--ships` accepts these names, e.g. `hauler-28cpx3`, and then knows the fleet's CP.
+- **`data/ships.csv`**: ship types from the game's ship list: `name,cost,limit,cp,cargo,dpm,hp,cruise_min,cruise_max,warp,notes`. `limit` is the build limit and `dpm` is damage per minute. In every row, `warp` is exactly 5 × `cruise_min`. `--ships` accepts these names, e.g. `ST59x3,FG300x2`, and then knows the fleet's CP, DPM, HP, cost and speed, and warns if you're over a build limit.
 - **`data/encounters.csv`** logs pirate attacks, one line per trip or attack. Safe trips count too. Nothing reads it yet; it's the evidence a pirate model will be calibrated from.
 
 In `market.csv`:
@@ -45,7 +45,8 @@ TycoLab Elec1, Troy Comm Comp.
 
 | Assumption | Basis |
 |---|---|
-| Leg time = `distance × 2.0 s/Gm`, no fixed overhead | Two timing runs: 7 Gm took 14 s, 1700 Gm took 56:40. Solving those gives 2.000 s/Gm and 0 s overhead. Measured on the first fleet (2× 3CP, 2000 cargo each). |
+| Leg time = `distance × s/Gm`, no fixed overhead | Two timing runs: 7 Gm took 14 s, 1700 Gm took 56:40. Solving those gives 2.000 s/Gm and 0 s overhead. Measured on the first fleet (2 × FG300). |
+| **Speed comes from warp, as a relative number** | The FG300 starters were the timing fleet: their warp is 5,000, but they flew 1,800 Gm/hr. So warp is not Gm/hr. Assumed: travel time ∝ 1/warp, so `s/Gm = 2.0 × 5000 / warp` (ST59, warp 2,250 → 4.44 s/Gm). A fleet moves at its slowest ship (assumed). Both need checking against the game's own $/hr figure. |
 | Two-stop cycles only | Game rule: trade routes are cyclical between two stops. |
 | Goods are bought in **whole units** | Game rule. `--ships` packs each hold separately (an unbounded knapsack over that leg's goods), so a hold smaller than a good's size can't carry it. `--whole-units` treats `--cargo` as one pooled hold. **Not yet confirmed:** whether the game pools a fleet's holds. Test: two 2,000 holds trying to buy one RefOre1 (size 4,000). |
 | Unlimited cash | Chosen simplification; cargo space is what limits you. |
@@ -69,6 +70,9 @@ fractionally, which is an upper bound. The whole-unit numbers are what a fleet a
 | 3 | Ares ↔ Free Port (Computer2 / Collect2) | 113 min | ≈ 14.5 |
 
 Proxima and AlphaCentA are about 7 Gm apart, which puts that route roughly 30× ahead of the next one.
+
+*(The fleet tables below predate per-ship speeds; they assume 2.0 s/Gm for every ship. With ST59's
+measured-relative 4.44 s/Gm, 3 × ST59 on Proxima → AlphaCentA is about 91 M/hr, not 203 M/hr.)*
 
 **Whole units change who can run it.** ResearchData3 is 100,000 cargo per unit, so with separate
 holds only a ship with ≥100,000 cargo can carry it. At 2.0 s/Gm, whole units, separate holds:

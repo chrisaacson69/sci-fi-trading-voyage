@@ -51,7 +51,13 @@ DEFAULT_PORTS = Path(__file__).resolve().parent / "data" / "ports.csv"
 DEFAULT_ROUTES = Path(__file__).resolve().parent / "data" / "routes.csv"
 DEFAULT_SHIPS = Path(__file__).resolve().parent / "data" / "ships.csv"
 ALARMS = ["Low", "Medium", "High", "Extreme"]  # the game's port alarm levels, in order
-SECONDS_PER_GM = 2.0  # measured, first fleet (2x 3CP, 2000 cargo each)
+SECONDS_PER_GM = 2.0  # measured, first fleet (2x FG300: 3CP, 2000 cargo each)
+REF_WARP = 5000       # FG300's listed warp. Warp is NOT Gm/hr: FG300 measured 1800 Gm/hr.
+                      # So warp is used as RELATIVE speed: s/Gm = SECONDS_PER_GM * REF_WARP / warp.
+
+
+def seconds_per_gm_for(warp: float) -> float:
+    return SECONDS_PER_GM * REF_WARP / warp
 
 
 @dataclass(frozen=True)
@@ -153,38 +159,74 @@ class ShipType:
     name: str
     cargo: int
     cp: int
+    cost: int | None = None
+    limit: int | None = None   # build limit: most of this ship you can own
+    dpm: int | None = None     # damage per minute
+    hp: int | None = None
+    warp: int | None = None    # relative speed, see REF_WARP
+
+    @property
+    def seconds_per_gm(self) -> float | None:
+        return seconds_per_gm_for(self.warp) if self.warp else None
 
 
 def load_ships(path: Path = DEFAULT_SHIPS) -> dict[str, ShipType]:
     if not path.exists():
         return {}
+    num = lambda v: int(v.replace(",", "")) if v and v.strip() else None
     with open(path, newline="") as f:
-        return {r["name"].strip(): ShipType(r["name"].strip(), int(r["cargo"]), int(r["cp"]))
+        return {r["name"].strip(): ShipType(r["name"].strip(), num(r["cargo"]), num(r["cp"]),
+                                            num(r.get("cost")), num(r.get("limit")), num(r.get("dpm")),
+                                            num(r.get("hp")), num(r.get("warp")))
                 for r in csv.DictReader(f)}
 
 
-def parse_ships(spec: str, types: dict[str, ShipType] | None = None) -> tuple[list[int], int | None]:
-    """'25200x12,hauler-28cpx3' -> (holds, total CP or None if any ship's CP is unknown).
+@dataclass
+class Fleet:
+    holds: list[int]
+    ships: list[ShipType | None]   # None = a bare cargo number with no known stats
 
-    Each part is a cargo number or a ship name from ships.csv, optionally followed by xN.
-    """
-    holds, cp = [], 0
+    def _sum(self, attr):
+        vals = [getattr(s, attr) if s else None for s in self.ships]
+        return None if any(v is None for v in vals) else sum(vals)
+
+    cp = property(lambda self: self._sum("cp"))
+    dpm = property(lambda self: self._sum("dpm"))
+    hp = property(lambda self: self._sum("hp"))
+    cost = property(lambda self: self._sum("cost"))
+
+    @property
+    def seconds_per_gm(self) -> float | None:
+        """The slowest ship sets the pace (assumed, not yet verified in game)."""
+        v = [s.seconds_per_gm if s else None for s in self.ships]
+        return None if any(x is None for x in v) else max(v)
+
+    def over_limit(self) -> list[str]:
+        c = Counter(s.name for s in self.ships if s)
+        by = {s.name: s for s in self.ships if s}
+        return [f"{n} x {k} (limit {by[k].limit})" for k, n in c.items() if by[k].limit and n > by[k].limit]
+
+
+def parse_ships(spec: str, types: dict[str, ShipType] | None = None) -> Fleet:
+    """'25200x12,ST59x3' -> a Fleet. Each part is a cargo number or a ship name from
+    ships.csv, optionally followed by xN."""
+    holds, ships = [], []
     for part in spec.split(","):
         m = re.fullmatch(r"\s*(.+?)(?:x(\d+))?\s*", part)
         what, n = m.group(1), int(m.group(2) or 1)
         if types and what in types:
             holds += [types[what].cargo] * n
-            cp = cp + types[what].cp * n if cp is not None else None
+            ships += [types[what]] * n
         else:
             try:
                 holds += [int(float(what))] * n
             except ValueError:
                 raise ValueError(f"--ships: {what!r} is neither a number nor a ship in ships.csv "
                                  f"({', '.join(sorted(types or {}))})") from None
-            cp = None
+            ships += [None] * n
     if not holds or min(holds) <= 0:
         raise ValueError(f"bad --ships spec {spec!r}")
-    return holds, cp
+    return Fleet(holds, ships)
 
 
 @dataclass
@@ -306,10 +348,14 @@ def fill_cap(a, b, sells, buys, coords, cap, ship_types, seconds_per_gm, overhea
     """For each ship type: fill the route's CP cap with only that ship. Best first."""
     rows = []
     for st in ship_types.values():
+        if not st.warp:
+            continue  # unknown speed: guessing one would decide the ranking
         n = cap // st.cp
+        if st.limit:
+            n = min(n, st.limit)
         if n == 0:
             continue
-        t = make_trip(a, b, sells, buys, coords, seconds_per_gm=seconds_per_gm,
+        t = make_trip(a, b, sells, buys, coords, seconds_per_gm=st.seconds_per_gm,
                       overhead_s=overhead_s, holds=[st.cargo] * n)
         rows.append((t.profit_per_hour, st, n, t))
     rows.sort(key=lambda r: r[0], reverse=True)
@@ -317,7 +363,7 @@ def fill_cap(a, b, sells, buys, coords, cap, ship_types, seconds_per_gm, overhea
 
 
 def route_card(a, b, quotes, coords, alarms, routes, ship_types, seconds_per_gm, overhead_s,
-               fleet=None, fleet_cp=None):
+               fleet: Fleet | None = None):
     sells, buys = book(quotes)
     t = make_trip(a, b, sells, buys, coords, seconds_per_gm=seconds_per_gm, overhead_s=overhead_s,
                   alarms=alarms)
@@ -336,21 +382,33 @@ def route_card(a, b, quotes, coords, alarms, routes, ship_types, seconds_per_gm,
         for g, size, m in opts[:4]:
             print(f"      {g:15} +{m:>11,}/unit  size {size:>9,}  {m / size:7.3f}/cargo  (needs a hold >= {size:,})")
     per_cargo_hr = t.margin_per_cargo * 3600 / t.seconds if t.seconds else math.inf
-    print(f"  SCORE: {per_cargo_hr:,.2f} credits per cargo unit per hour (fractional loading, travel only)")
+    print(f"  SCORE: {per_cargo_hr:,.2f} credits per cargo unit per hour at {seconds_per_gm:.2f} s/Gm "
+          f"(fractional loading, travel only)")
     if info and info.cp_cap and ship_types:
-        print(f"  filling the {info.cp_cap} CP cap with one ship type (whole units, travel only):")
+        print(f"  filling the {info.cp_cap} CP cap with one ship type (whole units, own speed, build limits, travel only):")
         for pph, st, n, ft in fill_cap(a, b, sells, buys, coords, info.cp_cap, ship_types,
                                        seconds_per_gm, overhead_s):
-            print(f"      {n:3} x {st.name:14} {n * st.cp:4} CP {n * st.cargo:>10,} cargo -> {pph:14,.0f}/hr"
+            spd = f"{st.seconds_per_gm:.2f}s/Gm" if st.seconds_per_gm else "speed?"
+            print(f"      {n:3} x {st.name:14} {n * st.cp:4} CP {n * st.cargo:>10,} cargo {spd:>10} -> {pph:14,.0f}/hr"
                   f"   [{_fmt_leg(ft.out, True)} / {_fmt_leg(ft.back, True)}]")
     if fleet:
-        ft = make_trip(a, b, sells, buys, coords, seconds_per_gm=seconds_per_gm, overhead_s=overhead_s,
-                       holds=fleet)
-        cp_txt = "" if fleet_cp is None else f", {fleet_cp} CP"
-        if fleet_cp is not None and info and info.cp_cap and fleet_cp > info.cp_cap:
+        spg = fleet.seconds_per_gm or seconds_per_gm
+        ft = make_trip(a, b, sells, buys, coords, seconds_per_gm=spg, overhead_s=overhead_s,
+                       holds=fleet.holds)
+        cp_txt = "" if fleet.cp is None else f", {fleet.cp} CP"
+        if fleet.cp is not None and info and info.cp_cap and fleet.cp > info.cp_cap:
             cp_txt += f" -- OVER the {info.cp_cap} CP cap"
-        print(f"  your fleet ({len(fleet)} ships, {sum(fleet):,} cargo{cp_txt}): {ft.profit_per_hour:,.0f}/hr"
+        print(f"  your fleet ({len(fleet.holds)} ships, {sum(fleet.holds):,} cargo{cp_txt}, {spg:.2f} s/Gm, "
+              f"round trip {ft.seconds / 60:.1f} min): {ft.profit_per_hour:,.0f}/hr"
               f"   [{_fmt_leg(ft.out, True)} / {_fmt_leg(ft.back, True)}]")
+        if fleet.dpm is not None:
+            print(f"      combat: {fleet.dpm:,} DPM, {fleet.hp:,} HP"
+                  + (f", cost {fleet.cost:,}" if fleet.cost is not None else ""))
+        for w in fleet.over_limit():
+            print(f"      WARNING: over build limit: {w}")
+    unknown = [st.name for st in ship_types.values() if not st.warp]
+    if info and info.cp_cap and unknown:
+        print(f"  not scored (no warp speed in ships.csv): {', '.join(unknown)}")
     print("  pirates are not modelled: every figure is a ceiling (see data/encounters.csv)")
     return t
 
@@ -432,17 +490,23 @@ def selftest() -> int:
             for w in round_trips(quotes, coords, holds=[25200]) if (w.a, w.b) == (c.a, c.b))), 1.0)
     # ships / routes files
     types = load_ships()
-    holds, cp = parse_ships("hauler-28cpx3,2000x2", types)
+    fl = parse_ships("ST59x3,2000x2", types)
     check("ship names parse: 3 x 130,000 + 2 x 2,000, CP unknown (bare numbers)",
-          holds == [130000] * 3 + [2000] * 2 and cp is None)
-    holds, cp = parse_ships("hauler-28cpx3", types)
-    eq("  ...named ships carry CP", cp, 84)
+          fl.holds == [130000] * 3 + [2000] * 2 and fl.cp is None)
+    fl = parse_ships("ST59x3", types)
+    eq("  ...named ships carry CP", fl.cp, 84)
+    eq("  ...and DPM", fl.dpm, 3 * 27373)
+    eq("FG300 (the timing fleet) runs at the measured 2.0 s/Gm", types["FG300"].seconds_per_gm, 2.0)
+    eq("ST59 (warp 2250) is 2.22x slower", types["ST59"].seconds_per_gm, 2.0 * 5000 / 2250)
+    eq("mixed fleet moves at its slowest ship", parse_ships("FG300x2,ST59", types).seconds_per_gm,
+       2.0 * 5000 / 2250)
+    check("build limit is flagged", parse_ships("FG300x16", types).over_limit() != [])
     routes = load_routes()
     check("routes.csv: Free Port/Ares is level 4, 160 CP either way round",
           routes[frozenset(("Ares", "Free Port"))].cp_cap == 160)
     sells, buys = book(quotes)
     rows = fill_cap("Free Port", "Ares", sells, buys, coords, 160, types, 2.0, 0.0)
-    eq("160 CP fits 20 hauler-8cp", {r[1].name: r[2] for r in rows}["hauler-8cp"], 20)
+    eq("160 CP would fit 20 AC721, but the build limit is 15", {r[1].name: r[2] for r in rows}["AC721"], 15)
     print("PASS" if all(checks) else "FAIL")
     return 0 if all(checks) else 1
 
@@ -461,7 +525,8 @@ def main(argv=None) -> int:
                     help="score every route in routes.csv, filling its CP cap with the best ship type")
     ap.add_argument("--routes-file", type=Path, default=DEFAULT_ROUTES)
     ap.add_argument("--ships-file", type=Path, default=DEFAULT_SHIPS)
-    ap.add_argument("--sec-per-gm", type=float, default=SECONDS_PER_GM, help="fleet travel time per Gm")
+    ap.add_argument("--sec-per-gm", type=float, default=None,
+                    help="travel time per Gm (default: from the fleet's slowest warp, else 2.0)")
     ap.add_argument("--overhead", type=float, default=0.0, help="fixed seconds per leg (dock/launch)")
     ap.add_argument("--top", type=int, default=20)
     ap.add_argument("--from", dest="stop", help="only round trips that include this stop")
@@ -481,9 +546,10 @@ def main(argv=None) -> int:
         return 0
     ship_types = load_ships(args.ships_file)
     routes = load_routes(args.routes_file)
-    fleet_cp = None
+    fleet = None
     if args.ships:
-        holds, fleet_cp = parse_ships(args.ships, ship_types)
+        fleet = parse_ships(args.ships, ship_types)
+        holds = fleet.holds
         label = f"whole units, {len(holds)} separate holds, {sum(holds):,} cargo total"
     elif args.whole_units:
         holds = [int(args.cargo)]
@@ -491,6 +557,10 @@ def main(argv=None) -> int:
     else:
         holds = None
         label = f"continuous loading, cargo {args.cargo:g}"
+    if args.sec_per_gm is None:
+        args.sec_per_gm = (fleet.seconds_per_gm if fleet else None) or SECONDS_PER_GM
+    if fleet and fleet.seconds_per_gm:
+        label += f", {args.sec_per_gm:.2f} s/Gm (slowest ship)"
     for key in routes:
         for p in key:
             if p not in coords:
@@ -500,7 +570,7 @@ def main(argv=None) -> int:
             if p not in coords:
                 ap.error(f"unknown stop {p!r}; known: {', '.join(sorted(coords))}")
         route_card(*args.route, quotes, coords, alarms, routes, ship_types, args.sec_per_gm,
-                   args.overhead, holds, fleet_cp)
+                   args.overhead, fleet)
         return 0
     if args.known_routes:
         sells, buys = book(quotes)

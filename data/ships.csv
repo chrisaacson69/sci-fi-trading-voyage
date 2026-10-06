@@ -1,5 +1,9 @@
-name,cargo,cp,notes
-starter-3cp,2000,3,first fleet ship (2 owned)
-hauler-8cp,25200,8,pure cargo; likely won't survive pirates
-hauler-28cp,130000,28,
-hauler-40cp,150000,40,
+name,cost,limit,cp,cargo,dpm,hp,cruise_min,cruise_max,warp,notes
+ST59,13560000,6,28,130000,27373,143335,450,1200,2250,big
+Conomara,1542000,8,20,20000,37833,77460,450,1200,2250,
+Reliiat T,3420,10,4,1800,4741,11450,800,1200,4000,
+NOMA,2986,10,6,2000,230,16240,800,1200,4000,Heal
+IO,1139000,8,18,20000,39477,67386,650,1200,3250,
+FG300,1623,15,3,2000,2560,15563,1000,1200,5000,starter; the timing fleet (2.0 s/Gm measured)
+AC721,86410,15,8,25200,2926,43949,800,1200,4000,hauler
+unnamed-40cp,,,40,150000,,,,,,seen in ship selection; name and stats not recorded yet
