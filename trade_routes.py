@@ -23,6 +23,8 @@ Usage:
   py -3 trade_routes.py --ships 130000x3,2000x2    # mixed fleet, separate holds
   py -3 trade_routes.py --cargo 302400 --whole-units   # one pooled fleet hold
   py -3 trade_routes.py --from Troy                # only round trips touching Troy
+  py -3 trade_routes.py --max-alarm Medium         # both ports at most Medium alarm
+  py -3 trade_routes.py --by-alarm --ships 130000x3   # best route under each alarm cap
   py -3 trade_routes.py --json > routes.json       # machine-readable, for ship pickers
   py -3 trade_routes.py --selftest
 """
@@ -41,6 +43,8 @@ from functools import reduce
 from pathlib import Path
 
 DEFAULT_DATA = Path(__file__).resolve().parent / "data" / "market.csv"
+DEFAULT_PORTS = Path(__file__).resolve().parent / "data" / "ports.csv"
+ALARMS = ["Low", "Medium", "High", "Extreme"]  # the game's port alarm levels, in order
 SECONDS_PER_GM = 2.0  # measured, first fleet (2x 3CP, 2000 cargo each)
 
 
@@ -74,23 +78,46 @@ class RoundTrip:
     per_cargo_per_kgm: float     # ship-independent score: margin per cargo / 1000 Gm flown
     seconds: float               # cycle time at the given speed/overhead
     cycle_margin: float          # credits per cycle for the given cargo / fleet
-    profit_per_hour: float
+    profit_per_hour: float       # travel time only -- pirate attacks are NOT modelled yet
+    alarm_a: str = ""
+    alarm_b: str = ""
+
+    @property
+    def alarm(self) -> str:
+        """The route's worse port alarm."""
+        return max((self.alarm_a, self.alarm_b), key=lambda a: ALARMS.index(a) if a in ALARMS else -1)
 
 
-def load_market(path: Path = DEFAULT_DATA):
-    """Return (quotes, coords) from a market CSV."""
-    quotes, coords = [], {}
+def load_ports(path: Path = DEFAULT_PORTS):
+    """Return ({planet: (x, y)}, {planet: alarm}) from the ports CSV."""
+    coords, alarms = {}, {}
     with open(path, newline="") as f:
         for r in csv.DictReader(f):
             p = r["planet"].strip()
-            xy = (float(r["x"]), float(r["y"]))
-            if coords.setdefault(p, xy) != xy:
-                raise ValueError(f"{p}: conflicting coordinates {coords[p]} vs {xy}")
+            if p in coords:
+                raise ValueError(f"{p}: listed twice in {path}")
+            coords[p] = (float(r["x"]), float(r["y"]))
+            a = r["alarm"].strip().capitalize()
+            if a not in ALARMS:
+                raise ValueError(f"{p}: alarm must be one of {ALARMS}, got {a!r}")
+            alarms[p] = a
+    return coords, alarms
+
+
+def load_market(path: Path = DEFAULT_DATA, ports: Path = DEFAULT_PORTS):
+    """Return (quotes, coords, alarms) from the market and ports CSVs."""
+    coords, alarms = load_ports(ports)
+    quotes = []
+    with open(path, newline="") as f:
+        for r in csv.DictReader(f):
+            p = r["planet"].strip()
+            if p not in coords:
+                raise ValueError(f"{p}: in {path} but not in {ports}")
             side = r["side"].strip().upper()
             if side not in ("S", "B"):
                 raise ValueError(f"{p}/{r['good']}: side must be S or B, got {side!r}")
             quotes.append(Quote(p, r["good"].strip(), int(r["size"]), side, int(r["price"])))
-    return quotes, coords
+    return quotes, coords, alarms
 
 
 def audit(quotes, outlier_ratio: float = 2.0):
@@ -182,7 +209,7 @@ def make_leg(origin, dest, sells, buys, holds, cargo) -> Leg:
 
 
 def round_trips(quotes, coords, cargo: float = 1.0, seconds_per_gm: float = SECONDS_PER_GM,
-                overhead_s: float = 0.0, holds: list[int] | None = None):
+                overhead_s: float = 0.0, holds: list[int] | None = None, alarms=None):
     """Every unordered stop pair with any profit, best first.
 
     holds=None -> continuous model scaled by `cargo`; otherwise whole units per hold.
@@ -203,7 +230,8 @@ def round_trips(quotes, coords, cargo: float = 1.0, seconds_per_gm: float = SECO
         out.append(RoundTrip(a, b, d, f, r, m,
                              per_cargo_per_kgm=m / (2 * d) * 1000 if d else math.inf,
                              seconds=secs, cycle_margin=cyc,
-                             profit_per_hour=cyc * 3600 / secs if secs else math.inf))
+                             profit_per_hour=cyc * 3600 / secs if secs else math.inf,
+                             alarm_a=(alarms or {}).get(a, ""), alarm_b=(alarms or {}).get(b, "")))
     out.sort(key=lambda t: t.profit_per_hour, reverse=True)
     return out
 
@@ -216,17 +244,19 @@ def _fmt_leg(leg: Leg, whole: bool) -> str:
 
 def print_table(trips, label, whole):
     print(f"{label}\n")
-    print(f"{'#':>3} {'profit/hr':>14} {'cycle':>9} {'dist Gm':>8}  {'A':15} {'B':15} "
+    print(f"{'#':>3} {'profit/hr':>14} {'cycle':>9} {'dist Gm':>8}  {'alarm':9} {'A':15} {'B':15} "
           f"{'A -> B':28} B -> A")
     for i, t in enumerate(trips, 1):
-        print(f"{i:3} {t.profit_per_hour:14,.0f} {t.seconds / 60:8.1f}m {t.distance_gm:8.0f}  "
+        al = f"{t.alarm_a[:3]}/{t.alarm_b[:3]}"
+        print(f"{i:3} {t.profit_per_hour:14,.0f} {t.seconds / 60:8.1f}m {t.distance_gm:8.0f}  {al:9} "
               f"{t.a:15} {t.b:15} {_fmt_leg(t.out, whole):28} {_fmt_leg(t.back, whole)}")
+    print("\nprofit/hr counts travel time only; pirate attacks (time and losses) are not modelled yet")
 
 
 def selftest() -> int:
     """Check against values worked out by hand from the 2026-10-06 snapshot."""
-    quotes, coords = load_market()
-    trips = {(t.a, t.b): t for t in round_trips(quotes, coords)}
+    quotes, coords, alarms = load_market()
+    trips = {(t.a, t.b): t for t in round_trips(quotes, coords, alarms=alarms)}
     checks = []
 
     def eq(name, got, want, tol=1e-3):
@@ -255,6 +285,10 @@ def selftest() -> int:
     ranked = round_trips(quotes, coords)
     check(f"ranking: #1 {ranked[0].a}/{ranked[0].b}, #2 {ranked[1].a}/{ranked[1].b}",
           ranked[0].a == "AlphaCentA" and ranked[1].a == "BlackGoldStar")
+    check("Proxima/AlphaCentA is an Extreme/Extreme route",
+          trips[("AlphaCentA", "Proxima")].alarm == "Extreme")
+    check("Ares/Free Port takes its worse end: Extreme", trips[("Ares", "Free Port")].alarm == "Extreme")
+    check("BlackGoldStar/Troy is High/High", trips[("BlackGoldStar", "Troy")].alarm == "High")
     check("no size mismatches in the corrected snapshot",
           not any(x.startswith("SIZE") for x in audit(quotes)))
 
@@ -284,6 +318,7 @@ def selftest() -> int:
 def main(argv=None) -> int:
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("--data", type=Path, default=DEFAULT_DATA, help="market CSV (default data/market.csv)")
+    ap.add_argument("--ports", type=Path, default=DEFAULT_PORTS, help="ports CSV (default data/ports.csv)")
     ap.add_argument("--cargo", type=float, default=1.0, help="cargo capacity (Size units)")
     ap.add_argument("--whole-units", action="store_true",
                     help="buy whole units only; --cargo is one pooled hold")
@@ -292,6 +327,8 @@ def main(argv=None) -> int:
     ap.add_argument("--overhead", type=float, default=0.0, help="fixed seconds per leg (dock/launch)")
     ap.add_argument("--top", type=int, default=20)
     ap.add_argument("--from", dest="stop", help="only round trips that include this stop")
+    ap.add_argument("--max-alarm", choices=ALARMS, help="only routes whose BOTH ports are at most this alarm")
+    ap.add_argument("--by-alarm", action="store_true", help="best route under each alarm cap")
     ap.add_argument("--json", action="store_true", help="emit JSON instead of a table")
     ap.add_argument("--audit", action="store_true", help="only print likely-typo warnings")
     ap.add_argument("--selftest", action="store_true")
@@ -299,7 +336,7 @@ def main(argv=None) -> int:
 
     if args.selftest:
         return selftest()
-    quotes, coords = load_market(args.data)
+    quotes, coords, alarms = load_market(args.data, args.ports)
     warnings = audit(quotes)
     if args.audit:
         print("\n".join(warnings) or "no warnings")
@@ -313,7 +350,19 @@ def main(argv=None) -> int:
     else:
         holds = None
         label = f"continuous loading, cargo {args.cargo:g}"
-    trips = round_trips(quotes, coords, args.cargo, args.sec_per_gm, args.overhead, holds)
+    trips = round_trips(quotes, coords, args.cargo, args.sec_per_gm, args.overhead, holds, alarms)
+    if args.by_alarm:
+        whole = holds is not None
+        print(label + "\n\nbest route with both ports at or below each alarm level (travel time only):")
+        for cap in ALARMS:
+            ok = [t for t in trips if ALARMS.index(t.alarm) <= ALARMS.index(cap)]
+            if ok:
+                t = ok[0]
+                print(f"  <= {cap:8} {t.profit_per_hour:14,.0f}/hr  {t.a} <-> {t.b} ({t.alarm_a}/{t.alarm_b}), "
+                      f"{_fmt_leg(t.out, whole)} / {_fmt_leg(t.back, whole)}")
+        return 0
+    if args.max_alarm:
+        trips = [t for t in trips if ALARMS.index(t.alarm) <= ALARMS.index(args.max_alarm)]
     if args.stop:
         if args.stop not in coords:
             ap.error(f"unknown stop {args.stop!r}; known: {', '.join(sorted(coords))}")
@@ -322,7 +371,8 @@ def main(argv=None) -> int:
     if args.json:
         json.dump({"mode": label, "cargo": args.cargo, "holds": holds,
                    "seconds_per_gm": args.sec_per_gm, "overhead_s": args.overhead,
-                   "warnings": warnings, "round_trips": [asdict(t) for t in trips]}, sys.stdout, indent=1)
+                   "warnings": warnings,
+                   "round_trips": [dict(asdict(t), alarm=t.alarm) for t in trips]}, sys.stdout, indent=1)
         print()
     else:
         for w in warnings:

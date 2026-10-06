@@ -1,126 +1,126 @@
-planet,x,y,good,size,side,price
-AlphaLupi,922,4510,Comm Comp,2000,S,18424
-AlphaLupi,922,4510,Computer2,42500,B,554880
-AlphaLupi,922,4510,Nuke Battery 2,100000,B,1113000
-AlphaLupi,922,4510,SpecMat3,33000,B,963000
-Beta Lupi,814,5682,Computer2,42500,S,403155
-Beta Lupi,814,5682,Comm Comp,2000,B,21168
-Beta Lupi,814,5682,SpecConGood2,500,B,7680
-Beta Lupi,814,5682,SpecMat3,33000,B,990000
-BountPlanet,2678,5908,Food1,100,S,27
-BountPlanet,2678,5908,RefOre1,4000,S,1130
-BountPlanet,2678,5908,Elec1,10000,B,3177
-BountPlanet,2678,5908,Media1,200,B,63
-BountPlanet,2678,5908,Std Uniform1,300,B,98
-Broadcast Star,2614,6164,Elec1,10000,S,2673
-Broadcast Star,2614,6164,Media1,200,S,55
-Broadcast Star,2614,6164,ConsumGood1,2000,B,625
-Broadcast Star,2614,6164,Std Uniform1,300,B,100
-DeepSpcArray,2675,5786,Comm Comp,2000,S,18228
-DeepSpcArray,2675,5786,Computer2,42500,S,416160
-DeepSpcArray,2675,5786,Elec1,10000,S,2732
-DeepSpcArray,2675,5786,ConsumGood1,2000,B,637
-DeepSpcArray,2675,5786,Food1,100,B,32
-DeepSpcArray,2675,5786,Std Uniform1,300,B,99
-Fracture Planet,2885,6028,Comm Comp,2000,S,18228
-Fracture Planet,2885,6028,Elec1,10000,S,2673
-Fracture Planet,2885,6028,RefOre1,4000,S,1130
-Fracture Planet,2885,6028,Media1,200,B,64
-Fracture Planet,2885,6028,Std Uniform1,300,B,97
-Free Port,2650,5124,Collect2,8000,S,74400
-Free Port,2650,5124,Nuke Battery 2,100000,S,966000
-Free Port,2650,5124,Comm Comp,2000,B,26264
-Free Port,2650,5124,Computer2,42500,B,654585
-Free Port,2650,5124,Int Nav Sys,1000000,B,33900000
-Granma,3456,6546,Nuke Battery 2,100000,S,997500
-Granma,3456,6546,Comm Comp,2000,B,21168
-Granma,3456,6546,Computer2,42500,B,550545
-Granma,3456,6546,Int Nav Sys,1000000,B,31800000
-LW Mon Station,800,5820,Collect2,8000,S,72800
-LW Mon Station,800,5820,Computer2,42500,S,394485
-LW Mon Station,800,5820,Nuke Battery 2,100000,S,976500
-LW Mon Station,800,5820,Comm Comp,2000,B,20776
-LW Mon Station,800,5820,SpecConGood2,500,B,7584
-LW Mon Station,800,5820,SpecMat3,33000,B,954000
-MuCentauri,2744,5891,Media1,200,S,57
-MuCentauri,2744,5891,Std Uniform1,300,S,79
-MuCentauri,2744,5891,ConsumGood1,2000,B,619
-MuCentauri,2744,5891,Elec1,10000,B,3267
-MuCentauri,2744,5891,Food1,100,B,33
-Orgin Station,2745,5926,ConsumGood1,2000,S,536
-Orgin Station,2745,5926,Food1,100,S,29
-Orgin Station,2745,5926,Std Uniform1,300,S,80
-Orgin Station,2745,5926,Elec1,10000,B,3177
-Orgin Station,2745,5926,Media1,200,B,64
-Orgin Station,2745,5926,RefOre1,4000,B,1349
-TycoLab,1740,5814,Comm Comp,2000,S,18032
-TycoLab,1740,5814,SpecMat3,33000,S,864000
-TycoLab,1740,5814,Computer2,42500,B,546210
-TycoLab,1740,5814,Elec1,10000,B,8969
-TycoLab,1740,5814,SpecConGood2,500,B,7536
-EpsiCentauri,2606,4294,Collect2,8000,S,72800
-EpsiCentauri,2606,4294,Computer2,42500,S,416160
-EpsiCentauri,2606,4294,SpecConGood2,500,B,7632
-EpsiCentauri,2606,4294,Comm Comp,2000,B,20972
-EpsiCentauri,2606,4294,Int Nav Sys,1000000,B,31800000
-ArbreCAP,2662,3666,SpecConGood2,500,S,4848
-ArbreCAP,2662,3666,Comm Comp,2000,S,17836
-ArbreCAP,2662,3666,SpecMat3,33000,S,837000
-ArbreCAP,2662,3666,Food1,100,B,93
-ArbreCAP,2662,3666,Computer2,42500,B,541875
-ArbreCAP,2662,3666,Int Nav Sys,1000000,B,33000000
-Proxima,1040,1700,ResearchData3,100000,S,2536500
-Proxima,1040,1700,Food1,100,B,309
-Proxima,1040,1700,SpecConGood2,500,B,18384
-Proxima,1040,1700,ExperDrug3,10000,B,275000
-AlphaCentA,1046,1704,Computer2,42500,S,394485
-AlphaCentA,1046,1704,Int Nav Sys,1000000,S,27600000
-AlphaCentA,1046,1704,SpecMat3,33000,S,846000
-AlphaCentA,1046,1704,SpecConGood2,500,B,18576
-AlphaCentA,1046,1704,ResearchData3,100000,B,3078000
-AlphaCentA,1046,1704,ExperDrug3,10000,B,270000
-AlphaCentB,1036,1694,Computer2,42500,S,372810
-AlphaCentB,1036,1694,Int Nav Sys,1000000,S,26700000
-AlphaCentB,1036,1694,SpecMat3,33000,S,819000
-AlphaCentB,1036,1694,Std Uniform1,300,B,178
-AlphaCentB,1036,1694,ExperDrug3,10000,B,272500
-BetaCrucis,3796,1658,ResearchData3,100000,S,2707500
-BetaCrucis,3796,1658,TrojiteCry3,240000,S,6212400
-BetaCrucis,3796,1658,ConsumGood1,2000,B,5905
-BetaCrucis,3796,1658,SpecConGood2,500,B,19248
-BetaCrucis,3796,1658,ExperDrug3,10000,B,275000
-Ares,4336,4900,Comm Comp,2000,S,18032
-Ares,4336,4900,Computer2,42500,S,403155
-Ares,4336,4900,SpecMat3,33000,S,846000
-Ares,4336,4900,SpecConGood2,500,B,7776
-Ares,4336,4900,Collect2,8000,B,245600
-BlackGoldStar,5644,4932,Comm Comp,2000,S,18032
-BlackGoldStar,5644,4932,Int Nav Sys,1000000,S,27300000
-BlackGoldStar,5644,4932,SpecMat3,33000,S,846000
-BlackGoldStar,5644,4932,SpecConGood2,500,B,18432
-BlackGoldStar,5644,4932,Computer2,42500,B,468180
-BlackGoldStar,5644,4932,TrojiteCry3,240000,B,7348000
-Troy,6692,4662,Computer2,42500,S,394485
-Troy,6692,4662,TrojiteCry3,240000,S,6145600
-Troy,6692,4662,Int Nav Sys,1000000,S,27600000
-Troy,6692,4662,Comm Comp,2000,B,58604
-Troy,6692,4662,SpecMat3,33000,B,954000
-Troy,6692,4662,ResearchData3,100000,B,3049500
-Gacrux,4972,2804,Int Nav Sys,1000000,S,28200000
-Gacrux,4972,2804,SpecMat3,33000,S,846000
-Gacrux,4972,2804,SpecConGood2,500,B,18480
-Gacrux,4972,2804,ResearchData3,100000,B,3021000
-Gacrux,4972,2804,TrojiteCry3,240000,B,7080800
-Acrux,5876,1200,ExperDrug3,10000,S,240000
-Acrux,5876,1200,SpecConGood2,500,B,24095
-Acrux,5876,1200,SpecMat3,33000,B,981000
-DS obs,8258,3386,SpecMat3,33000,S,801000
-DS obs,8258,3386,TrojiteCry3,240000,S,6680000
-DS obs,8258,3386,Collect2,8000,B,248800
-DS obs,8258,3386,ResearchData3,100000,B,2992500
-DS obs,8258,3386,Int Nav Sys,1000000,B,31800000
-Reach,8650,5470,ExperDrug3,10000,S,247500
-Reach,8650,5470,Int Nav Sys,1000000,S,29100000
-Reach,8650,5470,ConsumGood1,2000,B,17688
-Reach,8650,5470,TrojiteCry3,240000,B,7481600
-Reach,8650,5470,SpecMat3,33000,B,972000
+planet,good,size,side,price
+AlphaLupi,Comm Comp,2000,S,18424
+AlphaLupi,Computer2,42500,B,554880
+AlphaLupi,Nuke Battery 2,100000,B,1113000
+AlphaLupi,SpecMat3,33000,B,963000
+Beta Lupi,Computer2,42500,S,403155
+Beta Lupi,Comm Comp,2000,B,21168
+Beta Lupi,SpecConGood2,500,B,7680
+Beta Lupi,SpecMat3,33000,B,990000
+BountPlanet,Food1,100,S,27
+BountPlanet,RefOre1,4000,S,1130
+BountPlanet,Elec1,10000,B,3177
+BountPlanet,Media1,200,B,63
+BountPlanet,Std Uniform1,300,B,98
+Broadcast Star,Elec1,10000,S,2673
+Broadcast Star,Media1,200,S,55
+Broadcast Star,ConsumGood1,2000,B,625
+Broadcast Star,Std Uniform1,300,B,100
+DeepSpcArray,Comm Comp,2000,S,18228
+DeepSpcArray,Computer2,42500,S,416160
+DeepSpcArray,Elec1,10000,S,2732
+DeepSpcArray,ConsumGood1,2000,B,637
+DeepSpcArray,Food1,100,B,32
+DeepSpcArray,Std Uniform1,300,B,99
+Fracture Planet,Comm Comp,2000,S,18228
+Fracture Planet,Elec1,10000,S,2673
+Fracture Planet,RefOre1,4000,S,1130
+Fracture Planet,Media1,200,B,64
+Fracture Planet,Std Uniform1,300,B,97
+Free Port,Collect2,8000,S,74400
+Free Port,Nuke Battery 2,100000,S,966000
+Free Port,Comm Comp,2000,B,26264
+Free Port,Computer2,42500,B,654585
+Free Port,Int Nav Sys,1000000,B,33900000
+Granma,Nuke Battery 2,100000,S,997500
+Granma,Comm Comp,2000,B,21168
+Granma,Computer2,42500,B,550545
+Granma,Int Nav Sys,1000000,B,31800000
+LW Mon Station,Collect2,8000,S,72800
+LW Mon Station,Computer2,42500,S,394485
+LW Mon Station,Nuke Battery 2,100000,S,976500
+LW Mon Station,Comm Comp,2000,B,20776
+LW Mon Station,SpecConGood2,500,B,7584
+LW Mon Station,SpecMat3,33000,B,954000
+MuCentauri,Media1,200,S,57
+MuCentauri,Std Uniform1,300,S,79
+MuCentauri,ConsumGood1,2000,B,619
+MuCentauri,Elec1,10000,B,3267
+MuCentauri,Food1,100,B,33
+Orgin Station,ConsumGood1,2000,S,536
+Orgin Station,Food1,100,S,29
+Orgin Station,Std Uniform1,300,S,80
+Orgin Station,Elec1,10000,B,3177
+Orgin Station,Media1,200,B,64
+Orgin Station,RefOre1,4000,B,1349
+TycoLab,Comm Comp,2000,S,18032
+TycoLab,SpecMat3,33000,S,864000
+TycoLab,Computer2,42500,B,546210
+TycoLab,Elec1,10000,B,8969
+TycoLab,SpecConGood2,500,B,7536
+EpsiCentauri,Collect2,8000,S,72800
+EpsiCentauri,Computer2,42500,S,416160
+EpsiCentauri,SpecConGood2,500,B,7632
+EpsiCentauri,Comm Comp,2000,B,20972
+EpsiCentauri,Int Nav Sys,1000000,B,31800000
+ArbreCAP,SpecConGood2,500,S,4848
+ArbreCAP,Comm Comp,2000,S,17836
+ArbreCAP,SpecMat3,33000,S,837000
+ArbreCAP,Food1,100,B,93
+ArbreCAP,Computer2,42500,B,541875
+ArbreCAP,Int Nav Sys,1000000,B,33000000
+Proxima,ResearchData3,100000,S,2536500
+Proxima,Food1,100,B,309
+Proxima,SpecConGood2,500,B,18384
+Proxima,ExperDrug3,10000,B,275000
+AlphaCentA,Computer2,42500,S,394485
+AlphaCentA,Int Nav Sys,1000000,S,27600000
+AlphaCentA,SpecMat3,33000,S,846000
+AlphaCentA,SpecConGood2,500,B,18576
+AlphaCentA,ResearchData3,100000,B,3078000
+AlphaCentA,ExperDrug3,10000,B,270000
+AlphaCentB,Computer2,42500,S,372810
+AlphaCentB,Int Nav Sys,1000000,S,26700000
+AlphaCentB,SpecMat3,33000,S,819000
+AlphaCentB,Std Uniform1,300,B,178
+AlphaCentB,ExperDrug3,10000,B,272500
+BetaCrucis,ResearchData3,100000,S,2707500
+BetaCrucis,TrojiteCry3,240000,S,6212400
+BetaCrucis,ConsumGood1,2000,B,5905
+BetaCrucis,SpecConGood2,500,B,19248
+BetaCrucis,ExperDrug3,10000,B,275000
+Ares,Comm Comp,2000,S,18032
+Ares,Computer2,42500,S,403155
+Ares,SpecMat3,33000,S,846000
+Ares,SpecConGood2,500,B,7776
+Ares,Collect2,8000,B,245600
+BlackGoldStar,Comm Comp,2000,S,18032
+BlackGoldStar,Int Nav Sys,1000000,S,27300000
+BlackGoldStar,SpecMat3,33000,S,846000
+BlackGoldStar,SpecConGood2,500,B,18432
+BlackGoldStar,Computer2,42500,B,468180
+BlackGoldStar,TrojiteCry3,240000,B,7348000
+Troy,Computer2,42500,S,394485
+Troy,TrojiteCry3,240000,S,6145600
+Troy,Int Nav Sys,1000000,S,27600000
+Troy,Comm Comp,2000,B,58604
+Troy,SpecMat3,33000,B,954000
+Troy,ResearchData3,100000,B,3049500
+Gacrux,Int Nav Sys,1000000,S,28200000
+Gacrux,SpecMat3,33000,S,846000
+Gacrux,SpecConGood2,500,B,18480
+Gacrux,ResearchData3,100000,B,3021000
+Gacrux,TrojiteCry3,240000,B,7080800
+Acrux,ExperDrug3,10000,S,240000
+Acrux,SpecConGood2,500,B,24095
+Acrux,SpecMat3,33000,B,981000
+DS obs,SpecMat3,33000,S,801000
+DS obs,TrojiteCry3,240000,S,6680000
+DS obs,Collect2,8000,B,248800
+DS obs,ResearchData3,100000,B,2992500
+DS obs,Int Nav Sys,1000000,B,31800000
+Reach,ExperDrug3,10000,S,247500
+Reach,Int Nav Sys,1000000,S,29100000
+Reach,ConsumGood1,2000,B,17688
+Reach,TrojiteCry3,240000,B,7481600
+Reach,SpecMat3,33000,B,972000

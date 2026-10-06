@@ -1,0 +1,4 @@
+date,route_a,route_b,fleet_cp,attacked,pirate_cp,battle_minutes,ships_lost,notes
+2026-10-06,Proxima,AlphaCentA,84,y,82,14.5,1,3x 130000-cargo haulers; first attack right after starting the route
+2026-10-06,Proxima,AlphaCentA,56,y,,,2,second attack on the same run; remaining 2 haulers lost
+2026-10-06,Free Port,Ares,,y,60,,,attacks seen on this route are 60 CP fleets (count not logged)

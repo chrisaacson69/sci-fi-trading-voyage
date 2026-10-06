@@ -10,18 +10,24 @@ py -3 trade_routes.py --ships 130000x3         # whole units, three separate 130
 py -3 trade_routes.py --ships 25200x12,2000x2  # mixed fleet
 py -3 trade_routes.py --cargo 302400 --whole-units   # whole units, one pooled fleet hold
 py -3 trade_routes.py --from Troy              # only trips touching one stop
+py -3 trade_routes.py --max-alarm Medium       # both ports at most Medium alarm
+py -3 trade_routes.py --by-alarm --ships 130000x3   # best route under each alarm cap
 py -3 trade_routes.py --json > routes.json     # for other tools (e.g. a ship picker)
 py -3 trade_routes.py --audit                  # likely-typo warnings only
 py -3 trade_routes.py --selftest               # values checked by hand
 ```
 
-## Data — `data/market.csv`
+## Data
 
-One row per (stop, good): `planet,x,y,good,size,side,price`.
+- **`data/ports.csv`**, one row per stop: `planet,x,y,alarm`. This is the only place coordinates are stored. `alarm` is the game's port alarm level: Low, Medium, High or Extreme.
+- **`data/market.csv`**, one row per (stop, good): `planet,good,size,side,price`.
+- **`data/encounters.csv`** logs pirate attacks, one line per trip or attack. Safe trips count too. Nothing reads it yet; it's the evidence a pirate model will be calibrated from.
+
+In `market.csv`:
 
 - `side` **S** = the stop sells to you (buy here), **B** = the stop buys from you (sell here).
 - `size` = cargo space one unit takes; `price` is for one unit.
-- `x,y` = map coordinates; distance is straight-line, in Gm.
+- Distance is straight-line between the `ports.csv` coordinates, in Gm.
 
 Snapshot: all 25 stops, recorded 2026-10-06. **Prices change daily**, so re-enter them before you
 trust a ranking. That said, distance and choice of good have mattered more than the daily swings.
@@ -72,8 +78,27 @@ holds only a ship with ≥100,000 cargo can carry it. At 2.0 s/Gm, whole units, 
 
 These all assume the measured 2.0 s/Gm. Bigger ships may be slower; pass `--sec-per-gm`.
 
+## Pirates — the travel-only ranking is not the real ranking
+
+The first run of the top route (Proxima → AlphaCentA, 3 × 130,000 haulers, 84 CP) was attacked
+straight away by an 82 CP pirate fleet. The battle took 14.5 minutes, about 30 round trips' worth
+of flying, and lost 1 ship; a second attack took the other 2. Every profit/hr figure here counts
+travel time only, so treat it as a ceiling.
+
+What's known about alarm levels so far:
+- They roughly follow distance from Orgin Station, except Free Port (808 Gm away, Extreme) and the
+  AlphaCent/Proxima cluster (Extreme, though some ports further away are only High).
+- A route has two ports. Proxima/AlphaCentA (Extreme/Extreme) met 82 CP fleets. Free Port/Ares
+  (Extreme/Medium) has met only 60 CP fleets. So pirate strength isn't simply the worse of the two
+  ports, but two routes can't say what the rule is.
+
+The calculator shows both ports' alarms, and `--max-alarm` / `--by-alarm` filter routes so that
+**both** ends are at or below a level. Turning alarm levels into attack rate, pirate CP, battle time
+and losses needs more rows in `encounters.csv`.
+
 ## Not modelled yet
 
+- **Pirate attacks:** how often, how strong, how long a battle takes, and what is lost (see above).
 - **Fleet selection.** Fleets are capped at 100 CP, so the goal is to maximise cargo/CP × speed,
   plus enough combat strength to handle pirates. Use `--json` output alongside a ship-data tool.
 - Ship speed differences (assumed: a fleet moves at one speed).
