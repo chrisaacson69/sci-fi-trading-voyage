@@ -6,5 +6,5 @@ NOMA,2986,10,6,2000,230,16240,800,1200,4000,Heal
 IO,1139000,8,18,20000,39477,67386,650,1200,3250,
 FG300,1623,15,3,2000,2560,15563,1000,1200,5000,starter; the timing fleet (2.0 s/Gm measured)
 AC721,86410,15,8,25200,2926,43949,800,1200,4000,hauler
-Eternal Heavens,24610000,,40,150000,,298690,,,1750,carrier: firepower from aircraft and UAVs so no single DPM; spelled "Enternal" in chat - check in-game name
-CV3K,18810000,,40,150000,,292257,,,2000,carrier: firepower from aircraft and UAVs; cost given as "18,810,00" - assumed 18810000
+Eternal Heavens,24610000,5,40,150000,,298690,,,1750,carrier: firepower from aircraft and UAVs so no single DPM; spelled "Enternal" in chat - check in-game name
+CV3K,18810000,5,40,150000,,292257,,,2000,carrier: firepower from aircraft and UAVs; cost given as "18,810,00" - assumed 18810000
