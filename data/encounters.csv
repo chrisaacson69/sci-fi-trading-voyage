@@ -3,3 +3,5 @@ date,route_a,route_b,fleet_cp,attacked,pirate_cp,battle_minutes,ships_lost,notes
 2026-10-06,Proxima,AlphaCentA,56,y,,,2,second attack on the same run; remaining 2 haulers lost
 2026-10-06,Free Port,Ares,,y,60,,,attacks seen on this route are 60 CP fleets (count not logged)
 2026-10-06,ArbreCAP,EpsiCentauri,45,y,30,,4,"15x FG300; won, 4 FG300 lost"
+2026-10-07,ArbreCAP,EpsiCentauri,200,y,98,,2,"15 AC721 + 4 Conomara; typically ~2 haulers lost per battle (typical, not a single logged fight); route now Low/Low"
+2026-10-07,Orgin Station,MuCentauri,90,n,30,,,"15 FG300 + 15 FG300 Recon; pirate fleets seen in the area are 30 CP (were 25 CP when this fleet was 45 CP); no fight logged yet"

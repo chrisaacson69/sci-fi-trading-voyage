@@ -17,6 +17,7 @@ py -3 trade_routes.py --audit                  # likely-typo warnings only
 py -3 trade_routes.py --route "Free Port" Ares --ships hauler-8cpx20   # score card for one route
 py -3 trade_routes.py --known-routes           # score every route in routes.csv
 py -3 trade_routes.py --oracle                 # predictions vs the game's own $/hr
+py -3 trade_routes.py --premiums               # each price as a multiple of its class average
 py -3 trade_routes.py --selftest               # values checked by hand
 ```
 
@@ -54,6 +55,31 @@ day in this format and nothing else needs to change.
 that good, and a per-cargo price more than 2× away from that good's median. A flagged price can be
 real. The arbitrage *is* the outliers. These outliers were checked in the game and are real:
 TycoLab Elec1, Troy Comm Comp.
+
+### Goods classes and premiums (`--premiums`)
+
+A good's trailing digit is its class: 1 is cheap, 3 is expensive. Comm Comp is class 2 and Int Nav
+Sys is class 3; their names are recorded without the digit. Each class has an average price per
+cargo unit:
+
+| Class | Average per cargo | Source |
+|---|---|---|
+| 1 | 0.295 | Reach buys ConsumGood1 at 17,688 (size 2,000), shown in game as +2,898% over average |
+| 2 | 10 | the game's figure |
+| 3 | about 25–30, varies by good | estimated per good as the median of that day's quotes |
+
+On 2026-10-06, stops **sold** at 0.88–1.01× the average. Every large deviation was a stop
+**buying**. So the high prices are the signal, and the margin per cargo unit is roughly
+`class average × (buyer's multiple − seller's multiple)`. A big premium on a cheap class earns
+little: ArbreCAP pays ×3.15 for Food1, which is 0.66 per cargo unit. Even a ×1.5 class-2 buyer
+earns about 5. SpecConGood2 is sold only at ArbreCAP, and 11 stops buy it at ×1.5–4.8, which is
+the biggest premium in the game. No class-3 buyer pays more than ×1.16.
+
+`--premiums` lists each good's sellers and buyers as multiples of the class average, then a per-day
+trend for each class across every snapshot in `data/market/`. If class-3 goods become the most
+profitable as the event goes on, it will show up there: class-3 buyers' premiums rise and class-2
+premiums fall. The class-3 averages are estimated from the same day's quotes, so if every class-3
+price shifts together the trend won't show it.
 
 ## Model and how each assumption was measured
 
@@ -117,6 +143,8 @@ travel time only, so treat it as a ceiling.
 What's known about alarm levels so far:
 - They roughly follow distance from Orgin Station, except Free Port (808 Gm away, Extreme) and the
   AlphaCent/Proxima cluster (Extreme, though some ports further away are only High).
+- **They change.** At the 2026-10-07 changeover every Medium port became Low and Free Port went
+  from Extreme to High. Now: 14 Low, 8 High, 3 Extreme (AlphaCentA, AlphaCentB, Proxima).
 - A route has two ports. Proxima/AlphaCentA (Extreme/Extreme) met 82 CP fleets. Free Port/Ares
   (Extreme/Medium) has met only 60 CP fleets. So pirate strength isn't simply the worse of the two
   ports, but two routes can't say what the rule is.

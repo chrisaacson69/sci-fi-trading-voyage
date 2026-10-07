@@ -34,6 +34,7 @@ Usage:
   py -3 trade_routes.py --ships hauler-28cpx3      # ship names from data/ships.csv work too
   py -3 trade_routes.py --oracle                   # compare predictions with the game's own $/hr
   py -3 trade_routes.py --timings                  # compare predicted leg times with the stopwatch
+  py -3 trade_routes.py --premiums                 # each price as a multiple of its class average
   py -3 trade_routes.py --selftest
 """
 from __future__ import annotations
@@ -98,6 +99,35 @@ separate_holds = False
 # +12% route both imply +0.451. Its in-game source is not yet identified, and it may change over time.
 GLOBAL_BONUS = 0.45
 global_bonus = GLOBAL_BONUS
+
+
+# Goods come in classes, written as the name's trailing digit: 1 is cheap, 3 is expensive. These two
+# are recorded without the digit; their prices put them in classes 2 and 3.
+CLASS_OVERRIDES = {"Comm Comp": 2, "Int Nav Sys": 3}
+# The game's average price per cargo unit for each class. Class 1: Reach buys ConsumGood1 (size 2,000)
+# at 17,688, which the game shows as +2,898% over average, so 17,688 / 2,000 / 29.98 = 0.295. Class 2:
+# 10, the game's figure. Class 3's average varies by good (about 25 to 30), so it is estimated per good
+# as the median of that day's quotes.
+CLASS_AVG = {1: 0.295, 2: 10.0}
+
+
+def good_class(good: str) -> int | None:
+    if good in CLASS_OVERRIDES:
+        return CLASS_OVERRIDES[good]
+    m = re.search(r"(\d)\s*$", good)
+    return int(m.group(1)) if m else None
+
+
+def class_averages(quotes) -> dict[str, tuple[float, bool]]:
+    """{good: (average price per cargo unit, estimated?)} -- the game's class average where known."""
+    per_cargo = defaultdict(list)
+    for q in quotes:
+        per_cargo[q.good].append(q.price / q.size)
+    out = {}
+    for good, v in per_cargo.items():
+        c = good_class(good)
+        out[good] = (CLASS_AVG[c], False) if c in CLASS_AVG else (statistics.median(v), True)
+    return out
 
 
 def seconds_per_gm_for(warp: float) -> float:
@@ -521,6 +551,47 @@ def diff_days(old: str, new: str, ports: Path = DEFAULT_PORTS):
         print(f"    {good:15} {statistics.median(ch):+7.2f}%   ({min(ch):+.2f} .. {max(ch):+.2f}, {len(ch)} quotes)")
 
 
+def premium_report(quotes, alarms, label: str):
+    """Each price as a multiple of its class average. Stops sell at about the average; the premiums
+    are on the buying side, so margin per cargo is roughly average x (buyer's multiple - seller's)."""
+    avg = class_averages(quotes)
+    by_good = defaultdict(list)
+    for q in quotes:
+        by_good[q.good].append(q)
+    print(f"prices as a multiple of the class average ({label}); est = class 3, estimated per good")
+    for good in sorted(by_good, key=lambda g: (good_class(g) or 9, g)):
+        a, est = avg[good]
+        qs = by_good[good]
+        x = lambda q: q.price / q.size / a
+        print(f"\n{good}  class {good_class(good) or '?'}  avg {a:,.3f}/cargo{' est' if est else ''}  "
+              f"size {qs[0].size:,}")
+        sellers = sorted((q for q in qs if q.side == "S"), key=x)
+        buyers = sorted((q for q in qs if q.side == "B"), key=x, reverse=True)
+        if sellers:
+            print("  sold by   " + ", ".join(f"{q.planet} {x(q):.2f}x" for q in sellers))
+        for q in buyers:
+            margin = (q.price / q.size - sellers[0].price / sellers[0].size) if sellers else None
+            m = f"  {margin:,.2f}/cargo over the cheapest seller" if margin is not None else ""
+            print(f"  bought by {q.planet:15} {x(q):6.2f}x ({x(q) - 1:+.0%})  {alarms.get(q.planet, '?'):8}{m}")
+
+
+def premium_trend(ports: Path = DEFAULT_PORTS):
+    """Per class, per game day: the median seller's and buyer's multiple, and the best buyer."""
+    print("\nby class, per game day (median seller, median buyer, best buyer):")
+    for path in sorted(MARKET_DIR.glob("*.csv")):
+        quotes, _, _ = load_market(path, ports)
+        avg = class_averages(quotes)
+        for c in sorted({good_class(q.good) for q in quotes}, key=lambda c: c or 9):
+            qs = [q for q in quotes if good_class(q.good) == c]
+            x = {q: q.price / q.size / avg[q.good][0] for q in qs}
+            s = [x[q] for q in qs if q.side == "S"]
+            b = [q for q in qs if q.side == "B"]
+            top = max(b, key=x.get) if b else None
+            print(f"  {path.stem}  class {c or '?'}  sellers {statistics.median(s) if s else 0:5.2f}x  "
+                  f"buyers {statistics.median(x[q] for q in b) if b else 0:5.2f}x  "
+                  + (f"best {x[top]:.2f}x ({top.planet} {top.good})" if top else ""))
+
+
 def oracle_bonus(row, routes) -> float:
     v = (row.get("bonus_pct") or "").strip()
     return float(v) / 100 if v else route_bonus(routes, row["route_a"].strip(), row["route_b"].strip())
@@ -614,8 +685,14 @@ def selftest() -> int:
           ranked[0].a == "AlphaCentA" and ranked[1].a == "BlackGoldStar")
     check("Proxima/AlphaCentA is an Extreme/Extreme route",
           trips[("AlphaCentA", "Proxima")].alarm == "Extreme")
-    check("Ares/Free Port takes its worse end: Extreme", trips[("Ares", "Free Port")].alarm == "Extreme")
+    check("Ares/Free Port takes its worse end: High (Free Port, since the 2026-10-07 changeover)",
+          trips[("Ares", "Free Port")].alarm == "High")
     check("BlackGoldStar/Troy is High/High", trips[("BlackGoldStar", "Troy")].alarm == "High")
+    check("goods classes: Comm Comp 2, Int Nav Sys 3, Nuke Battery 2 2, Food1 1",
+          [good_class(g) for g in ("Comm Comp", "Int Nav Sys", "Nuke Battery 2", "Food1")] == [2, 3, 2, 1])
+    q = next(q for q in quotes if (q.planet, q.good) == ("Reach", "ConsumGood1"))
+    eq("Reach ConsumGood1 is the game's +2,898% over the class average", q.price / q.size / CLASS_AVG[1], 29.98,
+       tol=0.005)
     check("no size mismatches in the corrected snapshot",
           not any(x.startswith("SIZE") for x in audit(quotes)))
 
@@ -725,6 +802,8 @@ def main(argv=None) -> int:
     ap.add_argument("--by-alarm", action="store_true", help="best route under each alarm cap")
     ap.add_argument("--json", action="store_true", help="emit JSON instead of a table")
     ap.add_argument("--audit", action="store_true", help="only print likely-typo warnings")
+    ap.add_argument("--premiums", action="store_true",
+                    help="each price as a multiple of its class average, and the trend per class by day")
     ap.add_argument("--oracle", action="store_true", help="compare predictions with data/oracle.csv")
     ap.add_argument("--timings", action="store_true", help="compare leg times with data/timings.csv")
     ap.add_argument("--selftest", action="store_true")
@@ -745,6 +824,10 @@ def main(argv=None) -> int:
     quotes, coords, alarms = load_market(data, args.ports)
     if not args.json and not args.audit:
         print(f"prices: {data.name}", file=sys.stderr)
+    if args.premiums:
+        premium_report(quotes, alarms, data.stem)
+        premium_trend(args.ports)
+        return 0
     warnings = audit(quotes)
     if args.audit:
         print("\n".join(warnings) or "no warnings")
