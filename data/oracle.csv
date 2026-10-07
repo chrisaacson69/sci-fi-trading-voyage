@@ -1,6 +1,7 @@
 date,route_a,route_b,fleet,game_per_hr,bonus_pct,notes
-2026-10-06,Orgin Station,BountPlanet,"Reliiat Tx10,NOMAx10",66340,15,game's own $/hr figure; fleet survives (NOMA heal + Reliiat damage)
-2026-10-06,ArbreCAP,EpsiCentauri,"Conomara,FG300x2",219600,6,"game's own $/hr figure; isolates speed (48 SpecConGood2 fit separate or pooled); route was level 1 then, bonus 6% inferred from 6%/level (not read in game)"
-2026-10-06,ArbreCAP,EpsiCentauri,FG300x15,374600,12,"game's own $/hr figure after a route upgrade; pure FG300 fleet, 45 CP"
-2026-10-06,ArbreCAP,EpsiCentauri,Conomarax3,464100,12,"game's own $/hr figure, level 2; measured one-way leg 46:40 (630 Gm)"
-2026-10-06,ArbreCAP,EpsiCentauri,AC721x12,5325000,24,"game's own $/hr figure (shown as nominal), level 4"
+2026-10-06,Orgin Station,BountPlanet,"Reliiat Tx10,NOMAx10",66340,15,"game's own $/hr figure; fleet survives (NOMA heal + Reliiat damage); event log at BountPlanet: loading cargo Refined Ore x9, 10,170 spent (= 9 x 1,130). Pooled hold predicts exactly 9; separate holds predict 0 (size 4,000 > any one hold); earlier reading: implies global bonus +0.36, below the +0.45 measured later the same day (bonus grew, or fleet changed?)"
+2026-10-06,ArbreCAP,EpsiCentauri,"Conomara,FG300x2",219600,6,"game's own $/hr figure; isolates speed (48 SpecConGood2 fit separate or pooled); route was level 1 then, bonus 6% inferred from 6%/level (not read in game); OUTLIER: implies global +1.50; fleet may have changed mid-run"
+2026-10-06,ArbreCAP,EpsiCentauri,FG300x15,374600,12,"game's own $/hr figure after a route upgrade; pure FG300 fleet, 45 CP; CLEAN: implies global +0.451"
+2026-10-06,ArbreCAP,EpsiCentauri,Conomarax3,464100,12,"game's own $/hr figure, level 2; measured one-way leg 46:40 (630 Gm); CLEAN: implies global +0.451"
+2026-10-06,ArbreCAP,EpsiCentauri,AC721x12,5325000,24,"game's own $/hr figure (shown as nominal), level 4; event log at EpsiCentauri: loading cargo Computer x2, 832,320 spent (= 2 x 416,160). UNRELIABLE: some AC721 may have joined after that load; recheck on a full-fleet cycle (separate holds predict 0 Computer2, pooled 7)"
+2026-10-06,Orgin Station,BountPlanet,"Reliiat Tx10,NOMAx10",70760,15,"game's own $/hr, later reading; sale log: 126 Std Uniform1 sold for 13,708 = 3,628 profit on 10,080 (listed margin 2,268 x 1.60); CLEAN: implies global +0.458"

@@ -6,7 +6,7 @@ per cargo unit; an empty leg counts as zero.
 
 ```
 py -3 trade_routes.py                          # per cargo unit (fractional loading)
-py -3 trade_routes.py --ships 130000x3         # whole units, three separate 130,000 holds
+py -3 trade_routes.py --ships 130000x3         # whole units, a fleet of three 130,000 ships (pooled)
 py -3 trade_routes.py --ships 25200x12,2000x2  # mixed fleet
 py -3 trade_routes.py --cargo 302400 --whole-units   # whole units, one pooled fleet hold
 py -3 trade_routes.py --from Troy              # only trips touching one stop
@@ -26,7 +26,7 @@ py -3 trade_routes.py --selftest               # values checked by hand
 - **`data/market/YYYY-MM-DD.csv`**: one price snapshot per **game day**, one row per (stop, good): `planet,good,size,side,price`. The calculator uses the latest file unless you pass `--date`.
 - **`data/routes.csv`**: routes you've opened, with their in-game `level` and `cp_cap` (the most CP you can bring). Upgrading a route raises the cap, and upgrades cost more on better routes. `upgrade_cost` is blank until recorded. `bonus_pct` is the game's "+N% profit" for the route's level; the calculator multiplies the margin by it. Observed per-level rates: 3% (Low/Low), 6% (Med/Med and Ext/Med), 7% (Ext/Ext), i.e. apparently set by the route's *safer* port.
 - **`data/ships.csv`**: ship types from the game's ship list: `name,cost,limit,cp,cargo,dpm,hp,cruise_min,cruise_max,warp,notes`. `limit` is the build limit, a total across all your fleets, and `dpm` is damage per minute. In every row, `warp` is exactly 5 × `cruise_min`. `--ships` accepts these names, e.g. `ST59x3,FG300x2`, and then knows the fleet's CP, DPM, HP, cost and speed, and warns if you're over a build limit.
-- **`data/oracle.csv`**: the game's own $/hr figure for a fleet on a route (`date,route_a,route_b,fleet,game_per_hr,bonus_pct,notes`, fleet written like `--ships`; `bonus_pct` is the route's bonus *at the time*, since levels change). `--oracle` compares each row against the model's open choices: separate vs pooled holds, and timed vs warp-as-Gm/hr speed. It is an observation, not a pass/fail check: the game's figure is not yet explained.
+- **`data/oracle.csv`**: the game's own $/hr figure for a fleet on a route (`date,route_a,route_b,fleet,game_per_hr,bonus_pct,notes`, fleet written like `--ships`; `bonus_pct` is the route's bonus *at the time*, since levels change). `--oracle` compares each row against separate vs pooled holds, and timed vs warp-as-Gm/hr speed. `--selftest` checks the rows whose notes say CLEAN.
 - **`data/timings.csv`**: stopwatch leg times (`date,route_a,route_b,fleet,leg_seconds,notes`, one-way). `--timings` compares them with both speed models, and `--selftest` requires the default model within 2% of each.
 - **`data/encounters.csv`** logs pirate attacks, one line per trip or attack. Safe trips count too. Nothing reads it yet; it's the evidence a pirate model will be calibrated from.
 
@@ -61,10 +61,9 @@ TycoLab Elec1, Troy Comm Comp.
 |---|---|
 | Leg time = `distance × s/Gm`, no fixed overhead | Two timing runs: 7 Gm took 14 s, 1700 Gm took 56:40. Solving those gives 2.000 s/Gm and 0 s overhead. Measured on the first fleet (2 × FG300). |
 | **Speed: s/Gm = 10,000 / warp** (`--speed-model timed`, default) | Calibrated on the FG300 run above, then confirmed to the second on ArbreCAP ↔ EpsiCentauri (630 Gm): 15 × FG300 (warp 5,000) took 21:00, 3 × Conomara (warp 2,250) took 46:40 (`data/timings.csv`). `--speed-model warp` (warp = Gm/hr) was the default until 2026-10-06 because it matched the game's $/hr on the first two oracle rows; that was coincidence, as it is 2.8× too fast against every stopwatch run. A fleet moves at its slowest ship (assumed). |
-| **Route bonus** multiplies the margin | The game shows "+N% profit" per route level (`bonus_pct` in `routes.csv`). |
-| **Open: the game's own $/hr figure** | With real leg times and the bonus, the model still predicts only 0.39–0.71× the game's figure (`--oracle`). Candidates: global profit bonuses, or backhaul the model can't fit in separate holds (see next row). Until it's explained, a balance-before/after over one round trip is the real check. |
+| **Profit = listed margin × (1 + route bonus + global bonus)** | The bonuses add. Route bonus: the game's "+N% profit" per level (`bonus_pct` in `routes.csv`). Global bonus: +45% (`--global-bonus`), source in game not yet identified. Measured from a sale: 126 Std Uniform1 on a +15% route made 3,628 on a listed margin of 2,268, which is ×1.600 rounded down. With it, the model matches the game's own $/hr on every clean `oracle.csv` row to within 0.5% (`--selftest` requires 2%). Rows marked OUTLIER/UNRELIABLE are fleets that may have changed mid-run. An earlier reading on the same route implied +36%, so the global bonus may grow over time. |
 | Two-stop cycles only | Game rule: trade routes are cyclical between two stops. |
-| Goods are bought in **whole units**, **each ship's hold separately** | Game rule. `--ships` packs each hold separately (an unbounded knapsack over that leg's goods), so a hold smaller than a good's size can't carry it. The game's $/hr for 10 Reliiat T + 10 NOMA matched separate holds under the old warp speed model; under the stopwatch model pooled fits better (0.76× vs 0.39×), because a pooled hold can carry a RefOre1 (size 4,000) backhaul. Open: check in game whether a fleet carries goods bigger than any single ship's hold. `--whole-units` still treats `--cargo` as one pooled hold if you need it. |
+| Goods are bought in **whole units**, into **one pooled fleet hold** | The game's loading log for 10 Reliiat T + 10 NOMA on Orgin Station ↔ BountPlanet: 126 Std Uniform1 for 10,080, and 9 RefOre1 (size 4,000, bigger than any ship's hold) for 10,170. Pooled packing predicts exactly 126 and 9; separate holds predict 120 and 0. `--selftest` checks both. `--ships` packs the fleet's total cargo with an unbounded knapsack; `--separate-holds` packs each ship on its own. |
 | Unlimited cash | Chosen simplification; cargo space is what limits you. |
 | Prices don't move within a session | Observed; prices shift on a daily schedule. |
 
@@ -87,20 +86,11 @@ fractionally, which is an upper bound. The whole-unit numbers are what a fleet a
 
 Proxima and AlphaCentA are about 7 Gm apart, which puts that route roughly 30× ahead of the next one.
 
-*(The fleet tables below predate per-ship speeds; they assume 2.0 s/Gm for every ship. With ST59's
-measured-relative 4.44 s/Gm, 3 × ST59 on Proxima → AlphaCentA is about 91 M/hr, not 203 M/hr.)*
-
-**Whole units change who can run it.** ResearchData3 is 100,000 cargo per unit, so with separate
-holds only a ship with ≥100,000 cargo can carry it. At 2.0 s/Gm, whole units, separate holds:
-
-| Fleet | CP | Cargo | Best route | Profit/hr |
-|---|---|---|---|---|
-| 12 × 25,200 | 96 | 302,400 | BlackGoldStar ↔ Troy (Proxima impossible) | 4.9 M |
-| 2 × 150,000 | 80 | 300,000 | Proxima → AlphaCentA, 2 units | 135 M |
-| 3 × 130,000 | 84 | 390,000 | Proxima → AlphaCentA, 3 units | 203 M |
-| 50 × 2,000 (combat-fleet scale) | – | 100,000 | BlackGoldStar ↔ Troy | 1.7 M |
-
-These all assume the measured 2.0 s/Gm. Bigger ships may be slower; pass `--sec-per-gm`.
+**Whole units make hold size a threshold, but it's the *fleet's* total hold.** ResearchData3 is
+100,000 cargo per unit. The game pools a fleet's cargo, so 12 × AC721 (302,400) carries 3 units even
+though no single AC721 holds one. An earlier version of this table assumed separate holds, which
+claimed small haulers couldn't run Proxima at all; that was wrong. Rerun with `--ships` for current
+figures (`--separate-holds` reproduces the old assumption).
 
 ## Route cards — scoring a route
 

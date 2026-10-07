@@ -7,7 +7,8 @@ Model (see README.md for how each assumption was measured):
     takes `size` cargo space.
   * Leg time = overhead + distance * seconds_per_gm, with seconds_per_gm = 10,000 / warp
     and 0 s overhead. Stopwatch runs (data/timings.csv) match this to the second.
-  * Route bonus: a route's level adds a % to the margin (bonus_pct in data/routes.csv).
+  * Profit = listed margin * (1 + route bonus + global bonus). The route bonus is per level
+    (bonus_pct in data/routes.csv); the global bonus (--global-bonus, default 45%) is account-wide.
   * Cash is unlimited and prices don't move as you trade (they shift daily).
 
 Two loading modes:
@@ -15,8 +16,9 @@ Two loading modes:
     fractional units could be bought. Gives a score per cargo unit that doesn't
     depend on the ship, and an upper bound on whole-unit loading.
   * whole units (--ships, or --cargo with --whole-units): goods are bought in whole
-    units only, and each hold is packed with the best mix of goods (an unbounded
-    knapsack). A hold smaller than a good's size can't carry that good at all.
+    units only, and the hold is packed with the best mix of goods (an unbounded
+    knapsack). A fleet's cargo is ONE pooled hold (the game's own loading logs match
+    this exactly); --separate-holds packs each ship on its own instead.
 
 Usage:
   py -3 trade_routes.py                            # per cargo unit, continuous
@@ -88,6 +90,14 @@ SPEED_MODELS = {
     "timed": lambda warp: SECONDS_PER_GM * REF_WARP / warp,
 }
 speed_model = "timed"
+# The game pools a fleet's cargo into one hold: 10 Reliiat T + 10 NOMA (no hold over 2,000) loaded
+# 9 RefOre1 (size 4,000) and 126 Std Uniform1 -- exactly the pooled-hold packing (separate: 0 and 120).
+separate_holds = False
+# Account-wide profit bonus, added to the route's. Measured 2026-10-06: Std Uniform1 sold on a +15% route
+# made 3,628 on a listed margin of 2,268 (x1.600 = 1 + 0.15 + 0.45); 15 x FG300 and 3 x Conomara on a
+# +12% route both imply +0.451. Its in-game source is not yet identified, and it may change over time.
+GLOBAL_BONUS = 0.45
+global_bonus = GLOBAL_BONUS
 
 
 def seconds_per_gm_for(warp: float) -> float:
@@ -237,6 +247,11 @@ class Fleet:
         v = [s.seconds_per_gm if s else None for s in self.ships]
         return None if any(x is None for x in v) else max(v)
 
+    @property
+    def cargo_holds(self) -> list[int]:
+        """The holds to pack: one pooled hold, or each ship's with --separate-holds."""
+        return list(self.holds) if separate_holds else [sum(self.holds)]
+
     def over_limit(self) -> list[str]:
         c = Counter(s.name for s in self.ships if s)
         by = {s.name: s for s in self.ships if s}
@@ -377,11 +392,13 @@ def book(quotes):
 
 def make_trip(a, b, sells, buys, coords, cargo=1.0, seconds_per_gm=SECONDS_PER_GM, overhead_s=0.0,
               holds=None, alarms=None, bonus: float = 0.0) -> RoundTrip:
-    """bonus: the route's level bonus as a fraction, applied to the margin."""
+    """bonus: the route's level bonus as a fraction. It is added to the global bonus, and the
+    total multiplies the listed margin."""
     f = make_leg(a, b, sells, buys, holds, cargo)
     r = make_leg(b, a, sells, buys, holds, cargo)
-    m = (f.margin_per_cargo + r.margin_per_cargo) * (1 + bonus)
-    cyc = (f.margin + r.margin) * (1 + bonus)
+    mult = 1 + bonus + global_bonus
+    m = (f.margin_per_cargo + r.margin_per_cargo) * mult
+    cyc = (f.margin + r.margin) * mult
     d = math.dist(coords[a], coords[b])
     secs = 2 * (overhead_s + d * seconds_per_gm)
     return RoundTrip(a, b, d, f, r, m,
@@ -403,7 +420,8 @@ def fill_cap(a, b, sells, buys, coords, cap, ship_types, seconds_per_gm, overhea
         if n == 0:
             continue
         t = make_trip(a, b, sells, buys, coords, seconds_per_gm=st.seconds_per_gm,
-                      overhead_s=overhead_s, holds=[st.cargo] * n, bonus=bonus)
+                      overhead_s=overhead_s, holds=[st.cargo] * n if separate_holds else [st.cargo * n],
+                      bonus=bonus)
         rows.append((t.profit_per_hour, st, n, t))
     rows.sort(key=lambda r: r[0], reverse=True)
     return rows
@@ -418,6 +436,7 @@ def route_card(a, b, quotes, coords, alarms, routes, ship_types, seconds_per_gm,
     info = routes.get(frozenset((a, b)))
     lvl = f"level {info.level}, cap {info.cp_cap} CP" if info and info.cp_cap else "level/cap not recorded"
     lvl += f", +{bonus:.0%} route bonus" if bonus else ", no route bonus recorded"
+    lvl += f", +{global_bonus:.0%} global"
     print(f"{a} <-> {b}: {t.distance_gm:,.0f} Gm, round trip {t.seconds / 60:.1f} min, "
           f"alarm {t.alarm_a}/{t.alarm_b}, {lvl}")
     if info and info.notes:
@@ -443,7 +462,7 @@ def route_card(a, b, quotes, coords, alarms, routes, ship_types, seconds_per_gm,
     if fleet:
         spg = seconds_per_gm  # already resolved in main(): --sec-per-gm, else the fleet's slowest ship
         ft = make_trip(a, b, sells, buys, coords, seconds_per_gm=spg, overhead_s=overhead_s,
-                       holds=fleet.holds, bonus=bonus)
+                       holds=fleet.cargo_holds, bonus=bonus)
         cp_txt = "" if fleet.cp is None else f", {fleet.cp} CP"
         if fleet.cp is not None and info and info.cp_cap and fleet.cp > info.cp_cap:
             cp_txt += f" -- OVER the {info.cp_cap} CP cap"
@@ -545,7 +564,7 @@ def oracle_report(quotes, coords, ship_types, routes=None, path: Path = DEFAULT_
         fleet = parse_ships(r["fleet"], ship_types)
         warps = [st.warp for st in fleet.ships if st]
         bonus = oracle_bonus(r, routes)
-        print(f"{r['date']}  {a} <-> {b}  fleet {r['fleet']}  +{bonus:.0%} bonus  game says {game:,.0f}/hr"
+        print(f"{r['date']}  {a} <-> {b}  fleet {r['fleet']}  +{bonus:.0%} route +{global_bonus:.0%} global  game says {game:,.0f}/hr"
               f"  (prices: {snap.stem if snap.exists() else 'latest snapshot -- none for that day'})")
         if len(warps) != len(fleet.ships):
             print("   (a ship has no warp speed; skipped)")
@@ -562,6 +581,8 @@ def oracle_report(quotes, coords, ship_types, routes=None, path: Path = DEFAULT_
 def selftest() -> int:
     """Check against values worked out by hand from the 2026-10-06 snapshot."""
     quotes, coords, alarms = load_market(market_snapshot("2026-10-06"))
+    global global_bonus
+    saved_gb, global_bonus = global_bonus, 0.0  # the hand-worked values below are listed margins
     trips = {(t.a, t.b): t for t in round_trips(quotes, coords, alarms=alarms)}
     checks = []
 
@@ -636,6 +657,12 @@ def selftest() -> int:
        3600 / 2250)
     speed_model = saved
     check("build limit is flagged", parse_ships("FG300x16", types).over_limit() != [])
+    # the game's loading log, 10 Reliiat T + 10 NOMA on Orgin Station <-> BountPlanet
+    fl = parse_ships("Reliiat Tx10,NOMAx10", types)
+    sells, buys = book(quotes)
+    t = make_trip("Orgin Station", "BountPlanet", sells, buys, coords, holds=fl.cargo_holds)
+    eq("pooled hold: loads 126 Std Uniform1 at Orgin (game: 126 for 10,080)", t.out.load.get("Std Uniform1", 0), 126)
+    eq("pooled hold: loads 9 RefOre1 at BountPlanet (game: 9 for 10,170)", t.back.load.get("RefOre1", 0), 9)
     routes = load_routes()
     check("routes.csv: Free Port/Ares is level 4, 160 CP either way round",
           routes[frozenset(("Ares", "Free Port"))].cp_cap == 160)
@@ -643,9 +670,19 @@ def selftest() -> int:
     rows = fill_cap("Free Port", "Ares", sells, buys, coords, 160, types, 2.0, 0.0)
     eq("160 CP would fit 20 AC721, but the build limit is 15", {r[1].name: r[2] for r in rows}["AC721"], 15)
     eq("routes.csv: Free Port/Ares (level 4) bonus is +24%", route_bonus(routes, "Ares", "Free Port"), 0.24)
-    t0 = make_trip("ArbreCAP", "EpsiCentauri", sells, buys, coords, holds=[2000] * 15)
-    t1 = make_trip("ArbreCAP", "EpsiCentauri", sells, buys, coords, holds=[2000] * 15, bonus=0.12)
-    eq("  ...and multiplies the cycle margin by 1.12", t1.cycle_margin / t0.cycle_margin, 1.12)
+    global_bonus = saved_gb
+    t = make_trip("Orgin Station", "BountPlanet", sells, buys, coords, holds=[38000], bonus=0.15)
+    eq("Std Uniform1 sale: 126 x (98 - 80) x (1 + 0.15 + 0.45) rounds down to the game's 3,628",
+       math.floor(t.out.margin * (1 + 0.15 + global_bonus)), 3628)
+    # the game's own $/hr, on rows where the fleet and its loads are known to be clean
+    for r in csv.DictReader(open(DEFAULT_ORACLE, newline="")):
+        if "CLEAN" not in r["notes"]:
+            continue
+        fl = parse_ships(r["fleet"], types)
+        t = make_trip(r["route_a"], r["route_b"], sells, buys, coords, seconds_per_gm=fl.seconds_per_gm,
+                      holds=fl.cargo_holds, bonus=float(r["bonus_pct"]) / 100)
+        ratio = t.profit_per_hour / float(r["game_per_hr"])
+        check(f"oracle {r['route_a']}/{r['route_b']} {r['fleet']}: predicted {ratio:.3f}x game", 0.98 <= ratio <= 1.02)
     # the stopwatch: the default (timed) model must predict every leg within 2%
     for r in load_timings():
         fl = parse_ships(r["fleet"], types)
@@ -666,7 +703,9 @@ def main(argv=None) -> int:
     ap.add_argument("--cargo", type=float, default=1.0, help="cargo capacity (Size units)")
     ap.add_argument("--whole-units", action="store_true",
                     help="buy whole units only; --cargo is one pooled hold")
-    ap.add_argument("--ships", help="separate holds, whole units: e.g. 25200x12, 130000x3,2000x2, "
+    ap.add_argument("--separate-holds", action="store_true",
+                    help="pack each ship's hold on its own (default: the fleet's cargo is one pooled hold)")
+    ap.add_argument("--ships", help="a fleet, whole units: e.g. 25200x12, 130000x3,2000x2, "
                                     "or ship names from ships.csv like hauler-28cpx3")
     ap.add_argument("--route", nargs=2, metavar=("A", "B"), help="print a score card for one route")
     ap.add_argument("--known-routes", action="store_true",
@@ -678,6 +717,8 @@ def main(argv=None) -> int:
     ap.add_argument("--speed-model", choices=sorted(SPEED_MODELS), default="timed",
                     help="timed = stopwatch-calibrated (default) or warp = Gm/hr (2.78x faster)")
     ap.add_argument("--overhead", type=float, default=0.0, help="fixed seconds per leg (dock/launch)")
+    ap.add_argument("--global-bonus", type=float, default=GLOBAL_BONUS * 100,
+                    help="account-wide profit bonus in percent, added to each route's (default %(default)g)")
     ap.add_argument("--top", type=int, default=20)
     ap.add_argument("--from", dest="stop", help="only round trips that include this stop")
     ap.add_argument("--max-alarm", choices=ALARMS, help="only routes whose BOTH ports are at most this alarm")
@@ -693,6 +734,10 @@ def main(argv=None) -> int:
         return selftest()
     global speed_model
     speed_model = args.speed_model
+    global separate_holds
+    separate_holds = args.separate_holds
+    global global_bonus
+    global_bonus = args.global_bonus / 100
     if args.diff:
         diff_days(*args.diff, ports=args.ports)
         return 0
@@ -709,8 +754,9 @@ def main(argv=None) -> int:
     fleet = None
     if args.ships:
         fleet = parse_ships(args.ships, ship_types)
-        holds = fleet.holds
-        label = f"whole units, {len(holds)} separate holds, {sum(holds):,} cargo total"
+        holds = fleet.cargo_holds
+        label = (f"whole units, {len(fleet.holds)} ships, {sum(fleet.holds):,} cargo "
+                 + ("in separate holds" if separate_holds else "pooled"))
     elif args.whole_units:
         holds = [int(args.cargo)]
         label = f"whole units, one pooled hold of {int(args.cargo):,}"
