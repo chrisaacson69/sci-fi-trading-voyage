@@ -1,3 +1,6 @@
-date,route_a,route_b,fleet,game_per_hr,notes
-2026-10-06,Orgin Station,BountPlanet,"Reliiat Tx10,NOMAx10",66340,game's own $/hr figure; fleet survives (NOMA heal + Reliiat damage)
-2026-10-06,ArbreCAP,EpsiCentauri,"Conomara,FG300x2",219600,game's own $/hr figure; isolates speed (48 SpecConGood2 fit separate or pooled)
+date,route_a,route_b,fleet,game_per_hr,bonus_pct,notes
+2026-10-06,Orgin Station,BountPlanet,"Reliiat Tx10,NOMAx10",66340,15,game's own $/hr figure; fleet survives (NOMA heal + Reliiat damage)
+2026-10-06,ArbreCAP,EpsiCentauri,"Conomara,FG300x2",219600,6,"game's own $/hr figure; isolates speed (48 SpecConGood2 fit separate or pooled); route was level 1 then, bonus 6% inferred from 6%/level (not read in game)"
+2026-10-06,ArbreCAP,EpsiCentauri,FG300x15,374600,12,"game's own $/hr figure after a route upgrade; pure FG300 fleet, 45 CP"
+2026-10-06,ArbreCAP,EpsiCentauri,Conomarax3,464100,12,"game's own $/hr figure, level 2; measured one-way leg 46:40 (630 Gm)"
+2026-10-06,ArbreCAP,EpsiCentauri,AC721x12,5325000,24,"game's own $/hr figure (shown as nominal), level 4"

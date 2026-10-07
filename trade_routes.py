@@ -5,8 +5,9 @@ Model (see README.md for how each assumption was measured):
   * A trip is a cycle between two stops, A -> B -> A.
   * Margin per unit = buy price at destination - sell price at origin; a unit
     takes `size` cargo space.
-  * Leg time = overhead + distance * seconds_per_gm. Measured for the first fleet:
-    2.0 s/Gm and 0 s overhead (7 Gm took 14 s; 1700 Gm took 56:40).
+  * Leg time = overhead + distance * seconds_per_gm, with seconds_per_gm = 10,000 / warp
+    and 0 s overhead. Stopwatch runs (data/timings.csv) match this to the second.
+  * Route bonus: a route's level adds a % to the margin (bonus_pct in data/routes.csv).
   * Cash is unlimited and prices don't move as you trade (they shift daily).
 
 Two loading modes:
@@ -30,6 +31,7 @@ Usage:
   py -3 trade_routes.py --known-routes             # score every route in data/routes.csv
   py -3 trade_routes.py --ships hauler-28cpx3      # ship names from data/ships.csv work too
   py -3 trade_routes.py --oracle                   # compare predictions with the game's own $/hr
+  py -3 trade_routes.py --timings                  # compare predicted leg times with the stopwatch
   py -3 trade_routes.py --selftest
 """
 from __future__ import annotations
@@ -68,21 +70,24 @@ DEFAULT_PORTS = Path(__file__).resolve().parent / "data" / "ports.csv"
 DEFAULT_ROUTES = Path(__file__).resolve().parent / "data" / "routes.csv"
 DEFAULT_SHIPS = Path(__file__).resolve().parent / "data" / "ships.csv"
 DEFAULT_ORACLE = Path(__file__).resolve().parent / "data" / "oracle.csv"
+DEFAULT_TIMINGS = Path(__file__).resolve().parent / "data" / "timings.csv"
 ALARMS = ["Low", "Medium", "High", "Extreme"]  # the game's port alarm levels, in order
 SECONDS_PER_GM = 2.0  # measured with a stopwatch, first fleet (2x FG300: 3CP, 2000 cargo each)
 REF_WARP = 5000       # FG300's listed warp
 
-# Two ways to turn warp into travel time. They disagree by 2.78x, and the evidence splits:
-#   "warp"  : warp is Gm/hr, so s/Gm = 3600 / warp. Matches the game's own $/hr figure
-#             (data/oracle.csv: 0.94x and 1.09x on two routes). DEFAULT.
-#   "timed" : calibrated on the FG300 stopwatch run (1700 Gm in 56:40 = 1800 Gm/hr, not 5000),
-#             s/Gm = 2.0 * 5000 / warp. Matches the stopwatch, but runs 0.34-0.39x the game's figure.
+# Two ways to turn warp into travel time. They disagree by 2.78x:
+#   "timed" : s/Gm = 2.0 * 5000 / warp, calibrated on the FG300 stopwatch run (1700 Gm in 56:40).
+#             Predicts every stopwatch leg in data/timings.csv to the second, for warp 5000 and
+#             warp 2250 alike. DEFAULT.
+#   "warp"  : warp is Gm/hr, so s/Gm = 3600 / warp. Matched the game's own $/hr figure on the first
+#             two oracle rows, but that was coincidence: it is 1.3-1.8x on later rows, and it
+#             contradicts every stopwatch run. Kept for comparison.
 # Both are proportional to 1/warp, so they rank ships and routes identically; only absolute $/hr differs.
 SPEED_MODELS = {
     "warp": lambda warp: 3600 / warp,
     "timed": lambda warp: SECONDS_PER_GM * REF_WARP / warp,
 }
-speed_model = "warp"
+speed_model = "timed"
 
 
 def seconds_per_gm_for(warp: float) -> float:
@@ -266,6 +271,13 @@ class RouteInfo:
     cp_cap: int | None
     upgrade_cost: str
     notes: str
+    bonus_pct: float = 0.0   # the game's "+N% profit" for the route's level
+
+
+def route_bonus(routes, a, b) -> float:
+    """The route's profit bonus as a fraction (0.12 for +12%); 0 if not recorded."""
+    info = (routes or {}).get(frozenset((a, b)))
+    return info.bonus_pct / 100 if info else 0.0
 
 
 def load_routes(path: Path = DEFAULT_ROUTES) -> dict[frozenset, RouteInfo]:
@@ -278,7 +290,8 @@ def load_routes(path: Path = DEFAULT_ROUTES) -> dict[frozenset, RouteInfo]:
             key = frozenset((r["route_a"].strip(), r["route_b"].strip()))
             out[key] = RouteInfo(int(r["level"]) if r["level"].strip() else None,
                                  int(r["cp_cap"]) if r["cp_cap"].strip() else None,
-                                 r.get("upgrade_cost", "").strip(), r.get("notes", "").strip())
+                                 r.get("upgrade_cost", "").strip(), r.get("notes", "").strip(),
+                                 float(r.get("bonus_pct") or 0))
     return out
 
 
@@ -338,15 +351,17 @@ def make_leg(origin, dest, sells, buys, holds, cargo) -> Leg:
 
 
 def round_trips(quotes, coords, cargo: float = 1.0, seconds_per_gm: float = SECONDS_PER_GM,
-                overhead_s: float = 0.0, holds: list[int] | None = None, alarms=None):
+                overhead_s: float = 0.0, holds: list[int] | None = None, alarms=None, routes=None):
     """Every unordered stop pair with any profit, best first.
 
     holds=None -> continuous model scaled by `cargo`; otherwise whole units per hold.
+    routes -> apply each recorded route's level bonus.
     """
     sells, buys = book(quotes)
     out = []
     for a, b in itertools.combinations(sorted(coords), 2):
-        t = make_trip(a, b, sells, buys, coords, cargo, seconds_per_gm, overhead_s, holds, alarms)
+        t = make_trip(a, b, sells, buys, coords, cargo, seconds_per_gm, overhead_s, holds, alarms,
+                      bonus=route_bonus(routes, a, b))
         if t.cycle_margin > 0:
             out.append(t)
     out.sort(key=lambda t: t.profit_per_hour, reverse=True)
@@ -361,11 +376,12 @@ def book(quotes):
 
 
 def make_trip(a, b, sells, buys, coords, cargo=1.0, seconds_per_gm=SECONDS_PER_GM, overhead_s=0.0,
-              holds=None, alarms=None) -> RoundTrip:
+              holds=None, alarms=None, bonus: float = 0.0) -> RoundTrip:
+    """bonus: the route's level bonus as a fraction, applied to the margin."""
     f = make_leg(a, b, sells, buys, holds, cargo)
     r = make_leg(b, a, sells, buys, holds, cargo)
-    m = f.margin_per_cargo + r.margin_per_cargo
-    cyc = f.margin + r.margin
+    m = (f.margin_per_cargo + r.margin_per_cargo) * (1 + bonus)
+    cyc = (f.margin + r.margin) * (1 + bonus)
     d = math.dist(coords[a], coords[b])
     secs = 2 * (overhead_s + d * seconds_per_gm)
     return RoundTrip(a, b, d, f, r, m,
@@ -375,7 +391,7 @@ def make_trip(a, b, sells, buys, coords, cargo=1.0, seconds_per_gm=SECONDS_PER_G
                      alarm_a=(alarms or {}).get(a, ""), alarm_b=(alarms or {}).get(b, ""))
 
 
-def fill_cap(a, b, sells, buys, coords, cap, ship_types, seconds_per_gm, overhead_s):
+def fill_cap(a, b, sells, buys, coords, cap, ship_types, seconds_per_gm, overhead_s, bonus=0.0):
     """For each ship type: fill the route's CP cap with only that ship. Best first."""
     rows = []
     for st in ship_types.values():
@@ -387,7 +403,7 @@ def fill_cap(a, b, sells, buys, coords, cap, ship_types, seconds_per_gm, overhea
         if n == 0:
             continue
         t = make_trip(a, b, sells, buys, coords, seconds_per_gm=st.seconds_per_gm,
-                      overhead_s=overhead_s, holds=[st.cargo] * n)
+                      overhead_s=overhead_s, holds=[st.cargo] * n, bonus=bonus)
         rows.append((t.profit_per_hour, st, n, t))
     rows.sort(key=lambda r: r[0], reverse=True)
     return rows
@@ -396,10 +412,12 @@ def fill_cap(a, b, sells, buys, coords, cap, ship_types, seconds_per_gm, overhea
 def route_card(a, b, quotes, coords, alarms, routes, ship_types, seconds_per_gm, overhead_s,
                fleet: Fleet | None = None):
     sells, buys = book(quotes)
+    bonus = route_bonus(routes, a, b)
     t = make_trip(a, b, sells, buys, coords, seconds_per_gm=seconds_per_gm, overhead_s=overhead_s,
-                  alarms=alarms)
+                  alarms=alarms, bonus=bonus)
     info = routes.get(frozenset((a, b)))
     lvl = f"level {info.level}, cap {info.cp_cap} CP" if info and info.cp_cap else "level/cap not recorded"
+    lvl += f", +{bonus:.0%} route bonus" if bonus else ", no route bonus recorded"
     print(f"{a} <-> {b}: {t.distance_gm:,.0f} Gm, round trip {t.seconds / 60:.1f} min, "
           f"alarm {t.alarm_a}/{t.alarm_b}, {lvl}")
     if info and info.notes:
@@ -418,14 +436,14 @@ def route_card(a, b, quotes, coords, alarms, routes, ship_types, seconds_per_gm,
     if info and info.cp_cap and ship_types:
         print(f"  filling the {info.cp_cap} CP cap with one ship type (whole units, own speed, build limits, travel only):")
         for pph, st, n, ft in fill_cap(a, b, sells, buys, coords, info.cp_cap, ship_types,
-                                       seconds_per_gm, overhead_s):
+                                       seconds_per_gm, overhead_s, bonus):
             spd = f"{st.seconds_per_gm:.2f}s/Gm" if st.seconds_per_gm else "speed?"
             print(f"      {n:3} x {st.name:14} {n * st.cp:4} CP {n * st.cargo:>10,} cargo {spd:>10} -> {pph:14,.0f}/hr"
                   f"   [{_fmt_leg(ft.out, True)} / {_fmt_leg(ft.back, True)}]")
     if fleet:
         spg = seconds_per_gm  # already resolved in main(): --sec-per-gm, else the fleet's slowest ship
         ft = make_trip(a, b, sells, buys, coords, seconds_per_gm=spg, overhead_s=overhead_s,
-                       holds=fleet.holds)
+                       holds=fleet.holds, bonus=bonus)
         cp_txt = "" if fleet.cp is None else f", {fleet.cp} CP"
         if fleet.cp is not None and info and info.cp_cap and fleet.cp > info.cp_cap:
             cp_txt += f" -- OVER the {info.cp_cap} CP cap"
@@ -484,9 +502,36 @@ def diff_days(old: str, new: str, ports: Path = DEFAULT_PORTS):
         print(f"    {good:15} {statistics.median(ch):+7.2f}%   ({min(ch):+.2f} .. {max(ch):+.2f}, {len(ch)} quotes)")
 
 
-def oracle_report(quotes, coords, ship_types, path: Path = DEFAULT_ORACLE):
+def oracle_bonus(row, routes) -> float:
+    v = (row.get("bonus_pct") or "").strip()
+    return float(v) / 100 if v else route_bonus(routes, row["route_a"].strip(), row["route_b"].strip())
+
+
+def load_timings(path: Path = DEFAULT_TIMINGS) -> list[dict]:
+    if not path.exists():
+        return []
+    with open(path, newline="") as f:
+        return list(csv.DictReader(f))
+
+
+def timing_report(coords, ship_types, path: Path = DEFAULT_TIMINGS):
+    """Predicted one-way leg time for each stopwatch run, under both speed models."""
+    for r in load_timings(path):
+        a, b = r["route_a"].strip(), r["route_b"].strip()
+        fleet = parse_ships(r["fleet"], ship_types)
+        d = math.dist(coords[a], coords[b])
+        got = float(r["leg_seconds"])
+        print(f"{r['date']}  {a} -> {b}  {d:,.0f} Gm  fleet {r['fleet']}  stopwatch {got / 60:.2f} min")
+        warps = [st.warp for st in fleet.ships if st]
+        for name, model in SPEED_MODELS.items():
+            want = d * model(min(warps))
+            print(f"   {name:6} {want / 60:8.2f} min  ({want / got:5.2f}x stopwatch)")
+
+
+def oracle_report(quotes, coords, ship_types, routes=None, path: Path = DEFAULT_ORACLE):
     """Compare each logged game $/hr figure against the model's open choices:
-    separate vs pooled holds, and warp-relative-to-FG300 vs warp-as-Gm/hr speed."""
+    separate vs pooled holds, and timed (stopwatch) vs warp-as-Gm/hr speed. The route bonus is the
+    row's own bonus_pct (the route's level can change), else routes.csv's."""
     if not path.exists():
         print(f"no {path}")
         return
@@ -499,16 +544,17 @@ def oracle_report(quotes, coords, ship_types, path: Path = DEFAULT_ORACLE):
         a, b, game = r["route_a"].strip(), r["route_b"].strip(), float(r["game_per_hr"])
         fleet = parse_ships(r["fleet"], ship_types)
         warps = [st.warp for st in fleet.ships if st]
-        print(f"{r['date']}  {a} <-> {b}  fleet {r['fleet']}  game says {game:,.0f}/hr"
+        bonus = oracle_bonus(r, routes)
+        print(f"{r['date']}  {a} <-> {b}  fleet {r['fleet']}  +{bonus:.0%} bonus  game says {game:,.0f}/hr"
               f"  (prices: {snap.stem if snap.exists() else 'latest snapshot -- none for that day'})")
         if len(warps) != len(fleet.ships):
             print("   (a ship has no warp speed; skipped)")
             continue
-        speeds = {"calibrated (FG300 timing)": SPEED_MODELS["timed"](min(warps)),
+        speeds = {"timed (stopwatch)": SPEED_MODELS["timed"](min(warps)),
                   "warp = Gm/hr": SPEED_MODELS["warp"](min(warps))}
         for hold_name, holds in (("separate holds", fleet.holds), ("pooled hold", [sum(fleet.holds)])):
             for sp_name, spg in speeds.items():
-                t = make_trip(a, b, sells, buys, coords, seconds_per_gm=spg, holds=holds)
+                t = make_trip(a, b, sells, buys, coords, seconds_per_gm=spg, holds=holds, bonus=bonus)
                 print(f"   {hold_name:15} {sp_name:26} {spg:5.2f} s/Gm -> {t.profit_per_hour:12,.0f}/hr"
                       f"  ({t.profit_per_hour / game:5.2f}x game)")
 
@@ -596,22 +642,17 @@ def selftest() -> int:
     sells, buys = book(quotes)
     rows = fill_cap("Free Port", "Ares", sells, buys, coords, 160, types, 2.0, 0.0)
     eq("160 CP would fit 20 AC721, but the build limit is 15", {r[1].name: r[2] for r in rows}["AC721"], 15)
-    # the game's own $/hr figures: default model must land within 15% of each
-    saved, speed_model = speed_model, "warp"
-    if DEFAULT_ORACLE.exists():
-        with open(DEFAULT_ORACLE, newline="") as f:
-            for r in csv.DictReader(f):
-                snap = MARKET_DIR / f"{r['date'].strip()}.csv"
-                if not snap.exists():
-                    continue  # a game day we have no prices for can't be checked
-                osells, obuys = book(load_market(snap)[0])
-                fl = parse_ships(r["fleet"], types)
-                t = make_trip(r["route_a"], r["route_b"], osells, obuys, coords,
-                              seconds_per_gm=fl.seconds_per_gm, holds=fl.holds)
-                ratio = t.profit_per_hour / float(r["game_per_hr"])
-                check(f"oracle {r['route_a']}/{r['route_b']} {r['fleet']}: predicted {ratio:.2f}x game",
-                      0.85 <= ratio <= 1.15)
-    speed_model = saved
+    eq("routes.csv: Free Port/Ares (level 4) bonus is +24%", route_bonus(routes, "Ares", "Free Port"), 0.24)
+    t0 = make_trip("ArbreCAP", "EpsiCentauri", sells, buys, coords, holds=[2000] * 15)
+    t1 = make_trip("ArbreCAP", "EpsiCentauri", sells, buys, coords, holds=[2000] * 15, bonus=0.12)
+    eq("  ...and multiplies the cycle margin by 1.12", t1.cycle_margin / t0.cycle_margin, 1.12)
+    # the stopwatch: the default (timed) model must predict every leg within 2%
+    for r in load_timings():
+        fl = parse_ships(r["fleet"], types)
+        want = math.dist(coords[r["route_a"].strip()], coords[r["route_b"].strip()]) * fl.seconds_per_gm
+        ratio = want / float(r["leg_seconds"])
+        check(f"stopwatch {r['route_a']}->{r['route_b']} {r['fleet']}: predicted {ratio:.3f}x measured",
+              0.98 <= ratio <= 1.02)
     print("PASS" if all(checks) else "FAIL")
     return 0 if all(checks) else 1
 
@@ -634,8 +675,8 @@ def main(argv=None) -> int:
     ap.add_argument("--ships-file", type=Path, default=DEFAULT_SHIPS)
     ap.add_argument("--sec-per-gm", type=float, default=None,
                     help="travel time per Gm (default: from the fleet's slowest warp, else an FG300's)")
-    ap.add_argument("--speed-model", choices=sorted(SPEED_MODELS), default="warp",
-                    help="warp = Gm/hr (matches the game's $/hr; default) or timed (stopwatch, 2.78x slower)")
+    ap.add_argument("--speed-model", choices=sorted(SPEED_MODELS), default="timed",
+                    help="timed = stopwatch-calibrated (default) or warp = Gm/hr (2.78x faster)")
     ap.add_argument("--overhead", type=float, default=0.0, help="fixed seconds per leg (dock/launch)")
     ap.add_argument("--top", type=int, default=20)
     ap.add_argument("--from", dest="stop", help="only round trips that include this stop")
@@ -644,6 +685,7 @@ def main(argv=None) -> int:
     ap.add_argument("--json", action="store_true", help="emit JSON instead of a table")
     ap.add_argument("--audit", action="store_true", help="only print likely-typo warnings")
     ap.add_argument("--oracle", action="store_true", help="compare predictions with data/oracle.csv")
+    ap.add_argument("--timings", action="store_true", help="compare leg times with data/timings.csv")
     ap.add_argument("--selftest", action="store_true")
     args = ap.parse_args(argv)
 
@@ -680,7 +722,10 @@ def main(argv=None) -> int:
     if fleet and fleet.seconds_per_gm:
         label += f", {args.sec_per_gm:.2f} s/Gm (slowest ship)"
     if args.oracle:
-        oracle_report(quotes, coords, ship_types)
+        oracle_report(quotes, coords, ship_types, routes)
+        return 0
+    if args.timings:
+        timing_report(coords, ship_types)
         return 0
     for key in routes:
         for p in key:
@@ -698,10 +743,11 @@ def main(argv=None) -> int:
         rows = []
         for key, info in routes.items():
             a, b = sorted(key)
+            bonus = info.bonus_pct / 100
             best = fill_cap(a, b, sells, buys, coords, info.cp_cap or 0, ship_types,
-                            args.sec_per_gm, args.overhead) if info.cp_cap else []
+                            args.sec_per_gm, args.overhead, bonus) if info.cp_cap else []
             t = make_trip(a, b, sells, buys, coords, seconds_per_gm=args.sec_per_gm,
-                          overhead_s=args.overhead, alarms=alarms)
+                          overhead_s=args.overhead, alarms=alarms, bonus=bonus)
             rows.append((best[0][0] if best else 0.0, a, b, info, t, best[0] if best else None))
         rows.sort(key=lambda r: r[0], reverse=True)
         print(f"{'best fill/hr':>14}  {'route':34} {'lvl':>3} {'cap':>4}  {'alarm':9} {'per cargo/hr':>12}  best ship type")
@@ -712,7 +758,7 @@ def main(argv=None) -> int:
                   f"{t.alarm_a[:3] + '/' + t.alarm_b[:3]:9} {pch:12,.2f}  {ship}")
         print("\ntravel time only; pirates are not modelled. Add routes to data/routes.csv as you learn them.")
         return 0
-    trips = round_trips(quotes, coords, args.cargo, args.sec_per_gm, args.overhead, holds, alarms)
+    trips = round_trips(quotes, coords, args.cargo, args.sec_per_gm, args.overhead, holds, alarms, routes)
     if args.by_alarm:
         whole = holds is not None
         print(label + "\n\nbest route with both ports at or below each alarm level (travel time only):")
