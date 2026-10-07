@@ -741,12 +741,12 @@ def selftest() -> int:
     eq("pooled hold: loads 126 Std Uniform1 at Orgin (game: 126 for 10,080)", t.out.load.get("Std Uniform1", 0), 126)
     eq("pooled hold: loads 9 RefOre1 at BountPlanet (game: 9 for 10,170)", t.back.load.get("RefOre1", 0), 9)
     routes = load_routes()
-    check("routes.csv: Free Port/Ares is level 4, 160 CP either way round",
-          routes[frozenset(("Ares", "Free Port"))].cp_cap == 160)
+    check("routes.csv: Free Port/Ares is level 5, 200 CP either way round",
+          routes[frozenset(("Ares", "Free Port"))].cp_cap == 200)
     sells, buys = book(quotes)
-    rows = fill_cap("Free Port", "Ares", sells, buys, coords, 160, types, 2.0, 0.0)
-    eq("160 CP would fit 20 AC721, but the build limit is 15", {r[1].name: r[2] for r in rows}["AC721"], 15)
-    eq("routes.csv: Free Port/Ares (level 4) bonus is +24%", route_bonus(routes, "Ares", "Free Port"), 0.24)
+    rows = fill_cap("Free Port", "Ares", sells, buys, coords, 200, types, 2.0, 0.0)
+    eq("200 CP would fit 25 AC721, but the build limit is 15", {r[1].name: r[2] for r in rows}["AC721"], 15)
+    eq("routes.csv: Free Port/Ares (level 5) bonus is +30%", route_bonus(routes, "Ares", "Free Port"), 0.30)
     global_bonus = saved_gb
     t = make_trip("Orgin Station", "BountPlanet", sells, buys, coords, holds=[38000], bonus=0.15)
     eq("Std Uniform1 sale: 126 x (98 - 80) x (1 + 0.15 + 0.45) rounds down to the game's 3,628",
