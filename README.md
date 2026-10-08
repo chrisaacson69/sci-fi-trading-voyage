@@ -172,6 +172,9 @@ every other type. They are also hard to kill in numbers: ship weapons hit aircra
 (WingHussar AA) does far worse than AA aircraft. Fleets of gun ships tend to lose to carrier fleets. Measured on Troy (2026-10-08, `encounters.csv`): 5 CV3000
 against a 126 CP pirate fleet dealt 601,362 damage to its 3 Indefatigable BCs, and the carriers' own
 guns did 4,385 of it (0.7%). The aircraft did the rest. The fight took 4:17 with no losses.
+Aircraft give diminishing returns as you stack more of them, and their quality varies a lot (Chris
+rates the AT021 low: pulse weapons but little DPM), so carrier strength doesn't scale with carrier count.
+A good shape for a hard route: BCs in front to screen, carriers behind for the damage.
 
 The first run of the top route (Proxima → AlphaCentA, 3 × 130,000 haulers, 84 CP) was attacked
 straight away by an 82 CP pirate fleet. The battle took 14.5 minutes, about 30 round trips' worth
