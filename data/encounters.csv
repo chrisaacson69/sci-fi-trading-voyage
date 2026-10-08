@@ -3,6 +3,8 @@ date,route_a,route_b,fleet_cp,attacked,pirate_cp,battle_minutes,ships_lost,notes
 2026-10-06,Proxima,AlphaCentA,56,y,,,2,second attack on the same run; remaining 2 haulers lost
 2026-10-06,Free Port,Ares,,y,60,,,attacks seen on this route are 60 CP fleets (count not logged)
 2026-10-06,ArbreCAP,EpsiCentauri,45,y,30,,4,"15x FG300; won, 4 FG300 lost"
+2026-10-07,ArbreCAP,EpsiCentauri,200,y,98,,2,"15 AC721 + 4 Conomara; typically ~2 haulers lost per battle (typical, not a single logged fight); route now Low/Low"
+2026-10-07,Orgin Station,MuCentauri,90,n,30,,,"15 FG300 + 15 FG300 Recon; pirate fleets seen in the area are 30 CP (were 25 CP when this fleet was 45 CP); no fight logged yet"
 2026-10-06,Proxima,AlphaCentA,168,y,126,,6,"6x ST59; one delivery completed then wiped. Pirate was lightly upgraded, mine were not."
 2026-10-06,BlackGoldStar,Troy,200,y,98,,,"15x AC721 + 10x Eris; wiped. Pirate group included an Indefatigable (anti-DD, high armor): the Eris cannons are BALLISTIC base 100, so armor >=90 pins them at the 10% floor (10 dmg/shot). Engine: Eris Cannon 500 DPM/CP at armor 0 -> 50 at armor 80+. Swapping to Taurus (ENERGY, flat vs armor) is the right counter."
 2026-10-07,BlackGoldStar,Troy,197,y,98,17,22,"15x AC721 Logistics + 7x Taurus Assault(Offense A); wiped, 133,500 damage dealt (~7,853 DPM avg). Enemy: 1x Indomitable Missile (BC, armor 120, edef 15, 136,510 HP) + 2x 066 Bombardment + 2x KCCPV2.0 Carrier with 4x Stingray torpedo bombers = exactly 98 CP, 367,270 HP total. Engine: the 15 haulers contribute 3,184 DPM (11%) - AC721 Logistics guns are ballistic base 40/10, floored to 4/1 by armor >=50. Focused fire predicts ~28,000 DPM, so only ~28% of guns were alive on average. No AA in the fleet against the bombers."
