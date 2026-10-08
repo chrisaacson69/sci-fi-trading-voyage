@@ -26,7 +26,8 @@ py -3 trade_routes.py --selftest               # values checked by hand
 - **`data/ports.csv`**, one row per stop: `planet,x,y,alarm`. This is the only place coordinates are stored. `alarm` is the game's port alarm level: Low, Medium, High or Extreme.
 - **`data/market/YYYY-MM-DD.csv`**: one price snapshot per **game day**, one row per (stop, good): `planet,good,size,side,price`. The calculator uses the latest file unless you pass `--date`.
 - **`data/routes.csv`**: routes you've opened, with their in-game `level` and `cp_cap` (the most CP you can bring). Upgrading a route raises the cap, and upgrades cost more on better routes. `upgrade_cost` is blank until recorded. `bonus_pct` is the game's "+N% profit" for the route's level; the calculator multiplies the margin by it. Observed per-level rates: 3% (Low/Low), 6% (Med/Med and Ext/Med), 7% (Ext/Ext), i.e. apparently set by the route's *safer* port. Routes max out at level 5, and the CP cap is a fixed step × level: 20 CP per level on the short routes near Orgin Station (max 100), 40 per level on the mid routes (ArbreCAP/EpsiCentauri, Free Port/Ares; max 200). Proxima/AlphaCentA is 100 CP at level 2, which suggests 50 per level (max 250, not yet reached). Upgrade costs seen: Orgin/MuCentauri 30,000 (level 3→4) and 40,000 (4→5).
-- **`data/ships.csv`**: ship types from the game's ship list: `name,cost,limit,cp,cargo,dpm,hp,cruise_min,cruise_max,warp,notes`. `limit` is the build limit, a total across all your fleets, and `dpm` is damage per minute. In every row, `warp` is exactly 5 × `cruise_min`. `--ships` accepts these names, e.g. `ST59x3,FG300x2`, and then knows the fleet's CP, DPM, HP, cost and speed, and warns if you're over a build limit.
+- **`data/route_tiers.csv`**: what each route tier gives and costs per level (`tier,level,cp_cap,bonus_pct,step_cost,total_cost,source`). Easy routes (near Orgin) step 20 CP and +3% per level, mid routes 40 CP and +6%, hard routes 50 CP and +7% (300 CP at level 5, a +100 jump). Upgrade costs: hard doubles each level (9M to 144M, 279M in total), mid triples (240K to 19.44M, 29.04M in total), easy runs 1K, 3K, 8K, 20K, 50K (82K in total; being rechecked). Blank cells are not yet read.
+- **`data/ships.csv`**: ship types from the game's ship list: `name,cost,limit,cp,cargo,dpm,hp,cruise_min,cruise_max,warp,type,tp,notes`. `type` is the hull class (FF, DD small; CA, BC, CV cruiser and capital): a fleet mixing the two gets a warning (see Pirates). `tp` is upgrade points, shared within a class (the first word of the name) and spent on one variant; `dpm` is stock. `limit` is the build limit, a total across all your fleets, and `dpm` is damage per minute. In every row, `warp` is exactly 5 × `cruise_min`. `--ships` accepts these names, e.g. `ST59x3,FG300x2`, and then knows the fleet's CP, DPM, HP, cost and speed, and warns if you're over a build limit.
 - **`data/oracle.csv`**: the game's own $/hr figure for a fleet on a route (`date,route_a,route_b,fleet,game_per_hr,bonus_pct,global_pct,notes`, fleet written like `--ships`; `bonus_pct` is the route's bonus and `global_pct` the global bonus *at the time*, since both change). `--oracle` compares each row against separate vs pooled holds, and mean vs slowest-ship fleet speed, using that day's prices (or the latest before it). Rows from another account are skipped unless you pass its `--ships-file`. `--selftest` checks the rows whose notes say CLEAN.
 - **`data/timings.csv`**: stopwatch leg times (`date,route_a,route_b,fleet,leg_seconds,notes`, one-way). `--timings` compares them with both speed models, and `--selftest` requires the default model within 2% of each.
 - **`data/encounters.csv`** logs pirate attacks, one line per trip or attack. Safe trips count too. Nothing reads it yet; it's the evidence a pirate model will be calibrated from.
@@ -137,6 +138,22 @@ not a fleet that will survive pirates.
 
 ## Pirates — the travel-only ranking is not the real ranking
 
+**Speed and combat pull in opposite directions.** A fleet flies at the average of its ships'
+cruise speeds, so small fast hulls can lift a slow capital fleet's speed a lot: 20 frigates
+would take 5 CV3K from warp 2,000 to about 3,800 in the model, untested. But the battle engine
+assigns weapons to target classes and puts ships in rows, with the front rows hit most. Frigates
+in a fleet of cruisers and capital ships draw every small-ship weapon and die quickly. **Rule of
+thumb (Chris): don't mix FF/DD with CA and capital ships**, unless the small ships form a group
+that could survive on its own, with its own screen and padding. The calculator's warning is a
+flag, not a ban: ArbreCAP's 15 AC721 (DD) ride in front of 4 Conomara (CA) on purpose. They take the
+direct fire and about 2 die per battle (~173K at 86,410 each), under 3% of the route's 6.3M/hr even
+with a fight every 58-minute trip. The Conomaras give the best damage per CP, and AC721 DPM is too low
+for a fleet of them to defend itself. Mixing is fine when the small ships are cheap to lose and the
+big ones can carry the fight; it isn't when losing the screen exposes expensive hulls. So within a combat fleet, get
+speed from drive upgrades (minimum cruise) or from faster hulls of the same class. The targeting
+model itself (weapon classes, rows, armour) is the other agent's work in this repo
+(`data/encounters.csv`, `data/npc_teams.csv`, `data/system_damage.md`).
+
 The first run of the top route (Proxima → AlphaCentA, 3 × 130,000 haulers, 84 CP) was attacked
 straight away by an 82 CP pirate fleet. The battle took 14.5 minutes, about 30 round trips' worth
 of flying, and lost 1 ship; a second attack took the other 2. Every profit/hr figure here counts
@@ -150,6 +167,17 @@ What's known about alarm levels so far:
 - A route has two ports. Proxima/AlphaCentA (Extreme/Extreme) met 82 CP fleets. Free Port/Ares
   (Extreme/Medium) has met only 60 CP fleets. So pirate strength isn't simply the worse of the two
   ports, but two routes can't say what the rule is.
+
+**When fights happen (2026-10-08, 19 fights on two routes in `encounters.csv`).** Gaps between
+fights are a whole number of legs plus one battle, within a few percent, so the chance is per leg.
+ArbreCAP ↔ EpsiCentauri (Low/Low, 28.9-minute legs): gaps of 2 or 3 legs, 0.71 fights/hr, never on
+back-to-back legs. At its ~36% per leg, 11 gaps without one back-to-back pair would happen under 1% of
+the time, so there is probably also a short cooldown after each fight. Free Port ↔ Ares (Low/High,
+113.4-minute legs): gaps of 1 or 2 legs, 0.30 fights/hr. Working hypothesis: **alarm sets a % chance
+per leg, plus a cooldown.** A faster fleet then meets proportionally more fights per hour, so the
+pirate cost stays a fixed share of income and speed still pays. Measured pirate cost: ArbreCAP ~7.5% of
+nominal (battle time 5.6%, AC721 losses 2%); Free Port ↔ Ares ~19% (ST59 losses ~16%, 3 in 8 fights at
+13.56M each).
 
 The calculator shows both ports' alarms, and `--max-alarm` / `--by-alarm` filter routes so that
 **both** ends are at or below a level. Turning alarm levels into attack rate, pirate CP, battle time

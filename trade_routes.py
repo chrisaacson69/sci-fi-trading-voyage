@@ -262,6 +262,7 @@ class ShipType:
     hp: int | None = None
     warp: int | None = None    # the warp stat; NOT what trade routes use once upgrades split it from cruise
     cruise: int | None = None  # minimum cruise speed; trade speed = 5 x this
+    type: str = ""             # hull class: FF, DD (small); CA, BC, CV (cruiser and capital)
 
     @property
     def travel_warp(self) -> int | None:
@@ -283,7 +284,8 @@ def load_ships(path: Path = DEFAULT_SHIPS) -> dict[str, ShipType]:
     with open(path, newline="") as f:
         return {r["name"].strip(): ShipType(r["name"].strip(), num(r["cargo"]), num(r["cp"]),
                                             num(r.get("cost")), num(r.get("limit")), num(r.get("dpm")),
-                                            num(r.get("hp")), num(r.get("warp")), num(r.get("cruise_min")))
+                                            num(r.get("hp")), num(r.get("warp")), num(r.get("cruise_min")),
+                                            (r.get("type") or "").strip().upper())
                 for r in csv.DictReader(f)}
 
 
@@ -321,12 +323,26 @@ class Fleet:
         """The holds to pack: one pooled hold, or each ship's with --separate-holds."""
         return list(self.holds) if separate_holds else [sum(self.holds)]
 
+    def mixed_classes(self) -> str | None:
+        """A warning if the fleet mixes small hulls (FF/DD) with cruisers or capital ships (CA/BC/CV).
+        The battle engine aims each weapon at certain classes and hits the front rows hardest, so small
+        ships among big ones draw every small-ship weapon and die quickly. Chris's rule of thumb: don't
+        mix them, unless the small ships form a group that could survive on its own."""
+        types = Counter(s.type for s in self.ships if s and s.type)
+        small = {t: n for t, n in types.items() if t in SMALL_CLASSES}
+        big = {t: n for t, n in types.items() if t not in SMALL_CLASSES}
+        if not (small and big):
+            return None
+        fmt = lambda d: " + ".join(f"{n} {t}" for t, n in sorted(d.items()))
+        return f"mixes small hulls ({fmt(small)}) with big ones ({fmt(big)}): the small ones draw fire and die first"
+
     def over_limit(self) -> list[str]:
         c = Counter(s.name for s in self.ships if s)
         by = {s.name: s for s in self.ships if s}
         return [f"{n} x {k} (limit {by[k].limit})" for k, n in c.items() if by[k].limit and n > by[k].limit]
 
 
+SMALL_CLASSES = {"FF", "DD"}
 SHIP_OVERRIDES = {"cruise_min": "cruise", "warp": "warp", "cargo": "cargo", "cp": "cp", "dpm": "dpm", "hp": "hp"}
 
 
@@ -557,6 +573,8 @@ def route_card(a, b, quotes, coords, alarms, routes, ship_types, seconds_per_gm,
                   + (f", cost {fleet.cost:,}" if fleet.cost is not None else ""))
         for w in fleet.over_limit():
             print(f"      WARNING: over build limit: {w}")
+        if fleet.mixed_classes():
+            print(f"      WARNING: {fleet.mixed_classes()}")
     unknown = [st.name for st in ship_types.values() if not st.warp]
     if info and info.cp_cap and unknown:
         print(f"  not scored (no warp speed in ships.csv): {', '.join(unknown)}")
@@ -807,6 +825,16 @@ def selftest() -> int:
        parse_ships("IO{cruise_min=650;warp=3737}", types).warp, 3250)
     fleet_speed = saved_fs
     check("build limit is flagged", parse_ships("FG300x16", types).over_limit() != [])
+    check("class mix is flagged: FF among CV", parse_ships("CV3Kx5,FG300 Armorx2", types).mixed_classes() is not None)
+    check("  ...but not an all-cruiser fleet (CA only)", parse_ships("Conomarax4,IOx3,Callistox1", types).mixed_classes() is None)
+    # variants of a class (same first word of the name) change most stats but never their hull class
+    by_class = defaultdict(set)
+    for st in types.values():
+        if st.type:
+            by_class[st.name.split()[0]].add(st.type)
+    split = {c: t for c, t in by_class.items() if len(t) > 1}
+    check(f"ships.csv: every variant of a class has the same hull type{'' if not split else f' -- not: {split}'}", not split)
+    check("ships.csv: every hull has a type", all(st.type for st in types.values()))
     # the game's loading log, 10 Reliat T + 10 NOMA on Orgin Station <-> BountPlanet
     fl = parse_ships("Reliat Tx10,NOMAx10", types)
     sells, buys = book(quotes)
@@ -932,6 +960,8 @@ def main(argv=None) -> int:
         args.sec_per_gm = (fleet.seconds_per_gm if fleet else None) or seconds_per_gm_for(REF_WARP)
     if fleet and fleet.seconds_per_gm:
         label += f", {args.sec_per_gm:.2f} s/Gm (fleet warp {fleet.warp:,.0f}, {fleet_speed})"
+    if fleet and fleet.mixed_classes():
+        print(f"WARNING: this fleet {fleet.mixed_classes()}", file=sys.stderr)
     if args.oracle:
         oracle_report(quotes, coords, ship_types, routes)
         return 0
