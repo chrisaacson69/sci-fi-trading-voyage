@@ -305,7 +305,9 @@ def parse_ships(spec: str, types: dict[str, ShipType] | None = None) -> Fleet:
                 raise ValueError(f"--ships: {what!r} is neither a number nor a ship in ships.csv "
                                  f"({', '.join(sorted(types or {}))})") from None
             ships += [None] * n
-    if not holds or min(holds) <= 0:
+    # A fleet may include ships that carry nothing - pure escorts. They still cost CP, add
+    # DPM and HP, and can cap the fleet's speed, so only an empty or all-zero spec is bad.
+    if not holds or max(holds) <= 0:
         raise ValueError(f"bad --ships spec {spec!r}")
     return Fleet(holds, ships)
 
