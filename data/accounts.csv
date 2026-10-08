@@ -1,0 +1,5 @@
+file,account,userid,role_name,server,platform,source,notes
+data/ships.csv,mobile,,,,mobile,"hand-entered by the other agent","The older, well-developed account. Default ships-file, so --selftest and any command without --ships-file uses it. Hand-captured, so some rows lack cruise_min/warp."
+data/ships/main.csv,anewname,3542278,anewname#2976203,10584,PC,"captured 2026-10-07 (trade3.jsonl)","The newest account, played in this session. Few hulls, essentially no TP: every blueprint level 1 with 0 research points. Roster read from Tb_ship_play, so it is what is actually BUILT; limit is the build cap from Tb_cfg_ship_blueprint.MAX_NUM."
+data/ships/alt-account.csv,mobile,,,,mobile,"snapshot of data/ships.csv at 2026-10-07","Kept so the pre-split state is recoverable; data/ships.csv is the live one."
+,third,,,,PC,"NOT CAPTURED YET","Third account, reached by switching logins on this machine. Reported to be more expansive than the mobile one. Because it is on this PC it can be captured rather than hand-entered - one login capture yields Tb_ship_play (ships actually built, with hp_max showing upgrades) and Tb_ship_bp_overview (blueprints with research_point = TP)."
