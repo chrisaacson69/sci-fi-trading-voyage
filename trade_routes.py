@@ -117,9 +117,10 @@ fleet_speed = "mean"
 # Account-wide profit bonus, added to the route's. It CHANGES over time: 2026-10-06 readings imply
 # +0.36 to +0.46 (a Std Uniform1 sale made 3,628 on a listed margin of 2,268 on a +15% route, x1.600 =
 # 1 + 0.15 + 0.45); 2026-10-07 and most of 2026-10-08 imply +0.30; three readings late on 2026-10-08, on two
-# routes with different goods, all imply +0.35. Source in game unknown.
+# routes with different goods, all imply +0.35; four readings later that evening, on four routes, are back
+# at +0.30. It moves within a day, like a timed buff. Source in game unknown.
 # oracle.csv carries the value at the time of each reading (global_pct).
-GLOBAL_BONUS = 0.35
+GLOBAL_BONUS = 0.30
 global_bonus = GLOBAL_BONUS
 
 
@@ -263,7 +264,8 @@ class ShipType:
     hp: int | None = None
     warp: int | None = None    # the warp stat; NOT what trade routes use once upgrades split it from cruise
     cruise: int | None = None  # minimum cruise speed; trade speed = 5 x this
-    type: str = ""             # hull class: FF, DD (small); CA, BC, CV (cruiser and capital)
+    type: str = ""             # hull type: FF, DD (small); CA, BC, CV, AUX (cruiser and capital)
+    cls: str = ""              # class, for TP sharing; blank = the first word of the name
 
     @property
     def travel_warp(self) -> int | None:
@@ -286,7 +288,7 @@ def load_ships(path: Path = DEFAULT_SHIPS) -> dict[str, ShipType]:
         return {r["name"].strip(): ShipType(r["name"].strip(), num(r["cargo"]), num(r["cp"]),
                                             num(r.get("cost")), num(r.get("limit")), num(r.get("dpm")),
                                             num(r.get("hp")), num(r.get("warp")), num(r.get("cruise_min")),
-                                            (r.get("type") or "").strip().upper())
+                                            (r.get("type") or "").strip().upper(), (r.get("class") or "").strip())
                 for r in csv.DictReader(f)}
 
 
@@ -350,7 +352,7 @@ SHIP_OVERRIDES = {"cruise_min": "cruise", "warp": "warp", "cargo": "cargo", "cp"
 def parse_ships(spec: str, types: dict[str, ShipType] | None = None) -> Fleet:
     """'25200x12,ST59x3' -> a Fleet. Each part is a cargo number or a ship name from
     ships.csv, optionally followed by xN. A name may carry overrides for that ship's state at the
-    time, e.g. IO{cruise_min=650}x5: ships.csv holds the CURRENT stats, so a logged reading taken
+    time, e.g. IO Ion{cruise_min=650}x5: ships.csv holds the CURRENT stats, so a logged reading taken
     before an upgrade says what the ship was then."""
     holds, ships = [], []
     for part in spec.split(","):
@@ -821,18 +823,19 @@ def selftest() -> int:
     eq("--fleet-speed slowest: 2 FG300 + 1 ST59 fly at the ST59's warp", parse_ships("FG300x2,ST59", types).warp, 2250)
     fleet_speed = "mean"
     eq("fleet speed: 4 Conomara + 2 stock IO fly at floor(mean cruise 516.67) x 5 = warp 2,580",
-       parse_ships("Conomara{cruise_min=450}x4,IO{cruise_min=650}x2", types).warp, 2580)
+       parse_ships("Conamara Plasma{cruise_min=450}x4,IO Ion{cruise_min=650}x2", types).warp, 2580)
     eq("trade speed follows cruise_min, not warp: an IO at warp 3,737 but cruise 650 flies at 3,250",
-       parse_ships("IO{cruise_min=650;warp=3737}", types).warp, 3250)
+       parse_ships("IO Ion{cruise_min=650;warp=3737}", types).warp, 3250)
     fleet_speed = saved_fs
     check("build limit is flagged", parse_ships("FG300x16", types).over_limit() != [])
-    check("class mix is flagged: FF among CV", parse_ships("CV3Kx5,FG300 Armorx2", types).mixed_classes() is not None)
-    check("  ...but not an all-cruiser fleet (CA only)", parse_ships("Conomarax4,IOx3,Callistox1", types).mixed_classes() is None)
-    # variants of a class (same first word of the name) change most stats but never their hull class
+    check("class mix is flagged: FF among CV", parse_ships("CV3000x5,FG300 Armorx2", types).mixed_classes() is not None)
+    check("  ...but not an all-cruiser fleet (CA only)", parse_ships("Conamara Plasmax4,IO Ionx3,Callisto Torpx1", types).mixed_classes() is None)
+    # variants of a class (same first word of the name, unless `class` says otherwise) change most stats
+    # but never their hull type
     by_class = defaultdict(set)
     for st in types.values():
         if st.type:
-            by_class[st.name.split()[0]].add(st.type)
+            by_class[st.cls or st.name.split()[0]].add(st.type)
     split = {c: t for c, t in by_class.items() if len(t) > 1}
     check(f"ships.csv: every variant of a class has the same hull type{'' if not split else f' -- not: {split}'}", not split)
     check("ships.csv: every hull has a type", all(st.type for st in types.values()))
