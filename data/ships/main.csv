@@ -1,0 +1,13 @@
+name,cost,limit,cp,cargo,dpm,hp,cruise_min,cruise_max,warp,row,notes
+AC721 Amphibious,,5,12,11500,,30730,800,,4000,2,id 40104; owned 5; hp from capture; hp = base (no upgrade); dpm/cost from game UI
+AC721 Logistics,,15,8,18000,,34140,800,,4000,1,id 40101; owned 15; hp from capture; hp = base (no upgrade); dpm/cost from game UI
+Carilion Recon,,6,4,1800,,8340,1040,,5200,0,id 30801; owned 6; hp from capture; hp = base (no upgrade); dpm/cost from game UI
+Eris Cannon,,5,7,9000,,30540,900,,4500,0,id 40201; owned 5; hp from capture; hp = base (no upgrade); dpm/cost from game UI
+Eris Heavy Cannon,,5,9,8500,,32067,850,,4250,0,id 40202; owned 5; hp from capture; hp x1.05 vs base; dpm/cost from game UI
+FG300 Armored,,14,3,1500,,12540,900,,4500,0,id 30102; owned 14; hp from capture; hp = base (no upgrade); dpm/cost from game UI
+FG300 Multipurpose,,1,3,2000,,10530,1000,,5000,1,id 30101; owned 1; hp from capture; hp = base (no upgrade); dpm/cost from game UI
+Light Cone Composite A,,8,20,26000,,69570,450,,2250,1,id 50501; owned 8; hp from capture; hp = base (no upgrade); dpm/cost from game UI
+Reliat A,,10,4,2000,,10530,800,,4000,1,id 31601; owned 10; hp from capture; hp = base (no upgrade); dpm/cost from game UI
+Taurus Pulse,,10,11,7000,,37842,650,,3250,0,id 40501; owned 10; hp from capture; hp x1.05 vs base; dpm/cost from game UI
+Winged Hussar A,,10,6,8500,,23845,700,,3500,1,id 40801; owned 10; hp from capture; hp x1.05 vs base; dpm/cost from game UI
+hull 21401,,10,2,0,,6000,2400,,12000,0,id 21401; owned 10; hp from capture;; dpm/cost from game UI

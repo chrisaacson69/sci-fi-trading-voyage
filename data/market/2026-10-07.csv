@@ -1,7 +1,7 @@
 planet,good,size,side,price
 Acrux,ExperDrug3,10000,S,240000
 Acrux,SpecConGood2,500,B,24095
-Acrux,SpecMat3,33000,B,981000
+Acrux,SpecMat3,33000,B,1161000
 AlphaCentA,Computer2,42500,S,394485
 AlphaCentA,ExperDrug3,10000,B,270000
 AlphaCentA,Int Nav Sys,1000000,S,27600000
@@ -16,7 +16,7 @@ AlphaCentB,Std Uniform1,300,B,178
 AlphaLupi,Comm Comp,2000,S,18424
 AlphaLupi,Computer2,42500,B,554880
 AlphaLupi,Nuke Battery 2,100000,B,1113000
-AlphaLupi,SpecMat3,33000,B,963000
+AlphaLupi,SpecMat3,33000,B,1143000
 ArbreCAP,Comm Comp,2000,S,17836
 ArbreCAP,Computer2,42500,B,541875
 ArbreCAP,Food1,100,B,93
@@ -32,7 +32,7 @@ Ares,SpecMat3,33000,S,846000
 Beta Lupi,Comm Comp,2000,B,21168
 Beta Lupi,Computer2,42500,S,403155
 Beta Lupi,SpecConGood2,500,B,7680
-Beta Lupi,SpecMat3,33000,B,990000
+Beta Lupi,SpecMat3,33000,B,1170000
 BetaCrucis,ConsumGood1,2000,B,5905
 BetaCrucis,ExperDrug3,10000,B,275000
 BetaCrucis,ResearchData3,100000,S,2707500
@@ -93,7 +93,7 @@ LW Mon Station,Comm Comp,2000,B,20776
 LW Mon Station,Computer2,42500,S,394485
 LW Mon Station,Nuke Battery 2,100000,S,976500
 LW Mon Station,SpecConGood2,500,B,7584
-LW Mon Station,SpecMat3,33000,B,954000
+LW Mon Station,SpecMat3,33000,B,1134000
 MuCentauri,ConsumGood1,2000,B,619
 MuCentauri,Elec1,10000,B,3267
 MuCentauri,Food1,100,B,33
@@ -112,13 +112,13 @@ Proxima,SpecConGood2,500,B,18384
 Reach,ConsumGood1,2000,B,17688
 Reach,ExperDrug3,10000,S,247500
 Reach,Int Nav Sys,1000000,S,29100000
-Reach,SpecMat3,33000,B,972000
+Reach,SpecMat3,33000,B,1152000
 Reach,TrojiteCry3,240000,B,7481600
 Troy,Comm Comp,2000,B,58604
 Troy,Computer2,42500,S,394485
 Troy,Int Nav Sys,1000000,S,27600000
 Troy,ResearchData3,100000,B,3049500
-Troy,SpecMat3,33000,B,954000
+Troy,SpecMat3,33000,B,1134000
 Troy,TrojiteCry3,240000,S,6145600
 TycoLab,Comm Comp,2000,S,18032
 TycoLab,Computer2,42500,B,546210

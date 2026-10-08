@@ -4,3 +4,5 @@ Orgin Station,BountPlanet,5,100,,15,
 ArbreCAP,EpsiCentauri,4,,,24,"upgraded 2026-10-06: level 1 (40 CP) -> 2 (80 CP) -> 4; level 4 cap not recorded, but 12 AC721 (96 CP) fit"
 Free Port,Ares,4,160,,24,attacks seen are 60 CP fleets
 Proxima,AlphaCentA,2,,,14,cp_cap not recorded; attacks seen are 82 CP fleets
+AlphaCentA,Proxima,4,,,24,"from capture trade_day 9 (region 16<->18); level 4; bonus 24 assumed from the 6%/level pattern in oracle.csv - not read in game; Chris reports a 200 CP fleet cap"
+BlackGoldStar,Troy,4,,,24,"from capture trade_day 9 (region 19<->20); level 4; bonus 24 assumed from 6%/level - NOT yet confirmed: the day-8 oracle run fit 0.986x with NO route bonus, so recheck $/hr now it is level 4"
