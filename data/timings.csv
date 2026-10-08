@@ -2,4 +2,6 @@ date,route_a,route_b,fleet,leg_seconds,notes
 2026-10-06,ArbreCAP,EpsiCentauri,FG300x15,1260,one-way leg: exactly 21:00
 2026-10-06,ArbreCAP,EpsiCentauri,Conomarax3,2800,one-way leg: 46:40
 2026-10-08,Beta Lupi,TycoLab,Conomarax2,4155,"69:15 one-way, 935 Gm, the game's route PREVIEW (not a stopwatch); timed model predicts 4,157 s"
-2026-10-08,Beta Lupi,TycoLab,"Conomarax4,IOx2",3624,"60:24 one-way, 935 Gm: route preview, then confirmed in flight after opening. Mixed fleet: slowest ship predicts 69:17, floor(mean cruise) x 5 = warp 2,580 predicts 60:25"
+2026-10-08,Beta Lupi,TycoLab,"Conomarax4,IO{cruise_min=650}x2",3624,"60:24 one-way, 935 Gm: route preview, then confirmed in flight after opening. Mixed fleet: slowest ship predicts 69:17, floor(mean cruise) x 5 = warp 2,580 predicts 60:25"
+2026-10-08,Orgin Station,DeepSpcArray,IO{cruise_min=650;warp=3737}x5,480,"8:00 one-way, 156.5 Gm, AFTER an IO speed upgrade to warp 3,737 (from 3,250): the formula predicts 6:59 at 3,737 and 8:02 at 3,250, so the trade route still uses the base warp. Nominal unchanged at 58.61K. Answered: trade speed follows cruise_min, not warp (see the next row)"
+2026-10-08,Orgin Station,DeepSpcArray,IOx5,369,"6:09 one-way after a std drive upgrade, cruise 650-1200 -> 845-1200: 5 x 845 = warp 4,225 predicts 6:10. The warp upgrade (3,737) alone had left it at 8:00"

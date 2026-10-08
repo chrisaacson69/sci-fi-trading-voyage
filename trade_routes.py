@@ -7,8 +7,10 @@ Model (see README.md for how each assumption was measured):
     takes `size` cargo space.
   * Leg time = overhead + distance * seconds_per_gm, with seconds_per_gm = 10,000 / warp
     and 0 s overhead. Stopwatch runs (data/timings.csv) match this to the second.
-  * A fleet flies at its ships' AVERAGE warp, not its slowest ship's (floor(mean cruise) x 5;
-    --fleet-speed slowest for the old assumption).
+  * A ship's trade speed is 5 x its MINIMUM CRUISE speed (cruise_min), not its warp stat: a warp
+    upgrade left a route's leg unchanged, a drive upgrade (cruise 650 -> 845) moved it as predicted.
+  * A fleet flies at floor(mean cruise_min) x 5, the AVERAGE over its ships, not its slowest ship's
+    (--fleet-speed slowest for the old assumption).
   * Profit = listed margin * (1 + route bonus + global bonus). The route bonus is per level
     (bonus_pct in data/routes.csv); the global bonus (--global-bonus, default 45%) is account-wide.
   * Cash is unlimited and prices don't move as you trade (they shift daily).
@@ -50,6 +52,7 @@ import math
 import statistics
 import sys
 from collections import Counter, defaultdict
+import dataclasses
 from dataclasses import dataclass, asdict, field
 from functools import reduce
 from pathlib import Path
@@ -101,7 +104,7 @@ SPEED_MODELS = {
     "timed": lambda warp: SECONDS_PER_GM * REF_WARP / warp,
 }
 speed_model = "timed"
-# The game pools a fleet's cargo into one hold: 10 Reliiat T + 10 NOMA (no hold over 2,000) loaded
+# The game pools a fleet's cargo into one hold: 10 Reliat T + 10 NOMA (no hold over 2,000) loaded
 # 9 RefOre1 (size 4,000) and 126 Std Uniform1 -- exactly the pooled-hold packing (separate: 0 and 120).
 separate_holds = False
 # How a fleet of mixed hulls moves. "mean" (default): every ship flies at floor(mean cruise) x 5 warp,
@@ -257,11 +260,20 @@ class ShipType:
     limit: int | None = None   # build limit: most of this ship you can own
     dpm: int | None = None     # damage per minute
     hp: int | None = None
-    warp: int | None = None    # relative speed, see REF_WARP
+    warp: int | None = None    # the warp stat; NOT what trade routes use once upgrades split it from cruise
+    cruise: int | None = None  # minimum cruise speed; trade speed = 5 x this
+
+    @property
+    def travel_warp(self) -> int | None:
+        """Speed on a trade route, in warp units. Stock hulls all have warp == 5 x cruise_min, so the two
+        only differ after an upgrade, and then the route follows cruise_min: an IO with warp raised to
+        3,737 kept its 8:00 leg on Orgin/DeepSpcArray; raising cruise_min to 845 cut it to 6:09
+        (5 x 845 = 4,225 predicts 6:10)."""
+        return 5 * self.cruise if self.cruise else self.warp
 
     @property
     def seconds_per_gm(self) -> float | None:
-        return seconds_per_gm_for(self.warp) if self.warp else None
+        return seconds_per_gm_for(self.travel_warp) if self.travel_warp else None
 
 
 def load_ships(path: Path = DEFAULT_SHIPS) -> dict[str, ShipType]:
@@ -271,7 +283,7 @@ def load_ships(path: Path = DEFAULT_SHIPS) -> dict[str, ShipType]:
     with open(path, newline="") as f:
         return {r["name"].strip(): ShipType(r["name"].strip(), num(r["cargo"]), num(r["cp"]),
                                             num(r.get("cost")), num(r.get("limit")), num(r.get("dpm")),
-                                            num(r.get("hp")), num(r.get("warp")))
+                                            num(r.get("hp")), num(r.get("warp")), num(r.get("cruise_min")))
                 for r in csv.DictReader(f)}
 
 
@@ -291,8 +303,9 @@ class Fleet:
 
     @property
     def warp(self) -> float | None:
-        """The fleet's warp: floor(mean cruise) x 5 (measured), or the slowest ship's (--fleet-speed)."""
-        v = [s.warp if s else None for s in self.ships]
+        """The fleet's trade speed in warp units: floor(mean cruise_min) x 5 (measured), or the slowest
+        ship's (--fleet-speed slowest)."""
+        v = [s.travel_warp if s else None for s in self.ships]
         if any(x is None for x in v):
             return None
         if fleet_speed == "slowest":
@@ -314,16 +327,28 @@ class Fleet:
         return [f"{n} x {k} (limit {by[k].limit})" for k, n in c.items() if by[k].limit and n > by[k].limit]
 
 
+SHIP_OVERRIDES = {"cruise_min": "cruise", "warp": "warp", "cargo": "cargo", "cp": "cp", "dpm": "dpm", "hp": "hp"}
+
+
 def parse_ships(spec: str, types: dict[str, ShipType] | None = None) -> Fleet:
     """'25200x12,ST59x3' -> a Fleet. Each part is a cargo number or a ship name from
-    ships.csv, optionally followed by xN."""
+    ships.csv, optionally followed by xN. A name may carry overrides for that ship's state at the
+    time, e.g. IO{cruise_min=650}x5: ships.csv holds the CURRENT stats, so a logged reading taken
+    before an upgrade says what the ship was then."""
     holds, ships = [], []
     for part in spec.split(","):
-        m = re.fullmatch(r"\s*(.+?)(?:x(\d+))?\s*", part)
-        what, n = m.group(1), int(m.group(2) or 1)
+        m = re.fullmatch(r"\s*(.+?)(?:\{([^}]*)\})?(?:x(\d+))?\s*", part)
+        what, extra, n = m.group(1), m.group(2), int(m.group(3) or 1)
         if types and what in types:
-            holds += [types[what].cargo] * n
-            ships += [types[what]] * n
+            st = types[what]
+            if extra:
+                kv = dict(x.split("=") for x in extra.split(";"))
+                bad = set(kv) - set(SHIP_OVERRIDES)
+                if bad:
+                    raise ValueError(f"--ships: unknown override {sorted(bad)} (use {sorted(SHIP_OVERRIDES)})")
+                st = dataclasses.replace(st, **{SHIP_OVERRIDES[k]: int(v) for k, v in kv.items()})
+            holds += [st.cargo] * n
+            ships += [st] * n
         else:
             try:
                 holds += [int(float(what))] * n
@@ -776,12 +801,14 @@ def selftest() -> int:
     saved_fs, fleet_speed = fleet_speed, "slowest"
     eq("--fleet-speed slowest: 2 FG300 + 1 ST59 fly at the ST59's warp", parse_ships("FG300x2,ST59", types).warp, 2250)
     fleet_speed = "mean"
-    eq("fleet speed: 4 Conomara + 2 IO fly at floor(mean cruise 516.67) x 5 = warp 2,580",
-       parse_ships("Conomarax4,IOx2", types).warp, 2580)
+    eq("fleet speed: 4 Conomara + 2 stock IO fly at floor(mean cruise 516.67) x 5 = warp 2,580",
+       parse_ships("Conomarax4,IO{cruise_min=650}x2", types).warp, 2580)
+    eq("trade speed follows cruise_min, not warp: an IO at warp 3,737 but cruise 650 flies at 3,250",
+       parse_ships("IO{cruise_min=650;warp=3737}", types).warp, 3250)
     fleet_speed = saved_fs
     check("build limit is flagged", parse_ships("FG300x16", types).over_limit() != [])
-    # the game's loading log, 10 Reliiat T + 10 NOMA on Orgin Station <-> BountPlanet
-    fl = parse_ships("Reliiat Tx10,NOMAx10", types)
+    # the game's loading log, 10 Reliat T + 10 NOMA on Orgin Station <-> BountPlanet
+    fl = parse_ships("Reliat Tx10,NOMAx10", types)
     sells, buys = book(quotes)
     t = make_trip("Orgin Station", "BountPlanet", sells, buys, coords, holds=fl.cargo_holds)
     eq("pooled hold: loads 126 Std Uniform1 at Orgin (game: 126 for 10,080)", t.out.load.get("Std Uniform1", 0), 126)
