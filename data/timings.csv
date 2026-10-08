@@ -1,3 +1,5 @@
 date,route_a,route_b,fleet,leg_seconds,notes
 2026-10-06,ArbreCAP,EpsiCentauri,FG300x15,1260,one-way leg: exactly 21:00
 2026-10-06,ArbreCAP,EpsiCentauri,Conomarax3,2800,one-way leg: 46:40
+2026-10-08,Beta Lupi,TycoLab,Conomarax2,4155,"69:15 one-way, 935 Gm, the game's route PREVIEW (not a stopwatch); timed model predicts 4,157 s"
+2026-10-08,Beta Lupi,TycoLab,"Conomarax4,IOx2",3624,"60:24 one-way, 935 Gm: route preview, then confirmed in flight after opening. Mixed fleet: slowest ship predicts 69:17, floor(mean cruise) x 5 = warp 2,580 predicts 60:25"

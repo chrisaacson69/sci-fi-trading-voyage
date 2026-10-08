@@ -7,5 +7,7 @@ IO,1139000,8,18,20000,39477,67386,650,1200,3250,
 FG300,1623,15,3,2000,2560,15563,1000,1200,5000,starter; the timing fleet (2.0 s/Gm measured)
 AC721,86410,15,8,25200,2926,43949,800,1200,4000,hauler
 Eternal Heavens,24610000,5,40,150000,,298690,,,1750,carrier: firepower from aircraft and UAVs so no single DPM; spelled "Enternal" in chat - check in-game name
-CV3K,18810000,5,40,150000,,292257,,,2000,carrier: firepower from aircraft and UAVs; cost given as "18,810,00" - assumed 18810000
+CV3K,18810000,5,40,150000,43760,292257,,,2000,"carrier: dpm depends on the aircraft carried - 53,910 with the best complement, 43,760 average across the 5 built (fleet total 218,800, Chris 2026-10-08); cost given as ""18,810,00"" - assumed 18810000"
 FG300 Recon,1754,15,3,2200,552,13167,,,5200,"recon variant; build limit 15, as for FG300"
+KCCP Pulse,,,16,22000,10016,52640,,,3250,"cost and build limit not recorded"
+Callisto,,,18,21000,18883,79630,,,2000,"cost and build limit not recorded"

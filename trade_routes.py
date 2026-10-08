@@ -7,6 +7,8 @@ Model (see README.md for how each assumption was measured):
     takes `size` cargo space.
   * Leg time = overhead + distance * seconds_per_gm, with seconds_per_gm = 10,000 / warp
     and 0 s overhead. Stopwatch runs (data/timings.csv) match this to the second.
+  * A fleet flies at its ships' AVERAGE warp, not its slowest ship's (floor(mean cruise) x 5;
+    --fleet-speed slowest for the old assumption).
   * Profit = listed margin * (1 + route bonus + global bonus). The route bonus is per level
     (bonus_pct in data/routes.csv); the global bonus (--global-bonus, default 45%) is account-wide.
   * Cash is unlimited and prices don't move as you trade (they shift daily).
@@ -68,6 +70,14 @@ def market_snapshot(date: str | None = None) -> Path:
     return f
 
 
+def snapshot_for(date: str) -> Path:
+    """The price file for a game day, or the latest one before it (prices barely move day to day)."""
+    files = [f for f in sorted(MARKET_DIR.glob("????-??-??.csv")) if f.stem <= date.strip()]
+    if not files:
+        raise FileNotFoundError(f"no price snapshot on or before {date}")
+    return files[-1]
+
+
 DEFAULT_DATA = None  # resolved to the latest snapshot at call time
 DEFAULT_PORTS = Path(__file__).resolve().parent / "data" / "ports.csv"
 DEFAULT_ROUTES = Path(__file__).resolve().parent / "data" / "routes.csv"
@@ -94,10 +104,18 @@ speed_model = "timed"
 # The game pools a fleet's cargo into one hold: 10 Reliiat T + 10 NOMA (no hold over 2,000) loaded
 # 9 RefOre1 (size 4,000) and 126 Std Uniform1 -- exactly the pooled-hold packing (separate: 0 and 120).
 separate_holds = False
-# Account-wide profit bonus, added to the route's. Measured 2026-10-06: Std Uniform1 sold on a +15% route
-# made 3,628 on a listed margin of 2,268 (x1.600 = 1 + 0.15 + 0.45); 15 x FG300 and 3 x Conomara on a
-# +12% route both imply +0.451. Its in-game source is not yet identified, and it may change over time.
-GLOBAL_BONUS = 0.45
+# How a fleet of mixed hulls moves. "mean" (default): every ship flies at floor(mean cruise) x 5 warp,
+# where cruise = warp / 5. Measured 2026-10-08 on Beta Lupi <-> TycoLab (935 Gm): 4 Conomara (warp 2,250)
+# + 2 IO (3,250) took 60:24, in the route preview and again in flight. The slowest ship predicts 69:17,
+# the plain mean warp (2,583) 60:21, the floored mean cruise (516 -> warp 2,580) 60:25. It also explains
+# the game's $/hr for every mixed fleet logged (ArbreCAP, Free Port/Ares, Orgin/Mu): see oracle.csv.
+FLEET_SPEEDS = ("mean", "slowest")
+fleet_speed = "mean"
+# Account-wide profit bonus, added to the route's. It CHANGES over time: 2026-10-06 readings imply
+# +0.36 to +0.46 (a Std Uniform1 sale made 3,628 on a listed margin of 2,268 on a +15% route, x1.600 =
+# 1 + 0.15 + 0.45); every 2026-10-07/08 reading on this account implies +0.30. Source in game unknown.
+# oracle.csv carries the value at the time of each reading (global_pct).
+GLOBAL_BONUS = 0.30
 global_bonus = GLOBAL_BONUS
 
 
@@ -272,10 +290,18 @@ class Fleet:
     cost = property(lambda self: self._sum("cost"))
 
     @property
+    def warp(self) -> float | None:
+        """The fleet's warp: floor(mean cruise) x 5 (measured), or the slowest ship's (--fleet-speed)."""
+        v = [s.warp if s else None for s in self.ships]
+        if any(x is None for x in v):
+            return None
+        if fleet_speed == "slowest":
+            return min(v)
+        return math.floor(statistics.mean(x / 5 for x in v)) * 5
+
+    @property
     def seconds_per_gm(self) -> float | None:
-        """The slowest ship sets the pace (assumed, not yet verified in game)."""
-        v = [s.seconds_per_gm if s else None for s in self.ships]
-        return None if any(x is None for x in v) else max(v)
+        return seconds_per_gm_for(self.warp) if self.warp else None
 
     @property
     def cargo_holds(self) -> list[int]:
@@ -492,7 +518,7 @@ def route_card(a, b, quotes, coords, alarms, routes, ship_types, seconds_per_gm,
             print(f"      {n:3} x {st.name:14} {n * st.cp:4} CP {n * st.cargo:>10,} cargo {spd:>10} -> {pph:14,.0f}/hr"
                   f"   [{_fmt_leg(ft.out, True)} / {_fmt_leg(ft.back, True)}]")
     if fleet:
-        spg = seconds_per_gm  # already resolved in main(): --sec-per-gm, else the fleet's slowest ship
+        spg = seconds_per_gm  # already resolved in main(): --sec-per-gm, else the fleet's warp
         ft = make_trip(a, b, sells, buys, coords, seconds_per_gm=spg, overhead_s=overhead_s,
                        holds=fleet.cargo_holds, bonus=bonus)
         cp_txt = "" if fleet.cp is None else f", {fleet.cp} CP"
@@ -614,41 +640,54 @@ def timing_report(coords, ship_types, path: Path = DEFAULT_TIMINGS):
         d = math.dist(coords[a], coords[b])
         got = float(r["leg_seconds"])
         print(f"{r['date']}  {a} -> {b}  {d:,.0f} Gm  fleet {r['fleet']}  stopwatch {got / 60:.2f} min")
-        warps = [st.warp for st in fleet.ships if st]
-        for name, model in SPEED_MODELS.items():
-            want = d * model(min(warps))
-            print(f"   {name:6} {want / 60:8.2f} min  ({want / got:5.2f}x stopwatch)")
+        global fleet_speed
+        saved = fleet_speed
+        for rule in FLEET_SPEEDS:
+            fleet_speed = rule
+            want = d * fleet.seconds_per_gm
+            print(f"   {rule:8} warp {fleet.warp:7,.0f}  {want / 60:8.2f} min  ({want / got:5.3f}x stopwatch)")
+        fleet_speed = saved
 
 
 def oracle_report(quotes, coords, ship_types, routes=None, path: Path = DEFAULT_ORACLE):
     """Compare each logged game $/hr figure against the model's open choices:
     separate vs pooled holds, and timed (stopwatch) vs warp-as-Gm/hr speed. The route bonus is the
-    row's own bonus_pct (the route's level can change), else routes.csv's."""
+    row's own bonus_pct (the route's level can change), else routes.csv's; the global bonus is the row's
+    global_pct (it changes over time), else the current one."""
+    global fleet_speed, global_bonus
     if not path.exists():
         print(f"no {path}")
         return
     with open(path, newline="") as f:
         rows = list(csv.DictReader(f))
     for r in rows:
-        snap = MARKET_DIR / f"{r['date'].strip()}.csv"
-        day_quotes = load_market(snap)[0] if snap.exists() else quotes
-        sells, buys = book(day_quotes)
+        snap = snapshot_for(r["date"])
+        sells, buys = book(load_market(snap)[0])
+        gb = float(r["global_pct"]) / 100 if (r.get("global_pct") or "").strip() else global_bonus
         a, b, game = r["route_a"].strip(), r["route_b"].strip(), float(r["game_per_hr"])
-        fleet = parse_ships(r["fleet"], ship_types)
-        warps = [st.warp for st in fleet.ships if st]
+        try:
+            fleet = parse_ships(r["fleet"], ship_types)
+        except ValueError:
+            # oracle.csv holds rows from every account; a row whose hulls aren't in this roster
+            # belongs to another one (pass that account's --ships-file to score it)
+            print(f"{r['date']}  {a} <-> {b}  fleet {r['fleet']}: ships not in this --ships-file "
+                  f"(another account's row); skipped")
+            continue
         bonus = oracle_bonus(r, routes)
-        print(f"{r['date']}  {a} <-> {b}  fleet {r['fleet']}  +{bonus:.0%} route +{global_bonus:.0%} global  game says {game:,.0f}/hr"
-              f"  (prices: {snap.stem if snap.exists() else 'latest snapshot -- none for that day'})")
-        if len(warps) != len(fleet.ships):
+        print(f"{r['date']}  {a} <-> {b}  fleet {r['fleet']}  +{bonus:.0%} route +{gb:.0%} global  game says {game:,.0f}/hr"
+              f"  (prices: {snap.stem})")
+        if fleet.warp is None:
             print("   (a ship has no warp speed; skipped)")
             continue
-        speeds = {"timed (stopwatch)": SPEED_MODELS["timed"](min(warps)),
-                  "warp = Gm/hr": SPEED_MODELS["warp"](min(warps))}
+        saved = fleet_speed, global_bonus
+        global_bonus = gb
         for hold_name, holds in (("separate holds", fleet.holds), ("pooled hold", [sum(fleet.holds)])):
-            for sp_name, spg in speeds.items():
-                t = make_trip(a, b, sells, buys, coords, seconds_per_gm=spg, holds=holds, bonus=bonus)
-                print(f"   {hold_name:15} {sp_name:26} {spg:5.2f} s/Gm -> {t.profit_per_hour:12,.0f}/hr"
-                      f"  ({t.profit_per_hour / game:5.2f}x game)")
+            for rule in FLEET_SPEEDS:
+                fleet_speed = rule
+                t = make_trip(a, b, sells, buys, coords, seconds_per_gm=fleet.seconds_per_gm, holds=holds, bonus=bonus)
+                print(f"   {hold_name:15} {rule:8} speed {fleet.seconds_per_gm:5.2f} s/Gm -> {t.profit_per_hour:12,.0f}/hr"
+                      f"  ({t.profit_per_hour / game:6.3f}x game)")
+        fleet_speed, global_bonus = saved
 
 
 def selftest() -> int:
@@ -732,9 +771,14 @@ def selftest() -> int:
     eq("timed model: ST59 (warp 2250) is 2.22x slower", types["ST59"].seconds_per_gm, 2.0 * 5000 / 2250)
     speed_model = "warp"
     eq("warp model: FG300 at 3600/5000 s/Gm", types["FG300"].seconds_per_gm, 0.72)
-    eq("mixed fleet moves at its slowest ship", parse_ships("FG300x2,ST59", types).seconds_per_gm,
-       3600 / 2250)
     speed_model = saved
+    global fleet_speed
+    saved_fs, fleet_speed = fleet_speed, "slowest"
+    eq("--fleet-speed slowest: 2 FG300 + 1 ST59 fly at the ST59's warp", parse_ships("FG300x2,ST59", types).warp, 2250)
+    fleet_speed = "mean"
+    eq("fleet speed: 4 Conomara + 2 IO fly at floor(mean cruise 516.67) x 5 = warp 2,580",
+       parse_ships("Conomarax4,IOx2", types).warp, 2580)
+    fleet_speed = saved_fs
     check("build limit is flagged", parse_ships("FG300x16", types).over_limit() != [])
     # the game's loading log, 10 Reliiat T + 10 NOMA on Orgin Station <-> BountPlanet
     fl = parse_ships("Reliiat Tx10,NOMAx10", types)
@@ -751,18 +795,23 @@ def selftest() -> int:
     eq("routes.csv: Free Port/Ares (level 5) bonus is +30%", route_bonus(routes, "Ares", "Free Port"), 0.30)
     global_bonus = saved_gb
     t = make_trip("Orgin Station", "BountPlanet", sells, buys, coords, holds=[38000], bonus=0.15)
-    eq("Std Uniform1 sale: 126 x (98 - 80) x (1 + 0.15 + 0.45) rounds down to the game's 3,628",
-       math.floor(t.out.margin * (1 + 0.15 + global_bonus)), 3628)
-    # the game's own $/hr, on rows where the fleet and its loads are known to be clean
+    eq("Std Uniform1 sale (2026-10-06): 126 x (98 - 80) x (1 + 0.15 + 0.45) rounds down to the game's 3,628",
+       math.floor(t.out.margin * (1 + 0.15 + 0.45)), 3628)
+    # the game's own $/hr, on rows where the fleet and its loads are known to be clean, each with that
+    # day's prices and that day's global bonus
     for r in csv.DictReader(open(DEFAULT_ORACLE, newline="")):
         if "CLEAN" not in r["notes"]:
             continue
         fl = parse_ships(r["fleet"], types)
-        t = make_trip(r["route_a"], r["route_b"], sells, buys, coords, seconds_per_gm=fl.seconds_per_gm,
+        day_sells, day_buys = book(load_market(snapshot_for(r["date"]))[0])
+        global_bonus = float(r["global_pct"]) / 100
+        t = make_trip(r["route_a"], r["route_b"], day_sells, day_buys, coords, seconds_per_gm=fl.seconds_per_gm,
                       holds=fl.cargo_holds, bonus=float(r["bonus_pct"]) / 100)
         ratio = t.profit_per_hour / float(r["game_per_hr"])
-        check(f"oracle {r['route_a']}/{r['route_b']} {r['fleet']}: predicted {ratio:.3f}x game", 0.98 <= ratio <= 1.02)
-    # the stopwatch: the default (timed) model must predict every leg within 2%
+        check(f"oracle {r['date']} {r['route_a']}/{r['route_b']} {r['fleet']}: predicted {ratio:.3f}x game",
+              0.98 <= ratio <= 1.02)
+    global_bonus = saved_gb
+    # the stopwatch: the default model (timed, mean fleet speed) must predict every leg within 2%
     for r in load_timings():
         fl = parse_ships(r["fleet"], types)
         want = math.dist(coords[r["route_a"].strip()], coords[r["route_b"].strip()]) * fl.seconds_per_gm
@@ -792,7 +841,9 @@ def main(argv=None) -> int:
     ap.add_argument("--routes-file", type=Path, default=DEFAULT_ROUTES)
     ap.add_argument("--ships-file", type=Path, default=DEFAULT_SHIPS)
     ap.add_argument("--sec-per-gm", type=float, default=None,
-                    help="travel time per Gm (default: from the fleet's slowest warp, else an FG300's)")
+                    help="travel time per Gm (default: from the fleet's warp, else an FG300's)")
+    ap.add_argument("--fleet-speed", choices=FLEET_SPEEDS, default="mean",
+                    help="mean = floor(mean cruise) x 5, measured (default); slowest = the slowest ship's warp")
     ap.add_argument("--speed-model", choices=sorted(SPEED_MODELS), default="timed",
                     help="timed = stopwatch-calibrated (default) or warp = Gm/hr (2.78x faster)")
     ap.add_argument("--overhead", type=float, default=0.0, help="fixed seconds per leg (dock/launch)")
@@ -817,6 +868,8 @@ def main(argv=None) -> int:
     speed_model = args.speed_model
     global separate_holds
     separate_holds = args.separate_holds
+    global fleet_speed
+    fleet_speed = args.fleet_speed
     global global_bonus
     global_bonus = args.global_bonus / 100
     if args.diff:
@@ -851,7 +904,7 @@ def main(argv=None) -> int:
     if args.sec_per_gm is None:
         args.sec_per_gm = (fleet.seconds_per_gm if fleet else None) or seconds_per_gm_for(REF_WARP)
     if fleet and fleet.seconds_per_gm:
-        label += f", {args.sec_per_gm:.2f} s/Gm (slowest ship)"
+        label += f", {args.sec_per_gm:.2f} s/Gm (fleet warp {fleet.warp:,.0f}, {fleet_speed})"
     if args.oracle:
         oracle_report(quotes, coords, ship_types, routes)
         return 0

@@ -2,8 +2,8 @@ route_a,route_b,level,cp_cap,upgrade_cost,bonus_pct,notes
 Orgin Station,DeepSpcArray,5,100,,15,
 Orgin Station,BountPlanet,5,100,,15,
 ArbreCAP,EpsiCentauri,5,200,,30,"level 1 (40 CP) -> 2 (80 CP) on 2026-10-06, level 5 (max, 200 CP) by 2026-10-07; +30% confirmed in game"
-Free Port,Ares,5,200,,30,"NOT on this account (routes are per-account, like ships - see data/routes/main.csv): level 4 (160 CP, +24%) on 2026-10-06, level 5 (max, 200 CP) by 2026-10-07; +30% confirmed in game; attacks seen are 60 CP fleets"
-Proxima,AlphaCentA,4,200,,28,"level 2 (100 CP, +14%) read in game 2026-10-07; capture trade_day 9 shows level 4, so 200 CP and +28% by the confirmed 50 CP and 7%/level (Ext/Ext) steps - cap and bonus not re-read in game at level 4; attacks seen are 82 CP fleets"
+Free Port,Ares,5,200,,30,"level 4 (160 CP, +24%) on 2026-10-06, level 5 (max, 200 CP) by 2026-10-07; +30% confirmed in game; running 6 ST59 + 2 KCCP Pulse at 9.52M/hr (2026-10-07); attacks seen are 60 CP fleets"
+Proxima,AlphaCentA,2,100,,14,"trial route, level 2, 100 CP, +14% read in game 2026-10-07 (the level 4 in the capture is the main account's); attacks seen are 82 CP fleets"
 Orgin Station,MuCentauri,5,100,,15,"2026-10-07: level 3 (60 CP) -> 4 for 30,000 -> 5 (max, 100 CP) for 40,000; an earlier note said 3 -> 4 for 70,000, which is the two steps together; +15% confirmed in game"
-BlackGoldStar,Troy,4,200,,28,"level 4 and 200 CP cap READ IN GAME 2026-10-07, so this is a 50 CP/level route - the same step as Proxima/AlphaCentA. bonus_pct 28 is DERIVED from that (50-step -> 7%/level), not read: the cap-step rule fits all five known routes (20->3%/level, 40->6%, 50->7%) where the safer-port rule does not. TEST: level 5 should show a 250 CP cap and +35%. Day-8 oracle (ST59x6, 10.44M/hr) fit 0.986x with no bonus, when the route was new."
-Broadcast Star,Orgin Station,5,100,,15,"Chris 2026-10-07: level 5, 100 CP cap. 20 CP/level -> 3%/level -> +15%, matching the other Orgin routes. Region 1<->3 in the capture, 272 Gm - the longest of the Orgin cluster."
+BlackGoldStar,Troy,4,200,,28,"opened 2026-10-08 (cost not recorded); level 4, +28% read in game, matching the main account (50 CP and 7% per level); running 5 CV3K"
+Beta Lupi,TycoLab,,,,,"NOT OPEN YET: previewed 2026-10-08 (the preview applies the level-1 +6% to any fleet size); 40 CP/level, max 200 at level 5 (read in game). Upgrade costs (marginal, x3 per level): L1 240,000; L2 720,000; L3 2,160,000; L4 6,480,000; L5 19,440,000 = 29,040,000 total. Level and bonus not recorded yet (6%/level assumed by the 40-CP ladder)"
