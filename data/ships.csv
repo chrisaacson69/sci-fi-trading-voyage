@@ -1,15 +1,15 @@
 name,cost,limit,cp,cargo,dpm,hp,cruise_min,cruise_max,warp,type,tp,notes
 ST59,13560000,6,28,130000,27373,143335,450,1200,2250,BC,,big
-Conomara,1542000,8,20,20000,37833,77460,450,1200,2250,CA,,
+Conomara,1542000,8,20,20000,36171,77460,585,1200,2250,CA,,"CA. Respecced 2026-10-08 toward speed: cruise 450 -> 585, dpm 37,833 -> 36,171 (hp, cost unchanged). Not stock"
 Reliat T,3420,10,4,1800,4741,11450,800,1200,4000,FF,,this class's TP was spent on this variant (Reliat AS has 0); name was misspelled Reliiat T until 2026-10-08
 NOMA,2986,10,6,2000,230,16240,800,1200,4000,FF,,Heal
 IO,1139000,8,18,20000,39477,67386,845,1200,3737,CA,,"upgraded 2026-10-08: std drive cruise 650-1200 -> 845-1200 (trade speed 5 x 845 = 4,225), warp 3,250 -> 3,737 (no effect on trade routes). Stock: cruise 650, warp 3,250"
 FG300,1623,15,3,2000,2560,15563,1000,1200,5000,FF,,starter; the timing fleet (2.0 s/Gm measured); this class's TP was spent on this variant
-AC721,86410,15,8,25200,2926,43949,800,1200,4000,DD,,hauler
+AC721 Gen,91060,15,8,25200,2256,46680,1040,1200,4000,DD,0,"hauler; was recorded as AC721 until 2026-10-08. The class's 66 TP are spent on this variant, respecced 2026-10-08 toward speed: cruise 800 -> 1040, dpm 2926 -> 2256, hp 43949 -> 46680, cost 91,060. Not stock"
 Eternal Heavens,24610000,5,40,150000,,298690,,,1750,CV,,"carrier: firepower from aircraft and UAVs so no single DPM; spelled ""Enternal"" in chat - check in-game name"
 CV3K,18810000,5,40,150000,43760,292257,,,2000,CV,,"carrier: dpm depends on the aircraft carried - 53,910 with the best complement, 43,760 average across the 5 built (fleet total 218,800, Chris 2026-10-08); cost given as ""18,810,00"" - assumed 18810000"
 FG300 Recon,1754,15,3,2200,552,13167,,,5200,FF,,"recon variant; build limit 15, as for FG300"
-KCCP Pulse,,,16,22000,10016,52640,,,3250,CA,,cost and build limit not recorded
+KCCP Pulse,981600,12,16,22000,9484,52640,845,,3250,CA,,"CA; build limit 12. Respecced 2026-10-08 toward speed: cruise 650 -> 845, dpm 10,016 -> 9,484 (hp, cost unchanged). Not stock"
 Callisto,,,18,21000,18883,79630,,,2000,CA,,cost and build limit not recorded
 Xeno Special,,10,8,1200,6156,11056,,,4000,FF,46,"stock dpm (Chris 2026-10-08); tp = upgrade points, shared by a class (first name), spent on one variant"
 Xeno AA,,10,8,1200,240,10530,,,4000,FF,46,"stock dpm (Chris 2026-10-08); tp = upgrade points, shared by a class (first name), spent on one variant"
@@ -22,3 +22,24 @@ Carilion Recon,,10,4,1800,1125,8340,,,5200,FF,51,"stock dpm (Chris 2026-10-08); 
 Carilion Spec,,10,5,1200,1203,10258,,,5200,FF,51,"stock dpm (Chris 2026-10-08); tp = upgrade points, shared by a class (first name), spent on one variant"
 Reliat AS,,10,4,2000,3008,11056,,,4000,FF,0,"stock dpm (Chris 2026-10-08); the Reliat class's TP went to Reliat T, so 0 here"
 FG300 Armor,,15,3,1500,1028,13167,,,4500,FF,0,"stock dpm (Chris 2026-10-08); the FG300 class's TP went to FG300, so 0 here"
+Taurus Off,137200,10,11,7000,6480,37842,650,,,DD,101,stock dpm (Chris 2026-10-08)
+Taurus Ass,147300,10,11,7500,6555,48036,650,,,DD,101,stock dpm (Chris 2026-10-08)
+Taurus Def,148100,10,8,7000,9000,63684,845,,,DD,101,"Taurus class TP (101) spent on this variant 2026-10-08: cruise 650 -> 845, dpm 4830 -> 9000, hp 48036 -> 63684, cost 134,500 -> 148,100. Not stock. Front row, energy weapons (ignore armour)"
+Tundra Sup,171100,10,9,10000,1462,43249,700,,,DD,10,stock dpm (Chris 2026-10-08); heal
+Tundra Air,185500,10,9,10000,2022,40030,700,,,DD,10,stock dpm (Chris 2026-10-08); carries 2 fighters
+Guardian Sup,209900,10,9,10000,3229,26932,650,,,DD,88,stock dpm (Chris 2026-10-08); heal
+Guardian DP,173500,10,14,9500,3054,25650,650,,,DD,88,stock dpm (Chris 2026-10-08); carries 2 corvettes
+Guardian Pulse,144300,10,9,8500,6210,25650,650,,,DD,88,stock dpm (Chris 2026-10-08)
+AC721 Missile,142800,15,8,1300,3300,34140,800,,,DD,0,stock dpm (Chris 2026-10-08)
+AC721 Air,130400,15,12,11500,1200,30730,800,,,DD,0,stock dpm (Chris 2026-10-08); carries 2 corvettes
+Ceres Air,147000,10,8,10000,1500,32310,850,,,DD,5,stock dpm (Chris 2026-10-08); carries 2 fighters
+Ceres Sup,147000,10,8,9000,1500,32310,850,,,DD,5,stock dpm (Chris 2026-10-08); heal
+Aladabra HC,163200,10,8,7000,5820,37090,650,,,DD,0,stock dpm (Chris 2026-10-08)
+Eris1 Cannon,111000,10,7,9000,4750,32067,900,,,DD,6,stock dpm (Chris 2026-10-08)
+Eris1 Hvy Can,120500,10,9,8500,5247,30540,850,,,DD,6,stock dpm (Chris 2026-10-08)
+Eris1 Armor,149000,10,7,9500,4500,35140,850,,,DD,6,stock dpm (Chris 2026-10-08)
+WingHussar As,119200,10,6,8500,4708,23845,700,,,DD,103,stock dpm (Chris 2026-10-08)
+WingHussar Int,119500,10,6,8500,4100,22710,850,,,DD,103,stock dpm (Chris 2026-10-08)
+WingHussar AA,135800,10,6,9000,3360,22710,850,,,DD,103,stock dpm (Chris 2026-10-08)
+Quaoar Rail,119800,10,6,8500,4800,30540,850,,,DD,0,stock dpm (Chris 2026-10-08)
+Quaoar Torp,129100,10,6,8500,5309,30450,850,,,DD,0,stock dpm (Chris 2026-10-08)

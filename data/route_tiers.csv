@@ -1,9 +1,9 @@
 tier,level,cp_cap,bonus_pct,step_cost,total_cost,source
-easy,1,20,3,1000,1000,"Chris 2026-10-08, in-game schedule; bonus 3%/level from the Orgin routes (+15% at level 5)"
+easy,1,20,3,1000,1000,"Chris 2026-10-08, in-game schedule, rechecked and confirmed (totals 1K, 4K, 12K, 32K, 82K); bonus 3%/level from the Orgin routes (+15% at level 5)"
 easy,2,40,6,3000,4000,"Chris 2026-10-08"
 easy,3,60,9,8000,12000,"Chris 2026-10-08"
-easy,4,80,12,20000,32000,"Chris 2026-10-08; Orgin/MuCentauri was earlier reported as 30,000 for 3->4 (sum to level 5 is 70,000 either way)"
-easy,5,100,15,50000,82000,"Chris 2026-10-08; Orgin/MuCentauri earlier reported as 40,000 for 4->5"
+easy,4,80,12,20000,32000,"Chris 2026-10-08, confirmed"
+easy,5,100,15,50000,82000,"Chris 2026-10-08, confirmed"
 mid,1,40,6,240000,240000,"Beta Lupi/TycoLab schedule, Chris 2026-10-08; step cost x3 per level"
 mid,2,80,12,720000,960000,"Beta Lupi/TycoLab"
 mid,3,120,18,2160000,3120000,"Beta Lupi/TycoLab"

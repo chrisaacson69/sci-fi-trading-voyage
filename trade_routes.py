@@ -116,9 +116,10 @@ FLEET_SPEEDS = ("mean", "slowest")
 fleet_speed = "mean"
 # Account-wide profit bonus, added to the route's. It CHANGES over time: 2026-10-06 readings imply
 # +0.36 to +0.46 (a Std Uniform1 sale made 3,628 on a listed margin of 2,268 on a +15% route, x1.600 =
-# 1 + 0.15 + 0.45); every 2026-10-07/08 reading on this account implies +0.30. Source in game unknown.
+# 1 + 0.15 + 0.45); 2026-10-07 and most of 2026-10-08 imply +0.30; three readings late on 2026-10-08, on two
+# routes with different goods, all imply +0.35. Source in game unknown.
 # oracle.csv carries the value at the time of each reading (global_pct).
-GLOBAL_BONUS = 0.30
+GLOBAL_BONUS = 0.35
 global_bonus = GLOBAL_BONUS
 
 
@@ -575,7 +576,7 @@ def route_card(a, b, quotes, coords, alarms, routes, ship_types, seconds_per_gm,
             print(f"      WARNING: over build limit: {w}")
         if fleet.mixed_classes():
             print(f"      WARNING: {fleet.mixed_classes()}")
-    unknown = [st.name for st in ship_types.values() if not st.warp]
+    unknown = [st.name for st in ship_types.values() if not st.travel_warp]
     if info and info.cp_cap and unknown:
         print(f"  not scored (no warp speed in ships.csv): {', '.join(unknown)}")
     print("  pirates are not modelled: every figure is a ceiling (see data/encounters.csv)")
@@ -820,7 +821,7 @@ def selftest() -> int:
     eq("--fleet-speed slowest: 2 FG300 + 1 ST59 fly at the ST59's warp", parse_ships("FG300x2,ST59", types).warp, 2250)
     fleet_speed = "mean"
     eq("fleet speed: 4 Conomara + 2 stock IO fly at floor(mean cruise 516.67) x 5 = warp 2,580",
-       parse_ships("Conomarax4,IO{cruise_min=650}x2", types).warp, 2580)
+       parse_ships("Conomara{cruise_min=450}x4,IO{cruise_min=650}x2", types).warp, 2580)
     eq("trade speed follows cruise_min, not warp: an IO at warp 3,737 but cruise 650 flies at 3,250",
        parse_ships("IO{cruise_min=650;warp=3737}", types).warp, 3250)
     fleet_speed = saved_fs
@@ -846,7 +847,7 @@ def selftest() -> int:
           routes[frozenset(("Ares", "Free Port"))].cp_cap == 200)
     sells, buys = book(quotes)
     rows = fill_cap("Free Port", "Ares", sells, buys, coords, 200, types, 2.0, 0.0)
-    eq("200 CP would fit 25 AC721, but the build limit is 15", {r[1].name: r[2] for r in rows}["AC721"], 15)
+    eq("200 CP would fit 25 AC721 Gen, but the build limit is 15", {r[1].name: r[2] for r in rows}["AC721 Gen"], 15)
     eq("routes.csv: Free Port/Ares (level 5) bonus is +30%", route_bonus(routes, "Ares", "Free Port"), 0.30)
     global_bonus = saved_gb
     t = make_trip("Orgin Station", "BountPlanet", sells, buys, coords, holds=[38000], bonus=0.15)
