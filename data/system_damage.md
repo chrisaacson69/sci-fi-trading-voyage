@@ -35,13 +35,26 @@ reported, so only 150 spilled into systems that survived.
 Bomber damage that fight: 108,522 total, **48.5% of it into system pools**, and 74% of it
 aimed at the five AC721. Four 1-CP craft at +90 evasion, against a fleet with no AA.
 
-## Open
+## Explosion, repair and permanent loss - SOLVED
 
-Explosion damage was 6,768 over 5 system kills = 1,354 each. Two formulas still fit:
-**18.3% of the destroyed system's HP**, or **4.40% of the ship's max HP**. They separate on
-the per-ship numbers, because group 1 is 7,650 and group 3 is 6,300: scaling with system HP
-gives four explosions near 1,400 and one near 1,153, while scaling with ship HP gives five
-identical 1,354s. Needs one more reading.
+From the AC721 blueprint text: **each disable deals 5% of the ship's max HP**, the system
+**repairs in 25 seconds**, and it **repairs twice - the third disable is permanent**. Chris
+confirms the explosions are all the same size, which rules out the system-HP formula.
+
+Both halves show up in the tables:
+
+| effect | id | param |
+|---|---|---|
+| `EFFECT_DO_DAMAGE_WHEN_REMOVE` | 12270 | **5** (= the 5% of max HP). A param-10 variant exists, so some hulls take 10%. |
+| `EFFECT_AUTO_SYSTEM_REPAIR` | 12250 | **4025** - the `25` is the 25-second repair; the leading `40` is not yet decoded. |
+
+Arithmetic check: 5% of the AC721 Amphibious' 30,730 max HP is 1,536 per explosion, so five
+should be 7,682 against the 6,768 observed - 88%. The likely cause is that two of those five
+ships died, and an explosion on a dying ship is capped by its remaining HP. Not confirmed.
+
+The repair rule matters tactically: a disabled primary weapon is a ship that stops shooting for
+25 seconds and comes back, twice. That is a concrete mechanism for the gap between predicted and
+realised DPM that this project has been covering with a hand-waved factor.
 
 Also unmodelled: the engine tracks HP only, so none of its DPM figures account for the system
 half of a bomber's output.
