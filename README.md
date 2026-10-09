@@ -272,8 +272,10 @@ plans above run 13 to 16 ships, and 22 has been seen in game.
 ## Craft names: what the account calls them vs the tables
 
 The client has no official English names for craft, so `ship_variants.csv` carries literal
-translations of the Chinese. Thirteen of the account's names needed identifying, and each was settled
-against the data rather than spelling (`ALIAS` in `tools/craft_csv.py` records the reason per row):
+translations of the Chinese. Fourteen of the account's names needed identifying, and each was settled
+against the data rather than spelling (`ALIAS` in `tools/craft_csv.py` records the reason per row).
+**All fourteen were then confirmed by Chris against the game's own craft list on 2026-10-09**, so the
+mapping is read, not inferred:
 
 | account name | id | how it was identified |
 |---|---|---|
@@ -288,14 +290,18 @@ against the data rather than spelling (`ALIAS` in `tools/craft_csv.py` records t
 | RedBeast | 20701 | cn RB7 = Red Beast 7 |
 | Cellular Defender | 20801 | cn 蜂巢 = hive/honeycomb, i.e. cells |
 | NebulaChaser Ball / Pulse | 20901 / 20902 | cn 星云A (ballistic) / 星云脉冲 (pulse) |
-| Void Elfin | 21001 | cn 虚灵 = void spirit |
+| Void Elfin | 21001 | cn 虚灵 = void spirit (Wraith) |
+| **Silent Assassin** | **20301** | not resolvable from the tables — Chris: "the RAY, 5350 HP", which picks 鳐 (5,350) over 鳐SP (7,700) |
 
-**`Silent Assassin` is unresolved and is NOT in `data/craft.csv`.** No craft in the tables carries that
-name under any of the four name fields, and guessing one would put a wrong ship id in a file another
-agent reads. The unclaimed corvettes it must be one of: 20301 Ray (鳐), 20302 Ray SP, 20702 RB7SP,
-21201 Wildfire (野火, 240 torpedo, crit 15%/+320%), 21701 Wildfire A, 21702 Wildfire B, 22101 Shadow of
-the Somme (索姆河之影, one 550-damage direct-fire shot — the closest on flavour), 22201/22202 Megrez A/B
-(天玑A/B), 22301/22302 Sky Lance A/B (天枪A/B).
+`Silent Assassin` was the one name no field could resolve, and it is **not** 22101 索姆河之影, which
+was the closest on flavour and would have been the wrong ship id — a good reason the tool reports
+unresolved names rather than guessing them. Chris's "5350 HP" is what separates 鳐 from 鳐SP.
+
+The craft not on the account, for when they turn up: 20302 Ray SP, 20702 RB7SP, 21201 Wildfire (野火),
+21701/21702 Wildfire A/B, 22101 Shadow of the Somme (索姆河之影), 22201/22202 Megrez A/B (天玑),
+22301/22302 Sky Lance A/B (天枪), and on the fighter side 10701 Sand Dragon, 11201 Follower,
+11301 Hale, 12001 Saber, 12401 Mistral, 12503 AT021 Attack, 12701 Reason A101,
+12801–12803 Thunderfire V022, 15701/15702 Merak Fighter A/B.
 
 **Open question: is the TP pool per variant or per family?** The account shows NebulaChaser Ball 0 and
 NebulaChaser Pulse 44 — same 209xx family, different numbers, which says per variant. But M011 reads
