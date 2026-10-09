@@ -157,15 +157,19 @@ Reading it against what the account has actually done:
 
 ## The mobile account's fighters
 
-**Scored per HANGAR SEAT, not per CP.** A fighter is 1 CP but takes 1–3 slots of a carrier's hangar
-(`seats` in `craft.csv`, and `EFFECT_CARRIER` packs group × 100 + count), so hangar size is the scarce
-resource. Per CP a 3-seat Bullfrog and a 1-seat SC002 look equally cheap, which is wrong — Vitas B010
-reads 521 per CP against 174 per seat.
+**Every craft takes exactly one slot** (Chris, 2026-10-09). The 1/2/3 on a craft is a **size class** —
+small / medium / large — and a bay accepts anything **at or below** its own size, so a size-1 SC002
+fits everywhere and a size-3 Stingray needs a large bay. It is a compatibility rule, not a cost.
 
-A fighter also only fits a hangar of its own **group** (2, 3 or 5 here), so these are not freely
-interchangeable: a carrier with group-2 bays cannot take a group-3 Strix.
+The bay declares both, packed `G CC` in `EFFECT_CARRIER`: leading digit the size it accepts, last two
+the **number of craft in the wing**. Wings run 1–8 (`data/carriers.csv`): CV3000 carries 18 fighters
+across four bays, Marshal Crux 10, ST59 two bays of 2. That wing size, not the craft, is what the
+scoring below gets wrong — see the triangle rule after the table.
 
-| fighter | id | seats | grp | HP | ev | stock | maxed | TP | gain | pool | TP split |
+The figures below are **per craft**, which is what the blueprint detail screen shows; the overall
+screens show wing totals.
+
+| fighter | id | size | grp | HP | ev | stock | maxed | TP | gain | pool | TP split |
 |---|---|---|---|---|---|---|---|---|---|---|---|
 | **Vitas B010** | 11601 | 3 | 2 | 5,860 | 0 | 114.8 | **173.7** | 76 | +51% | 15 | damage 58 / tank 42 |
 | **Strix** | 10901 | 2 | 3 | 4,920 | 0 | 87.7 | **130.7** | 82 | +49% | 14 | damage 61 / tank 39 |
@@ -181,6 +185,38 @@ interchangeable: a carrier with group-2 bays cannot take a group-3 Strix.
 | *Newland* | 11701 | 2 | 3 | 4,680 | 0 | 26.6 | 32.7 | 45 | +23% | 0 | tank 71 / damage 29 |
 | BR050 Incendiary | 12603 | 3 | 2 | 5,040 | 0 | 13.3 | 16.5 | 50 | +24% | 14 | tank 60 / damage 40 |
 | *Spore* | 11801 | 2 | 5 | 3,550 | 0 | 3.1 | 4.0 | 45 | +26% | 14 | tank 100 |
+
+> **The table above was computed per *seat* and is superseded.** Dividing by the size class was wrong
+> — it is a compatibility class, not a slot count. Per craft the order changes: the 3-size fighters
+> (Vitas B010, Stingray, BR050, Bullfrog) are worth 3× what is shown and the 1-size ones (Balance
+> Anderson, SC002) are unchanged, so **Vitas B010 521, Stingray 349, BR050 Basic 320, Bullfrog 282,
+> Strix 261, BR050 Defense 276** — Vitas B010 still leads, but Strix drops from 2nd to 5th and
+> Balance Anderson from 4th to last of the gun carriers.
+
+### The triangle rule: a wing is worth T(n), not n
+
+Craft die one at a time, so a wing's damage is not linear in its size. If anti-air kills them
+sequentially and each craft fires until it dies, craft *i* dies at time *i·T* and total damage is
+proportional to **T(n) = n(n+1)/2**:
+
+| wing | naive (n) | **T(n)** | per craft, T(n)/n |
+|---|---|---|---|
+| 1 | 1 | 1 | 1.00 |
+| 2 | 2 | **3** | 1.50 |
+| 3 | 3 | 6 | 2.00 |
+| **4** | 4 | **10** | 2.50 |
+| 5 | 5 | 15 | 3.00 |
+| 8 | 8 | 36 | 4.50 |
+
+Chris's two figures were *"5 fighters is 10× as strong as an individual while 2 fighters is only 3×"*.
+**T(2) = 3 matches exactly, and 10 is T(4), not T(5)** — so both numbers are on the triangular curve
+and the pairing of 10 with 5 looks like a slip. If a 5-wing really measures 10× rather than 15×, the
+rule is not triangular and the model needs a different attrition assumption; **that is the one thing a
+battle report would settle**, by showing how many of a wing died and how much each did.
+
+Consequence for scoring: **a craft in a 4-wing is worth 2.5× the same craft flying alone, and in a
+2-wing 1.5×** — so the carrier matters as much as the fighter. None of the per-craft figures above
+include this, and they should be multiplied by (n+1)/2 for the bay they will actually fly from.
 
 ### Four of these rows are meaningless, and it is the same failure as HaleBopp
 
