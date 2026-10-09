@@ -30,7 +30,7 @@ py -3 trade_routes.py --selftest               # values checked by hand
 - **`data/ships.csv`**: ship types from the game's ship list: `name,cost,limit,cp,cargo,dpm,hp,cruise_min,cruise_max,warp,type,tp,notes`. `type` is the hull class (FF, DD small; CA, BC, CV cruiser and capital): a fleet mixing the two gets a warning (see Pirates). `tp` is upgrade points, shared within a class (the first word of the name) and spent on one variant; `dpm` is stock. `limit` is the build limit, a total across all your fleets, and `dpm` is damage per minute. In every row, `warp` is exactly 5 × `cruise_min`. `--ships` accepts these names, e.g. `ST59x3,FG300x2`, and then knows the fleet's CP, DPM, HP, cost and speed, and warns if you're over a build limit.
 - **`data/oracle.csv`**: the game's own $/hr figure for a fleet on a route (`date,route_a,route_b,fleet,game_per_hr,bonus_pct,global_pct,notes`, fleet written like `--ships`; `bonus_pct` is the route's bonus and `global_pct` the global bonus *at the time*, since both change). `--oracle` compares each row against separate vs pooled holds, and mean vs slowest-ship fleet speed, using that day's prices (or the latest before it). Rows from another account are skipped unless you pass its `--ships-file`. `--selftest` checks the rows whose notes say CLEAN.
 - **`data/timings.csv`**: stopwatch leg times (`date,route_a,route_b,fleet,leg_seconds,notes`, one-way). `--timings` compares them with both speed models, and `--selftest` requires the default model within 2% of each.
-- **`data/craft.csv`**: the mobile account's **fighters and corvettes** — `name,ship_id,kind,cp,seats,group,hp,armor,ev,flight_speed,dpm_vs_*,role,limit,tp,tp_max,class,notes`. `kind` is FT (fighter) or CO (corvette). These are **carried craft, not fleet hulls**: they have no cargo and `flight_speed` is a flight speed, not a warp stat, which is why the columns deliberately differ from `ships.csv` and why `trade_routes.py` excludes FT and CO from route fleets (`NOT_FLEET_TYPES`). `seats` is the hangar size a fighter consumes (`EFFECT_CARRIER` = group × 100 + count); a corvette takes one boat seat (`EFFECT_CARRIER_BOAT`) and is written as 1. `group` is the hangar group that accepts it — fighters 2–5, corvettes 1. `class` is the **family**, read off the id (a craft id is family(3) + variant(2), so 126xx is BR050, 211xx M011, 209xx Nebula). `tp` is TP available as Chris read it in game; `tp_max` is the most the variant's systems can absorb. Rebuild with `python tools/craft_csv.py --names <list> --out data/craft.csv` in `lagrange-combat`.
+- **`data/craft.csv`**: the mobile account's **fighters and corvettes** — `name,ship_id,kind,cp,seats,group,hp,armor,ev,flight_speed,dpm_vs_*,role,limit,tp,tp_max,class,notes`. `kind` is FT (fighter) or CO (corvette). These are **carried craft, not fleet hulls**: they have no cargo and `flight_speed` is a flight speed, not a warp stat, which is why the columns deliberately differ from `ships.csv` and why `trade_routes.py` excludes FT and CO from route fleets (`NOT_FLEET_TYPES`). `seats` is the hangar size a fighter consumes (`EFFECT_CARRIER` = group × 100 + count); a corvette takes one boat seat (`EFFECT_CARRIER_BOAT`) and is written as 1. `group` is the hangar group that accepts it — fighters 2–5, corvettes 1. `class` is the **family**, read off the id (a craft id is family(3) + variant(2), so 126xx is BR050, 211xx M011, 209xx Nebula). `tp` is TP available to that variant as Chris read it in game, `tp_pool` is the family's shared pool (the max over its variants — see below), and `tp_max` is the most the variant's systems can absorb. Rebuild with `python tools/craft_csv.py --names <list> --out data/craft.csv` in `lagrange-combat`.
 - **`data/upgrades.md`**: what tech points buy. Warp is a **+30% cap** and responds only to
   `EFFECT_SPEED`, not `EFFECT_CURVATURE_SPEED`, which shares the same propulsion slots; 40 hulls
   (Carilion, Reliat, FG300, Trader, Mare\*) are hard-capped at +15%, while every 16-20 CP cruiser
@@ -303,11 +303,29 @@ The craft not on the account, for when they turn up: 20302 Ray SP, 20702 RB7SP, 
 11301 Hale, 12001 Saber, 12401 Mistral, 12503 AT021 Attack, 12701 Reason A101,
 12801–12803 Thunderfire V022, 15701/15702 Merak Fighter A/B.
 
-**Open question: is the TP pool per variant or per family?** The account shows NebulaChaser Ball 0 and
-NebulaChaser Pulse 44 — same 209xx family, different numbers, which says per variant. But M011 reads
-6/6/6 and Vitas A/B both read 15, which fits either. BR050 came as a single number (14), so all three
-of its rows carry it. `ships.csv` says TP is "shared within a class and spent on one variant", and the
-Nebula pair contradicts that; worth one look at the game's research screen.
+## How to read `tp` and `tp_pool`
+
+Settled by Chris, 2026-10-09. **The pool is per family and `ships.csv` was right all along** — the
+number read in game is the TP available to *that variant*, and a shared pool can be **directed** at
+one of them:
+
+- *"I put all 44 in the Pulse leaving 0 for the Ballistic"* → NebulaChaser reads **0 / 44** on a single
+  pool of 44, directed entirely at the Pulse. The Ballistic's 0 means *nothing is left for it*, not
+  that anything has been consumed.
+- *"the variants that all share the same TP … indicates I have not assigned any TP"* → M011 reads
+  **6 / 6 / 6** on one undirected pool of 6.
+
+So a family's pool is the **max** over its variants under either case — `max(0, 44) = 44`,
+`max(6, 6, 6) = 6` — and never the sum, which would have read M011 as 18 and inflated the account's
+whole TP budget by about 3×. `tp_pool` carries that figure on every row of the family; `class` is the
+family, the first three digits of the ship id.
+
+The pair to watch for is a *directed* one: a row with `tp` 0 but `tp_pool` 44 is not an un-upgraded
+craft, it is the sibling of one that holds the family's whole pool.
+
+Against capacity (`tp_max`, the most a variant's systems can absorb) the account's craft are early:
+NebulaChaser 39%, CVT800 33%, RedBeast 33%, Cellular Defender 32%, Void Elfin 29%, BR050 11%,
+M011 5%. Nine of the thirty rows have no pool at all.
 
 ## Not modelled yet
 
