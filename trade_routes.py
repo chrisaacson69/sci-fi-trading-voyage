@@ -85,6 +85,16 @@ DEFAULT_DATA = None  # resolved to the latest snapshot at call time
 DEFAULT_PORTS = Path(__file__).resolve().parent / "data" / "ports.csv"
 DEFAULT_ROUTES = Path(__file__).resolve().parent / "data" / "routes.csv"
 DEFAULT_SHIPS = Path(__file__).resolve().parent / "data" / "ships.csv"
+DEFAULT_TIERS = Path(__file__).resolve().parent / "data" / "route_tiers.csv"
+
+# Hull types that are NOT ships and cannot be sent on a route on their own. Both are CARRIED craft, and
+# ships.csv lists them for the combat model: FT aircraft (AT021, Stingray, SC002) at 1 CP, 0 cargo and
+# cruise 3,000, and CO corvettes (II003, M011, T800, S-Levi 9 ...) at 2 CP, 0 cargo and cruise 2,400-2,500
+# - two to six times any real hull, because a craft's speed is its flight speed, not a warp stat.
+# Left in the pool they are the perfect speed ballast, and the planner "filled" a 200 CP cap with 105
+# fighters at 0.70 s/Gm, which is not a fleet. (The 16 corvettes were also labelled FF in
+# data/ships/count-demonet.csv; relabelled CO against Tb_cfg_ship.SHIP_TYPE.)
+NOT_FLEET_TYPES = {"FT", "CO"}
 DEFAULT_ORACLE = Path(__file__).resolve().parent / "data" / "oracle.csv"
 DEFAULT_TIMINGS = Path(__file__).resolve().parent / "data" / "timings.csv"
 ALARMS = ["Low", "Medium", "High", "Extreme"]  # the game's port alarm levels, in order
@@ -200,7 +210,7 @@ class RoundTrip:
 def load_ports(path: Path = DEFAULT_PORTS):
     """Return ({planet: (x, y)}, {planet: alarm}) from the ports CSV."""
     coords, alarms = {}, {}
-    with open(path, newline="") as f:
+    with open(path, newline="", encoding="utf-8-sig") as f:
         for r in csv.DictReader(f):
             p = r["planet"].strip()
             if p in coords:
@@ -218,7 +228,7 @@ def load_market(path: Path | None = None, ports: Path = DEFAULT_PORTS):
     path = path or market_snapshot()
     coords, alarms = load_ports(ports)
     quotes = []
-    with open(path, newline="") as f:
+    with open(path, newline="", encoding="utf-8-sig") as f:
         for r in csv.DictReader(f):
             p = r["planet"].strip()
             if p not in coords:
@@ -284,7 +294,7 @@ def load_ships(path: Path = DEFAULT_SHIPS) -> dict[str, ShipType]:
     if not path.exists():
         return {}
     num = lambda v: int(v.replace(",", "")) if v and v.strip() else None
-    with open(path, newline="") as f:
+    with open(path, newline="", encoding="utf-8-sig") as f:
         return {r["name"].strip(): ShipType(r["name"].strip(), num(r["cargo"]), num(r["cp"]),
                                             num(r.get("cost")), num(r.get("limit")), num(r.get("dpm")),
                                             num(r.get("hp")), num(r.get("warp")), num(r.get("cruise_min")),
@@ -402,7 +412,7 @@ def load_routes(path: Path = DEFAULT_ROUTES) -> dict[frozenset, RouteInfo]:
     if not path.exists():
         return {}
     out = {}
-    with open(path, newline="") as f:
+    with open(path, newline="", encoding="utf-8-sig") as f:
         for r in csv.DictReader(f):
             key = frozenset((r["route_a"].strip(), r["route_b"].strip()))
             out[key] = RouteInfo(int(r["level"]) if r["level"].strip() else None,
@@ -674,7 +684,7 @@ def oracle_bonus(row, routes) -> float:
 def load_timings(path: Path = DEFAULT_TIMINGS) -> list[dict]:
     if not path.exists():
         return []
-    with open(path, newline="") as f:
+    with open(path, newline="", encoding="utf-8-sig") as f:
         return list(csv.DictReader(f))
 
 
@@ -704,7 +714,7 @@ def oracle_report(quotes, coords, ship_types, routes=None, path: Path = DEFAULT_
     if not path.exists():
         print(f"no {path}")
         return
-    with open(path, newline="") as f:
+    with open(path, newline="", encoding="utf-8-sig") as f:
         rows = list(csv.DictReader(f))
     for r in rows:
         snap = snapshot_for(r["date"])
@@ -881,6 +891,272 @@ def selftest() -> int:
     return 0 if all(checks) else 1
 
 
+# ---------------------------------------------------------------- route upgrade ROI
+
+@dataclass
+class Tier:
+    tier: str
+    level: int
+    cp_cap: int
+    bonus_pct: float
+    step_cost: int
+
+
+def load_tiers(path: Path = DEFAULT_TIERS) -> dict[str, list[Tier]]:
+    """{tier: [Tier per level, 1..5]} from data/route_tiers.csv. The ladder as recorded, not a model."""
+    out: dict[str, list[Tier]] = {}
+    if not path.exists():
+        return out
+    with open(path, newline="", encoding="utf-8-sig") as f:
+        for r in csv.DictReader(f):
+            num = lambda k: int(r[k].replace(",", "")) if r.get(k, "").strip() else 0
+            out.setdefault(r["tier"].strip(), []).append(
+                Tier(r["tier"].strip(), num("level"), num("cp_cap"),
+                     float(r["bonus_pct"]) if r.get("bonus_pct", "").strip() else 0.0, num("step_cost")))
+    for v in out.values():
+        v.sort(key=lambda t: t.level)
+    return out
+
+
+def infer_tier(info: "RouteInfo", tiers: dict[str, list[Tier]]) -> str | None:
+    """Which tier a recorded route belongs to, from its (level, cp_cap) pair.
+
+    Not guessed: the three ladders give a different cap at every level except 200 CP, which is mid at
+    level 5 and hard at level 4 - and those differ in level, so (level, cap) is unique across all
+    fifteen rows. A route whose level or cap is not recorded has no tier and is reported, never assumed.
+    """
+    if not info or not info.level or not info.cp_cap:
+        return None
+    for name, rows in tiers.items():
+        for t in rows:
+            if t.level == info.level and t.cp_cap == info.cp_cap:
+                return name
+    return None
+
+
+def _mix_rate(a, b, sells, buys, coords, mix, overhead, bonus, battle_min):
+    """(rate, cargo, s/Gm, trip seconds) for a fleet given as [(ShipType, n)].
+
+    Fleet speed is floor(mean cruise) x 5, which is MEASURED, not assumed - data/timings.csv has mixed
+    fleets (4 Conamara + 2 IO, 2 Conamara, 15 FG300) and --selftest holds the default model within 2%
+    on every one. That rule is what makes a cheap fast frigate worth more than its hold: it pulls the
+    MEAN up, so 3 CP of FG300 buys trips for the whole fleet.
+    """
+    n_tot = sum(n for _, n in mix)
+    if not n_tot:
+        return None
+    cru = math.floor(sum((st.cruise or (st.warp or 0) / 5) * n for st, n in mix) / n_tot)
+    if cru <= 0:
+        return None
+    spg = seconds_per_gm_for(5 * cru)
+    holds = ([c for st, n in mix for c in [st.cargo] * n] if separate_holds
+             else [sum(st.cargo * n for st, n in mix)])
+    t = make_trip(a, b, sells, buys, coords, seconds_per_gm=spg, overhead_s=overhead,
+                  holds=holds, bonus=bonus)
+    rate = t.profit_per_hour
+    if battle_min and t.seconds:
+        rate *= t.seconds / (t.seconds + battle_min * 60)
+    return rate, sum(st.cargo * n for st, n in mix), spg, t
+
+
+def _best_mix(a, b, sells, buys, coords, cap, ship_types, left, overhead, bonus,
+              battle_min: float = 0.0, core_n: int = 8, ballast_n: int = 8):
+    """Best CORE + BALLAST fleet for a CP cap: the hull that carries, plus cheap fast hulls to lift the
+    fleet's MEAN cruise. Returns (rate, [(ShipType, n)], cargo, s/Gm, trip).
+
+    One hull type alone is never the answer on a long route. 6 ST59 fill Ares/Free Port's 200 CP cap at
+    8.07M/hr and 4.44 s/Gm; 6 ST59 + 10 FG300 Recon is 198 CP, adds 2.7% cargo, and drops the fleet to
+    2.44 s/Gm - 15.09M/hr, +87% - because speed is the mean and the ST59 is the slowest thing in the game
+    that carries. Searching every pair is ~400k trips per route, so the field is pruned to the top
+    `core_n` by cargo per CP and the top `ballast_n` by cruise per CP, which contains the optimum for
+    the reason above: the core maximises what is carried and the ballast maximises what lifts the mean.
+    """
+    usable = []
+    for st in ship_types.values():
+        if not st.travel_warp or not st.cp or st.type.upper() in NOT_FLEET_TYPES:
+            continue
+        avail = left.get(st.name, st.limit)
+        n = cap // st.cp
+        if avail is not None:
+            n = min(n, avail)
+        if n > 0:
+            usable.append((st, n))
+    if not usable:
+        return None
+    core = [st for st, _ in sorted(usable, key=lambda x: -(x[0].cargo or 0) / x[0].cp)[:core_n]]
+    ballast = [st for st, _ in sorted(usable, key=lambda x: -(x[0].cruise or (x[0].warp or 0) / 5) / x[0].cp)[:ballast_n]]
+    avail = {st.name: n for st, n in usable}
+    best = None
+    for c in core:
+        for nc in range(1, avail[c.name] + 1):
+            if nc * c.cp > cap:
+                break
+            rem = cap - nc * c.cp
+            cands = [[(c, nc)]]
+            for bl in ballast:
+                if bl.name == c.name or not bl.cp:
+                    continue
+                nb = min(rem // bl.cp, avail[bl.name])
+                if nb > 0:
+                    cands.append([(c, nc), (bl, nb)])
+            for mix in cands:
+                r = _mix_rate(a, b, sells, buys, coords, mix, overhead, bonus, battle_min)
+                if r and (best is None or r[0] > best[0]):
+                    best = (r[0], mix, r[1], r[2], r[3])
+    return best
+
+
+def _best_fill(a, b, sells, buys, coords, cap, ship_types, left, sec_per_gm, overhead, bonus,
+               battle_min: float = 0.0):
+    """Best single-type fleet for a CP cap, honouring what is LEFT of each build limit.
+
+    Build limits are account-wide, not per fleet (ships.csv), so a hull spent on one route is not
+    available on the next. fill_cap on its own re-spends the same ten Quaoars on every route.
+
+    battle_min discounts the rate by cycle / (cycle + battle), which is the measured cost of battle
+    time (data/upgrades.md: about 2% of the hourly rate per minute on a 48.5 min round trip). It is a
+    FLAT assumption, not a pirate model - but leaving it at zero is the assumption that fights are
+    free, and that is what makes a 7 Gm round trip look like the best route in the game.
+    """
+    best = None
+    for st in ship_types.values():
+        if not st.travel_warp or not st.cp or not st.cargo:
+            continue
+        n = cap // st.cp
+        avail = left.get(st.name, st.limit)
+        if avail is not None:
+            n = min(n, avail)
+        if n <= 0:
+            continue
+        t = make_trip(a, b, sells, buys, coords, seconds_per_gm=st.seconds_per_gm, overhead_s=overhead,
+                      holds=[st.cargo] * n if separate_holds else [st.cargo * n], bonus=bonus)
+        rate = t.profit_per_hour
+        if battle_min and t.seconds:
+            rate *= t.seconds / (t.seconds + battle_min * 60)
+        if best is None or rate > best[0]:
+            best = (rate, st, n, t)
+    return best
+
+
+def _mix_txt(mix) -> str:
+    return " + ".join(f"{n}x {st.name}" for st, n in mix)
+
+
+def roi_report(budget: int, quotes, coords, alarms, routes, ship_types, tiers,
+               sec_per_gm, overhead, fleets: int | None = None, fresh: bool = False,
+               max_alarm: str | None = None, battle_min: float = 0.0, exclude=()) -> int:
+    """Spend a credit budget on route upgrades, best marginal credits/hr per credit first.
+
+    Greedy is exact here, not an approximation: within every tier the step cost grows faster than the
+    value it unlocks (easy 1K -> 50K for 20 CP a step, mid x3 for 40 CP, hard x2 for 50 CP), so each
+    route's marginal ratio is strictly decreasing and the precedence - you cannot buy level 4 before
+    level 3 - never binds. The usual knapsack trap, a cheap high-ratio step hidden behind an expensive
+    low-ratio one, cannot occur on these ladders.
+
+    Each step is re-priced against the build limits still LEFT after the earlier ones, so a plan never
+    spends the same hull on two routes.
+    """
+    sells, buys = book(quotes)
+    cand, skipped, dropped = [], [], []
+    cap_i = ALARMS.index(max_alarm) if max_alarm else None
+    for key, info in sorted(routes.items(), key=lambda kv: sorted(kv[0])):
+        a, b = sorted(key)
+        if any(x.lower() in (a.lower(), b.lower()) or x.lower() == f"{a} <-> {b}".lower()
+               for x in exclude):
+            dropped.append((a, b, "excluded"))
+            continue
+        if cap_i is not None:
+            al = [alarms.get(a, ""), alarms.get(b, "")]
+            if any(x not in ALARMS or ALARMS.index(x) > cap_i for x in al):
+                dropped.append((a, b, f"alarm {al[0]}/{al[1]}"))
+                continue
+        tier = infer_tier(info, tiers)
+        if not tier:
+            skipped.append((a, b, info))
+            continue
+        cand.append([a, b, tier, 0 if fresh else (info.level or 0)])
+
+    left: dict[str, int | None] = {st.name: st.limit for st in ship_types.values()}
+    assigned: dict[tuple, tuple] = {}
+    spent, bought = 0, []
+
+    def price(route):
+        a, b, tier, lvl = route
+        nxt = next((t for t in tiers[tier] if t.level == lvl + 1), None)
+        if not nxt or not nxt.step_cost:
+            return None
+        cur = assigned.get((a, b))
+        freed = dict(left)                 # free this route's own ships before re-filling it
+        if cur:
+            for st, n in cur[1]:
+                if freed.get(st.name) is not None:
+                    freed[st.name] += n
+        fill = _best_mix(a, b, sells, buys, coords, nxt.cp_cap, ship_types, freed,
+                         overhead, nxt.bonus_pct / 100, battle_min)
+        if not fill:
+            return None
+        return fill[0] - (cur[0] if cur else 0.0), nxt.step_cost, fill, nxt
+
+    while True:
+        opts = []
+        for route in cand:
+            if fleets is not None and (route[0], route[1]) not in assigned and len(assigned) >= fleets:
+                continue
+            p = price(route)
+            if p and p[1] <= budget - spent and p[0] > 0:
+                opts.append((p[0] / p[1], route, p))
+        if not opts:
+            break
+        _, route, (drate, cost, fill, nxt) = max(opts, key=lambda o: o[0])
+        a, b, tier, lvl = route
+        cur = assigned.get((a, b))
+        if cur:
+            for st, n in cur[1]:
+                if left.get(st.name) is not None:
+                    left[st.name] += n
+        for st, n in fill[1]:
+            if left.get(st.name) is not None:
+                left[st.name] -= n
+        assigned[(a, b)] = fill
+        route[3] = lvl + 1
+        spent += cost
+        bought.append((a, b, tier, lvl + 1, cost, drate, fill, nxt))
+
+    total = sum(v[0] for v in assigned.values())
+    print(f"budget {budget:,}  --  spending {spent:,} ({spent / budget:.0%} of it), {budget - spent:,} left"
+          + (f", at most {fleets} fleets" if fleets else "")
+          + (f", {battle_min:g} min per fight charged" if battle_min else ", fights assumed FREE"))
+    print(f"\n{'buy':>3} {'route':32} {'tier':5} {'->L':>3} {'cost':>13} {'+credits/hr':>13} {'per 1M':>9}  fleet")
+    for i, (a, b, tier, lvl, cost, drate, fill, nxt) in enumerate(bought, 1):
+        print(f"{i:3} {a + ' <-> ' + b:32} {tier:5} {lvl:3} {cost:13,} {drate:13,.0f} "
+              f"{drate / (cost / 1e6):9,.0f}  {_mix_txt(fill[1])} "
+              f"({sum(st.cp * n for st, n in fill[1])} CP, +{nxt.bonus_pct:.0f}%)")
+    print(f"{'':3} {'TOTAL':32} {'':5} {'':3} {spent:13,} {total:13,.0f}")
+    if assigned:
+        print("\nthe plan, by route:")
+        for (a, b), (pph, mix, cargo, spg, t) in sorted(assigned.items(), key=lambda kv: -kv[1][0]):
+            lvl = next(r[3] for r in cand if (r[0], r[1]) == (a, b))
+            cp = sum(st.cp * n for st, n in mix)
+            print(f"   {a + ' <-> ' + b:30} L{lvl} {cp:4} CP {cargo:>9,} cargo {spg:5.2f}s/Gm "
+                  f"{t.seconds / 60:6.1f}m -> {pph:12,.0f}/hr   {_mix_txt(mix)}")
+        byclass: dict[str, list] = {}
+        for (pph, mix, cargo, spg, t) in assigned.values():
+            for st, n in mix:
+                byclass.setdefault(st.type or "??", [0, 0])[0] += st.cp * n
+                byclass.setdefault(st.type or "??", [0, 0])[1] += n
+        print("\n   CP by hull class: " + ", ".join(
+            f"{k} {v[0]} CP ({v[1]} ships)" for k, v in sorted(byclass.items(), key=lambda kv: -kv[1][0])))
+    if skipped:
+        print("\nno tier recorded, so not planned (record level and cp_cap in routes.csv):")
+        for a, b, info in skipped:
+            print(f"   {a} <-> {b}: level {info.level}, cap {info.cp_cap}")
+    if dropped:
+        print("\nleft out: " + ", ".join(f"{a} <-> {b} ({why})" for a, b, why in dropped))
+    print("\npirates are not modelled: every figure is a ceiling, and battle time costs about 2% of the"
+          "\nhourly rate per minute (data/upgrades.md), so a route that needs a slow fight is worth less.")
+    return 0
+
+
 def main(argv=None) -> int:
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("--data", type=Path, default=None, help="a price CSV (default: latest in data/market/)")
@@ -897,6 +1173,17 @@ def main(argv=None) -> int:
     ap.add_argument("--route", nargs=2, metavar=("A", "B"), help="print a score card for one route")
     ap.add_argument("--known-routes", action="store_true",
                     help="score every route in routes.csv, filling its CP cap with the best ship type")
+    ap.add_argument("--roi", type=lambda v: int(v.replace(",", "").replace("_", "")), metavar="BUDGET",
+                    help="spend this many credits on route upgrades, best marginal credits/hr first")
+    ap.add_argument("--fleets", type=int, default=None,
+                    help="with --roi: at most this many routes running at once")
+    ap.add_argument("--fresh", action="store_true",
+                    help="with --roi: plan from scratch, as on an account with no routes opened")
+    ap.add_argument("--battle-min", type=float, default=0.0, metavar="M",
+                    help="with --roi: charge M minutes of fighting per round trip (default 0 = free)")
+    ap.add_argument("--exclude", action="append", default=[], metavar="STOP",
+                    help="with --roi: skip any route touching this stop (repeatable)")
+    ap.add_argument("--tiers-file", type=Path, default=DEFAULT_TIERS)
     ap.add_argument("--routes-file", type=Path, default=DEFAULT_ROUTES)
     ap.add_argument("--ships-file", type=Path, default=DEFAULT_SHIPS)
     ap.add_argument("--sec-per-gm", type=float, default=None,
@@ -983,6 +1270,10 @@ def main(argv=None) -> int:
         route_card(*args.route, quotes, coords, alarms, routes, ship_types, args.sec_per_gm,
                    args.overhead, fleet)
         return 0
+    if args.roi is not None:
+        return roi_report(args.roi, quotes, coords, alarms, routes, ship_types,
+                          load_tiers(args.tiers_file), args.sec_per_gm, args.overhead,
+                          args.fleets, args.fresh, args.max_alarm, args.battle_min, args.exclude)
     if args.known_routes:
         sells, buys = book(quotes)
         rows = []

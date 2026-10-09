@@ -95,22 +95,22 @@ Reliat Stealth,,10,4,1500,,10530,800,,4000,FF,Reliat,127,1,id 31603; owned bluep
 FG300 Armored,,15,3,1500,,12540,900,,4500,FF,FG300,148,0,id 30102; owned blueprint; base hp; 0 extra slots unlocked; dpm/cost/upgraded hp from game UI
 FG300 Multipurpose,,15,3,2000,,10530,1000,,5000,FF,FG300,148,1,id 30101; owned blueprint; base hp; 0 extra slots unlocked; dpm/cost/upgraded hp from game UI
 FG300 Recon,,15,3,2200,,12540,1040,,5200,FF,FG300,148,1,id 30103; owned blueprint; base hp; 0 extra slots unlocked; dpm/cost/upgraded hp from game UI
-II003,,15,2,0,,4900,2500,,12500,FF,II003,77,0,id 20401; owned blueprint; base hp; 0 extra slots unlocked; dpm/cost/upgraded hp from game UI
-M011导弹,,15,2,0,,7500,2500,,12500,FF,M011导弹,29,0,id 21101; owned blueprint; base hp; 0 extra slots unlocked; dpm/cost/upgraded hp from game UI
-M011重炮,,15,2,0,,7500,2500,,12500,FF,M011重炮,29,0,id 21102; owned blueprint; base hp; 0 extra slots unlocked; dpm/cost/upgraded hp from game UI
-M011高速,,15,2,0,,7500,2500,,12500,FF,M011高速,29,0,id 21103; owned blueprint; base hp; 0 extra slots unlocked; dpm/cost/upgraded hp from game UI
-RB7,,10,2,0,,5200,2500,,12500,FF,RB7,92,0,id 20701; owned blueprint; base hp; 0 extra slots unlocked; dpm/cost/upgraded hp from game UI
-S-列维9,,10,2,0,,6000,2400,,12000,FF,S-列维9,106,0,id 21401; owned blueprint; base hp; 0 extra slots unlocked; dpm/cost/upgraded hp from game UI
-T800,,15,2,0,,7500,2500,,12500,FF,T800,104,0,id 21301; owned blueprint; base hp; 0 extra slots unlocked; dpm/cost/upgraded hp from game UI
-坦普尔,,10,2,0,,7100,2400,,12000,FF,坦普尔,0,0,id 21601; owned blueprint; base hp; 0 extra slots unlocked; dpm/cost/upgraded hp from game UI
-坦普尔,,10,2,0,,7100,2400,,12000,FF,坦普尔,0,0,id 21602; owned blueprint; base hp; 0 extra slots unlocked; dpm/cost/upgraded hp from game UI
-星云A,,10,2,0,,6300,2500,,12500,FF,星云A,99,0,id 20901; owned blueprint; base hp; 0 extra slots unlocked; dpm/cost/upgraded hp from game UI
-星云脉冲,,10,2,0,,5400,2500,,12500,FF,星云脉冲,99,0,id 20902; owned blueprint; base hp; 0 extra slots unlocked; dpm/cost/upgraded hp from game UI
-海尔波普,,10,2,0,,7000,2400,,12000,FF,海尔波普,0,0,id 21501; owned blueprint; base hp; 0 extra slots unlocked; dpm/cost/upgraded hp from game UI
-海尔波普,,10,2,0,,7000,2400,,12000,FF,海尔波普,0,0,id 21502; owned blueprint; base hp; 0 extra slots unlocked; dpm/cost/upgraded hp from game UI
-虚灵,,10,2,0,,5200,2500,,12500,FF,虚灵,88,0,id 21001; owned blueprint; base hp; 0 extra slots unlocked; dpm/cost/upgraded hp from game UI
-蜂巢,,10,2,0,,6650,2500,,12500,FF,蜂巢,97,0,id 20801; owned blueprint; base hp; 0 extra slots unlocked; dpm/cost/upgraded hp from game UI
-鳐,,10,2,0,,5350,2500,,12500,FF,鳐,20,0,id 20301; owned blueprint; base hp; 0 extra slots unlocked; dpm/cost/upgraded hp from game UI
+II003,,15,2,0,,4900,2500,,12500,CO,II003,77,0,id 20401; owned blueprint; base hp; 0 extra slots unlocked; dpm/cost/upgraded hp from game UI
+M011导弹,,15,2,0,,7500,2500,,12500,CO,M011导弹,29,0,id 21101; owned blueprint; base hp; 0 extra slots unlocked; dpm/cost/upgraded hp from game UI
+M011重炮,,15,2,0,,7500,2500,,12500,CO,M011重炮,29,0,id 21102; owned blueprint; base hp; 0 extra slots unlocked; dpm/cost/upgraded hp from game UI
+M011高速,,15,2,0,,7500,2500,,12500,CO,M011高速,29,0,id 21103; owned blueprint; base hp; 0 extra slots unlocked; dpm/cost/upgraded hp from game UI
+RB7,,10,2,0,,5200,2500,,12500,CO,RB7,92,0,id 20701; owned blueprint; base hp; 0 extra slots unlocked; dpm/cost/upgraded hp from game UI
+S-列维9,,10,2,0,,6000,2400,,12000,CO,S-列维9,106,0,id 21401; owned blueprint; base hp; 0 extra slots unlocked; dpm/cost/upgraded hp from game UI
+T800,,15,2,0,,7500,2500,,12500,CO,T800,104,0,id 21301; owned blueprint; base hp; 0 extra slots unlocked; dpm/cost/upgraded hp from game UI
+坦普尔,,10,2,0,,7100,2400,,12000,CO,坦普尔,0,0,id 21601; owned blueprint; base hp; 0 extra slots unlocked; dpm/cost/upgraded hp from game UI
+坦普尔,,10,2,0,,7100,2400,,12000,CO,坦普尔,0,0,id 21602; owned blueprint; base hp; 0 extra slots unlocked; dpm/cost/upgraded hp from game UI
+星云A,,10,2,0,,6300,2500,,12500,CO,星云A,99,0,id 20901; owned blueprint; base hp; 0 extra slots unlocked; dpm/cost/upgraded hp from game UI
+星云脉冲,,10,2,0,,5400,2500,,12500,CO,星云脉冲,99,0,id 20902; owned blueprint; base hp; 0 extra slots unlocked; dpm/cost/upgraded hp from game UI
+海尔波普,,10,2,0,,7000,2400,,12000,CO,海尔波普,0,0,id 21501; owned blueprint; base hp; 0 extra slots unlocked; dpm/cost/upgraded hp from game UI
+海尔波普,,10,2,0,,7000,2400,,12000,CO,海尔波普,0,0,id 21502; owned blueprint; base hp; 0 extra slots unlocked; dpm/cost/upgraded hp from game UI
+虚灵,,10,2,0,,5200,2500,,12500,CO,虚灵,88,0,id 21001; owned blueprint; base hp; 0 extra slots unlocked; dpm/cost/upgraded hp from game UI
+蜂巢,,10,2,0,,6650,2500,,12500,CO,蜂巢,97,0,id 20801; owned blueprint; base hp; 0 extra slots unlocked; dpm/cost/upgraded hp from game UI
+鳐,,10,2,0,,5350,2500,,12500,CO,鳐,20,0,id 20301; owned blueprint; base hp; 0 extra slots unlocked; dpm/cost/upgraded hp from game UI
 AT021-攻击,,15,1,0,,4920,3000,,15000,FT,AT021-攻击,0,0,id 12503; owned blueprint; base hp; 0 extra slots unlocked; dpm/cost/upgraded hp from game UI
 AT021-脉冲,,15,1,0,,4920,3000,,15000,FT,AT021-脉冲,0,0,id 12501; owned blueprint; base hp; 0 extra slots unlocked; dpm/cost/upgraded hp from game UI
 SC002,,15,1,0,,2850,2800,,14000,FT,SC002,91,0,id 10201; owned blueprint; base hp; 0 extra slots unlocked; dpm/cost/upgraded hp from game UI

@@ -214,6 +214,60 @@ The calculator shows both ports' alarms, and `--max-alarm` / `--by-alarm` filter
 **both** ends are at or below a level. Turning alarm levels into attack rate, pirate CP, battle time
 and losses needs more rows in `encounters.csv`.
 
+## Spending a budget: `--roi`
+
+```
+py -3 trade_routes.py --roi 87,000,000 --fresh --battle-min 3 --max-alarm High \
+                      --ships-file data/ships/count-demonet.csv
+```
+
+Picks which route upgrades to buy, best marginal credits/hr per credit first, and says which fleet to
+put on each. `--fresh` plans from scratch (an account with no routes opened); without it, it starts
+from each route's recorded level. `--fleets N` caps how many routes run at once. `--battle-min M`
+charges M minutes of fighting per round trip, `--max-alarm` and `--exclude` drop routes.
+
+**Greedy is exact here, not an approximation.** In every tier the step cost grows faster than the value
+it unlocks (easy 1K→50K for 20 CP a step, mid ×3 for 40 CP, hard ×2 for 50 CP), so each route's
+marginal ratio strictly decreases and the precedence — you cannot buy level 4 before level 3 — never
+binds. The knapsack trap, a cheap high-ratio step hidden behind an expensive low-ratio one, cannot
+occur on these ladders.
+
+A route's tier is **inferred, not guessed**: the three ladders give a different `cp_cap` at every level
+except 200 CP, which is mid at level 5 and hard at level 4, and those differ in level — so
+`(level, cp_cap)` is unique across all fifteen rows of `route_tiers.csv`. A route missing either is
+reported, never assumed.
+
+Build limits are account-wide, so each step is re-priced against what is **left** after the earlier
+ones; the plan never spends the same hull on two routes.
+
+### What it says, with 87M on a fresh account
+
+Buy order is not close: **every easy route to level 5 first** (82K buys the whole ladder, and the first
+step returns ~41M credits/hr per million spent), then mid routes opened at level 1 (240K, ~10M per
+million), then up the mid ladder, and **hard tier last and only as far as level 2**. The hard tier is
+dominated at every level below 5: hard level 4 is 200 CP and +28% for 135M, while mid level 5 is 200 CP
+and +30% for 29.04M. Only hard level 5 sells something mid cannot — the 300 CP cap — at 279M.
+
+### FF as speed ballast: the biggest single lever found so far
+
+Fleet speed is the **mean** cruise, so a cheap fast frigate is worth far more than its hold:
+
+| fleet on Ares ↔ Free Port (200 CP, +30%) | cargo | s/Gm | round trip | credits/hr |
+|---|---|---|---|---|
+| 6× ST59 (168 CP) | 780,000 | 4.44 | 252.0 m | 8,073,168 |
+| **6× ST59 + 10× FG300 Recon (198 CP)** | 802,000 | **2.44** | **138.6 m** | **15,093,639** |
+
+Ten 3 CP frigates add 2.7% cargo and **+87% credits/hr**, because the ST59 is the slowest thing in the
+game that carries and the FG300 Recon (cruise 1,040) drags the mean up. `--roi` therefore fills every
+cap as a **core + ballast** mix rather than one hull type; `--route`'s one-ship-type table is a floor,
+not the answer. Best of each class on that route, single-type: BC 8.07M (ST59), CV 6.88M (CV3000), BB
+4.75M (FSV830), **DD 4.89M (15× AC721 Logistics, only 120 CP)**, CA 4.46M, FF 0.72M. DD are the best
+*core* per CP after BC and leave 80 CP spare; FF are useless as a core and decisive as ballast.
+
+Two things this needs before the numbers are trustworthy: pirate attack rates (so `--battle-min` is
+measured rather than assumed) and confirmation that the game has no ship-count cap per fleet — the
+plans above run 13 to 16 ships, and 22 has been seen in game.
+
 ## Not modelled yet
 
 - **Pirate attacks:** how often, how strong, how long a battle takes, and what is lost (see above).
