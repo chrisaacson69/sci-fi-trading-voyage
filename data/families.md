@@ -439,17 +439,54 @@ All three are 73,260 HP cruisers. The **Composite is the interesting one**: +100
 aircraft is the largest anti-air modifier seen so far, and the 98 CP pirate team fields four
 Stingrays, which is the threat `data/tp.md` has had open as "ship-vs-aircraft AA not decoded".
 
-### "Thassa EW" — best match is the Antontas Command Ship, unconfirmed
+### Thassa = the Fluorite-class, and it decodes the EW question
 
-**Antontas Command Ship** (60801, 安东塔斯指挥舰 — the 塔斯 reads "tas"), battlecruiser, 35 CP,
-173,600 HP, armour 240. Not a jammer: it is a **command hull**, carrying **3 drones + 3 corvettes**,
-`AIRCRAFT_WEAPON_ATTKACK_ADD` +40 and +60, `EFFECT_BURST_INJURY_DEC 30` (takes 30% less *crit*
-damage), `ENERGY_INJURY_DEC 20`, `SHIP_ARMOR_REPAIR_INC 25`, and a skill-on-attack, with a
-1,000-damage railgun as its main gun.
+Chris, 2026-10-09: an EW destroyer in two flavours, **A** at 27,960 HP (AA with a jamming system) and
+**B** at 29,570 HP (interference). Those hit points are an exact fingerprint:
 
-**This identification is a guess from the transliteration and should be checked** — no hull in the
-tables is named Thassa under any of the four name fields. If it is a different ship, say so and it can
-be looked up properly.
+| | id | HP | CP |
+|---|---|---|---|
+| **Thassa A** | 41401 | **27,960** | 7 |
+| **Thassa B** | 41402 | **29,570** | 7 |
+
+— **Fluorite-class Info** (萤石级信息) and **Fluorite-class Electronic** (萤石级电子). Both turned up in
+the first EW search and were passed over in favour of a transliteration guess at the Antontas; the HP
+settles it outright. (The Antontas Command Ship is a real and separate hull: 3 drones + 3 corvettes,
++40/+60 aircraft attack, −30% crit damage taken, 1,000-damage railgun.)
+
+**How the jamming actually works.** Each carries a mount of `ACTION 7` doing **zero damage** whose
+only job is to land `WEAPON_ADD_SKILL_ON_BUFF_HIT` — a skill that is nothing but
+`EFFECT_HIT_RATE_DEC` on what it hits. The *application rate* is its weapon priority table:
+
+| target | application rate |
+|---|---|
+| aircraft (100–105) and corvettes (200) | **100%** |
+| frigates, destroyers | **75%** |
+| cruisers | **30%** |
+| battlecruisers and above | **20%** |
+
+**That is the answer to the open EW question, and it is the small-fleet answer.** A jammer lands on a
+frigate three-quarters of the time and on a battlecruiser one time in five, so electronic warfare is
+worth roughly 3.75× as much against the small pirate team as against the large one — the same
+direction as every other result in the section above, and much more sharply.
+
+**A and B are the same ship, exactly as Chris suspected.** Identical 7 CP, armour 20, energy resist 2,
+the same two mounts, the same 5% anti-missile, the same `BALLISTIC_INJURY_SUB 20`. Three differences,
+no more:
+
+| | Thassa A (41401) | Thassa B (41402) |
+|---|---|---|
+| HP | 27,960 | 29,570 |
+| jams first | **corvettes** (rank 1), aircraft rank 2 | **aircraft** (rank 1), corvettes rank 2 |
+| skill | 9189 — two `HIT_RATE_DEC` rows on the default curve | 9190 — two rows at **5 each, −10 points** |
+
+So B jams harder and prefers aircraft; A jams softer and prefers corvettes. Against the 98 CP team's
+four Stingrays, B is the one that matters.
+
+Two things still unverified: whether `TARGET_TEAM 0` really means the debuff lands on the enemy rather
+than buffing the firer (the zero-damage mount and the hit table make it very hard to read any other
+way, but it is not proven), and the size of 9189's blank-parameter rows, which take the default
+per-level curve rather than a stated number.
 
 ## Resets cap at 50 points
 

@@ -158,12 +158,15 @@ table covers all eight types after all, and nothing is missing.
 - **Fighter and corvette TP cannot be priced at all.** They are 25% of the supply (10% + 15%), and
   neither has a `playable_weapons` entry, so `tp_assign.py` has no mounts to work from. `craft.csv`
   and `craft_matrix.csv` have the stats; the gap is a craft-shaped `hull()`.
-- **Are the electronic-warfare and support hulls worth their CP at all?** The Balance Anderson is
-  meant to interfere with opposing ships' accuracy, and others raise your own. Chris, 2026-10-09:
-  they pick targets randomly, and even where that randomness can be narrowed it is not clear they
-  earn their cost — "right now, these seem like they are not worth it". Settling it needs the
-  targeting model extended to the accuracy effects and a measured engagement, which is real work.
-  Until then nothing in these tools scores them, and they should not be assumed to be worth a slot.
+- **Electronic warfare is now half-decoded, and it is a small-fleet tool.** The Thassa /
+  Fluorite-class (41401, 41402) jams with a zero-damage `ACTION 7` mount that lands
+  `EFFECT_HIT_RATE_DEC` on what it hits, and the application rate is its priority table: **100%
+  against aircraft and corvettes, 75% frigates and destroyers, 30% cruisers, 20% battlecruisers**.
+  So a jammer is worth about 3.75× as much against the small pirate team as the large one. What is
+  still missing is the *size* of the debuff in a battle — skill 9190 is −10 points of hit rate,
+  9189 takes the default per-level curve — and whether the Balance Anderson works the same way.
+  Nothing in these tools scores any of it yet, so EW hulls still carry no value here; the difference
+  is that the mechanism is now known rather than guessed at. See `data/families.md`.
 - **Stranding risk is not priced.** It needs a blueprint arrival rate and the reset cost, neither
   recorded, and a list of which basic hulls carry unremovable TP — a hard constraint.
 - **Combat and trade value are still separate scores.** `--roi` prices routes in credits per hour; a
