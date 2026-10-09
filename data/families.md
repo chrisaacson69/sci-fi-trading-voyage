@@ -88,3 +88,69 @@ and eight times the other two, but almost no offence: it ends lowest of the thre
 - **A variant's stock profile predicts its path.** Hulls that already hit hard buy defence first
   (Io A, Taurus Pulse); hulls with one system and a cooldown row buy cooldown first and keep buying
   it (Eris Heavy Cannon, Ruby Railgun).
+
+## Accuracy: how much the in-game DPM overstates a "full firepower" upgrade
+
+Chris: *"some hulls have these upgrades that either add an extra shot, or massively increase damage at
+the expense of accuracy. The in-game DPM shows huge gains, but without taking into account accuracy
+these are misleading. OTOH they tend to still be a good upgrade."*
+
+Both halves are right, and the size of the gap is 18%:
+
+| hull | prefix 115, 10 TP | stock | **nominal** (penalty ignored) | **effective** | display overstates by |
+|---|---|---|---|---|---|
+| Eris Heavy Cannon | −40% CD, −15% hit | 1,677 | 2,659 (+59%) | 2,260 (+35%) | **18%** |
+| Quaoar Railgun | −40% CD, −15% hit | 1,991 | 3,262 (+64%) | 2,773 (+39%) | **18%** |
+
+So a +60% headline is really +36% — and it is *still* the best 10 TP on the hull, which is why
+`tp_assign.py` buys it first on the Eris Heavy Cannon. The model nets the penalty because
+`system_mods` handles `EFFECT_HIT_RATE_DEC`; ignoring it banked the cooldown and threw away the
+downside, which Chris caught earlier.
+
+Worth knowing how contained this is: **prefix 115 is the only permanent upgrade in the tables that
+carries an accuracy penalty.** 8004 and 8006 are seasonal adjustments (excluded as unknowable), and
+every other one — 9038, 9044, 9189–9199, 9348, 9360, 9403–9405, 9521, 9525, 9779–9798 — is a `9xxx`
+timed strategy, not a permanent buff. So the "misleading DPM" problem has exactly one instance in the
+upgrade trees, and it is handled.
+
+## The mobile account's corvettes
+
+Craft were unpriceable until now because `matrix.craft_mounts` never set `system_group`, which is what
+`apply_upgrades` matches a mount to its system by — so **every weapon upgrade on a fighter or corvette
+was silently skipped** and their ladders read as 100% tank. Fixed; a craft slot id `0101` sits on
+system `<id>01` exactly as a ship's does.
+
+| corvette | id | HP | armour | ev | stock | maxed | TP | gain | pool | TP split |
+|---|---|---|---|---|---|---|---|---|---|---|
+| **Cellular Defender** (Hive) | 20801 | 6,650 | 2 | 0 | 182.3 | **311.5** | 79 | +71% | 36 | damage 68 / tank 32 |
+| NebulaChaser Pulse | 20902 | 5,400 | 2 | 0 | 176.2 | 280.9 | 77 | +59% | **44** | tank 65 / damage 35 |
+| CVT800 | 21301 | 7,500 | 2 | 0 | 179.9 | 261.3 | 78 | +45% | 37 | damage 62 / tank 38 |
+| SLevi9 | 21401 | 6,000 | 2 | 0 | 157.0 | 248.1 | **118** | +58% | **0** | damage 61 / tank 39 |
+| **RedBeast** (RB7) | 20701 | 5,200 | 2 | 0 | 110.2 | 204.6 | 106 | **+86%** | 35 | damage 62 / tank 38 |
+| Void Elfin | 21001 | 5,200 | 2 | 35 | 78.7 | 129.4 | 76 | +64% | 34 | tank 59 / damage 41 |
+| NebulaChaser Ball | 20901 | 6,300 | 2 | 0 | 63.9 | 94.0 | 63 | +47% | 44 | tank 65 / damage 35 |
+| CVM011 Miss | 21101 | 7,500 | 2 | 0 | 68.9 | 89.8 | 51 | +30% | 6 | damage 51 / tank 49 |
+| CVM011 Can | 21102 | 7,500 | 2 | 0 | 71.1 | 87.3 | 40 | +23% | 6 | tank 75 / damage 25 |
+| CV-11003 | 20401 | 4,900 | 2 | 0 | 49.9 | 71.4 | 66 | +43% | 19 | tank 70 / damage 30 |
+| Silent Assassin (Ray) | 20301 | 5,350 | 6 | 0 | 51.0 | 71.2 | 66 | +40% | 10 | tank 70 / damage 30 |
+| Tempel Intf / Alert | 21601/2 | 7,100 | 2 | 0 | 42.4 | 65.8 | 76 | +55% | 0 | tank 84 / damage 16 |
+| CVM011 HS | 21103 | 7,500 | 2 | 5 | 45.0 | 58.2 | 62 | +30% | 6 | damage 52 / tank 48 |
+| HaleBopp MR / Dock | 21501/2 | 7,000 | 0 | 0 | 3.8 | 4.8 | 46 | +24% | 0 | tank 100 |
+
+Reading it against what the account has actually done:
+
+- **NebulaChaser Pulse is the right call.** The family's whole 44-point pool is directed at it and it
+  needs 77 — so it is the one corvette already pointed at a hull that deserves it. The Ballistic
+  sibling ends at 94 against the Pulse's 281; directing the pool was correct.
+- **SLevi9 has the longest ladder of any corvette, 118 TP, and a pool of 0.** It is also the only one
+  whose stock value is near the top (157) with nothing invested. Biggest untouched opportunity.
+- **Cellular Defender is the best corvette in the account** and has 36 of the 79 it wants.
+- **RedBeast gains the most in relative terms (+86%)** but wants 106 TP against a pool of 35.
+- **Void Elfin has 34 points in it and ends at 129**, below five corvettes that have less invested.
+  Worth a second look before more goes in.
+- **HaleBopp MR and Dock score ~4** because they carry no weapon at all. Correct, not a modelling
+  failure — they are utility hulls (cycle ability, repair-triggered skill) and combat TP there is
+  wasted. Rating what they *do* needs the carrier/repair model, which does not exist yet.
+- **Tempel Intf and Alert are identical at 42.4 → 65.8**, because the only thing separating them is
+  the skill they grant (9158 targeting confusion vs 9159 early warning) and nothing here scores
+  skills. The model cannot tell them apart; do not read the tie as "they are the same hull".
