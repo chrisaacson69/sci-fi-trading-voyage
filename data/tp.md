@@ -1,103 +1,113 @@
-# Where to assign tech points
+# "I got XX tech points. Where do I put them?"
 
-## The constraints (Chris, 2026-10-09 — told, not derived)
+## The question
 
-These are the rules the assignment problem has to respect. None of them are in the client tables.
+**TP is typed, and you do not choose the type** (Chris, 2026-10-09). Points arrive as cruiser points,
+frigate points, destroyer points, and so on, in the proportions the blueprint drop table gives — see
+`data/drops.csv`. So there is no decision to make about *which* type to invest in; the only decision
+is, given 100 cruiser points, which of **your** cruisers they go into and in what order.
 
-1. **Blueprints arrive randomly.** You spend TP on the best design you have *now*, and a better hull
-   can turn up afterwards with nothing in it. TP already committed is stranded.
-2. **Resets exist but are expensive.** A reset strips a design's TP and lets you reallocate; the cost
-   is high enough that it is not a routine move.
-3. **Some TP cannot be removed at all.** A rare mechanic, and only on the **basic hulls**: that TP is
-   bound to the hull and survives a reset. Assignment there is irreversible.
-4. **A family's pool is shared and can be directed at one variant.** See the README on `tp` vs
-   `tp_pool` — NebulaChaser reads 0 / 44 on one pool of 44, all of it committed to the Pulse.
-5. **Chris's working rule** is to spread TP across every design he actually fields in a playthrough,
-   rather than maxing one, on the grounds that TP has diminishing returns.
+`lagrange-combat/tools/tp_assign.py` answers exactly that:
 
-## What is measured: the returns are NOT generally diminishing
+```
+python tools/tp_assign.py cruiser 100 --ships <roster.csv>
+python tools/tp_assign.py frigate 60 --for trade --fleet 14 --ships <roster.csv>
+```
 
-`lagrange-combat/tools/tp_curve.py` buys TP one **level** at a time — the ladder is 2 TP a level, five
-levels an enhancement — always taking the level that adds the most effective DPM per TP, and records
-the curve. DPM is measured, not scored: `per_shot` against a real reference target, the **Thunderbolt
-(60601)**, a battlecruiser whose armour is exactly 120 (the band the 98 CP pirate team sits in) and
-which carries 8% missile/torpedo interception, so projectile hulls are judged against something that
-actually shoots them down. Results for 150 hulls are in `data/tp_curves.csv`.
+## How value is scored
 
-Comparing marginal DPM per TP in the **last** quarter of a hull's ladder against the **first**:
+The damage buys run out first, and what you are left choosing among is survivability, speed and
+strategies — so a score that only counts DPM cannot answer the question at all. Combat value is
 
-| shape | hulls |
+> **sqrt( outgoing DPM × seconds survived ) / CP**
+
+- **outgoing DPM** against the Thunderbolt (60601), a real battlecruiser at armour exactly 120 — the
+  band the 98 CP pirate team sits in — carrying 8% missile/torpedo interception, so projectile hulls
+  are judged against something that shoots them down.
+- **seconds survived** = HP ÷ the DPM pirate team 1010801 actually lands on this hull. That is what
+  makes armour, evasion (per attacking weapon type) and energy resistance compete on equal terms with
+  a weapon level.
+- **÷ CP**, because a fleet is capped in CP and never in hull count.
+
+`--for trade` scores warp instead: fleet speed is the **mean** cruise, so a cruise level is worth its
+share of the fleet's credits per hour (`data/upgrades.md`).
+
+Points are bought one **level** at a time — the ladder is 2 TP a level, five levels an enhancement —
+always taking the level with the best value per TP.
+
+## What it says for this account
+
+### 100 cruiser points
+
+| hull | CP | stock BV/CP | at 100 TP | gain | per TP | gains stop at |
+|---|---|---|---|---|---|---|
+| **Io A** | 18 | 81.7 | 138.1 | +69% | 0.575 | **98 TP** |
+| Conamara Chaos Plasma | 20 | 76.5 | 128.4 | +68% | 0.524 | 99 TP |
+| Conamara Chaos Railgun | 16 | 60.3 | 108.7 | +80% | 0.484 | — |
+| Io Siege | 18 | 74.5 | 122.0 | +64% | 0.528 | **90 TP** |
+| Io B | 18 | 81.3 | 127.7 | +57% | 0.473 | 98 TP |
+| Chimera A | 18 | 56.9 | 102.2 | +80% | 0.459 | 99 TP |
+
+**Spreading wins by +31%.** Best marginal value per TP, across the whole type: Io A 34 TP, Callisto
+Drone 24, Io Siege 22, Io B 16, then scraps — **+73.7 BV/CP against +56.4** for putting all 100 into
+the single best hull. That is Chris's playthrough rule, measured, and the "gains stop at" column is
+the mechanism he described: the good buys genuinely run out, at 90–100 TP a hull.
+
+### The buy order is not what you would guess
+
+Io A spends its first 50 points on **defence**, not weapons:
+
+| TP | buys |
 |---|---|
-| diminishing (< 0.90) | 73 |
-| flat (0.90 – 1.10) | 23 |
-| **increasing (> 1.10)** | **54** |
+| 1–11 | evasion, then evasion vs weapon type |
+| 18–26 | hit rate vs type |
+| 27–35 | HP |
+| 37–42 | armour +30 |
+| 50+ | damage |
 
-Median 0.95 — essentially flat, with the quartiles at 0.52 and 1.31. So the curve shape is a property
-of the individual hull, not a law. Examples:
+Because the Io already has the biggest guns in its class, another 2% of damage is worth less than not
+dying — which only shows up once survival is in the score.
 
-| hull | CP | TP | stock | 25% | 50% | 75% | 100% | first → last DPM/TP |
-|---|---|---|---|---|---|---|---|---|
-| Io A | 18 | 56 | 17,761 | 21,144 | 23,921 | 27,084 | 29,234 | 242 → 154 (×0.64) |
-| Quaoar Torpedo | 6 | 70 | 2,029 | 3,508 | 4,405 | 5,403 | 6,511 | 85 → 63 (×0.75) |
-| Quaoar Railgun | 6 | 50 | 1,991 | 2,953 | 4,381 | 5,974 | 6,870 | 77 → 72 (×0.93) |
-| Taurus Pulse | 11 | 36 | 3,540 | 4,012 | 4,686 | 5,122 | 5,610 | 52 → 54 (×1.03) |
-| **ST59** | 28 | 72 | 8,559 | 10,360 | 11,686 | 13,300 | 15,452 | 100 → **120 (×1.20)** |
-| **Carilion Heavy Cannon** | 5 | 40 | 1,165 | 1,362 | 1,619 | 1,937 | 2,212 | 20 → **28 (×1.40)** |
+### 60 frigate points, for trade
 
-**So the diminishing-returns premise does not survive measurement**, and spreading TP needs a different
-justification — which it has, two of them, below. (Note the `maxTP` column is the TP that buys *DPM*,
-40–100 on most hulls. The total a hull can absorb is 106–150; the rest goes to HP, armour, evasion and
-cruise, which this curve does not score. A hull's TP does not "run out" at 56 — only its DPM TP does.)
+Cruise **runs out at 12 TP a hull** — that is the +30% `EFFECT_SPEED` ceiling from `data/upgrades.md`,
+and the tool rediscovers it from the ladder. So 60 frigate points buys cruise on **five** frigates and
+spreading is not a preference, it is forced. (For combat instead, Reliat Stealth is the standout at
+0.775 BV/CP per TP, nearly double the next frigate.)
 
-## What actually varies: DPM per TP between hulls, by 100×
+## The measured background
 
-| hull | CP | TP | stock → maxed | DPM/TP | DPM/TP/CP |
-|---|---|---|---|---|---|
-| Constantine the Great | 35 | 97 | 21,673 → 41,619 | 205.6 | 5.88 |
-| **Io A** | 18 | 56 | 17,761 → 29,234 | 204.9 | **11.38** |
-| Chimera B | 20 | 50 | 8,637 → 18,185 | 191.0 | 9.55 |
-| Conamara Chaos Plasma | 20 | 73 | 17,879 → 31,021 | 180.0 | 9.00 |
-| Callisto Heavy | 20 | 76 | 14,886 → 28,096 | 173.8 | 8.69 |
-| Io Siege | 18 | 52 | 14,778 → 22,868 | 155.6 | 8.64 |
-| … | | | | | |
-| Tundra Tactical | 9 | 20 | 249 → 334 | 5.4 | 0.60 |
+`tools/tp_curve.py` and `data/tp_curves.csv` carry the per-hull DPM ladder for 150 hulls: stock DPM,
+DPM at each quarter of the ladder, and `concavity` = marginal DPM/TP in the last quarter over the
+first.
 
-**Io A is the best TP buy in the game per CP** and Constantine the best in absolute terms. The spread
-from best to worst is about 38× on DPM/TP and 19× on DPM/TP/CP — an order of magnitude more than any
-within-hull curvature. **Which hull you spend on dominates how much you spend on it.**
+**Returns are not generally diminishing**: median concavity 0.95, with 73 hulls diminishing, 23 flat
+and **54 increasing** (ST59 ×1.20, Carilion Heavy Cannon ×1.40). Curve shape is a property of the
+hull, not a law. What spreading really rests on is the two things above — the good buys run out per
+hull, and the supply is typed — plus stranding risk, below.
 
-## The two real arguments for spreading
+## Constraints this has to respect (told, not derived)
 
-Spreading is still right, but not because of diminishing returns:
+1. **Blueprints arrive randomly**, so TP committed to the best design you have now is stranded when a
+   better one turns up.
+2. **Resets exist but are expensive** — not a routine move.
+3. **Some TP cannot be removed at all.** Rare, and only on the **basic hulls**; that TP survives a
+   reset, so assignment there is irreversible.
+4. **A family's pool is shared and can be directed at one variant** — see the README on `tp` vs
+   `tp_pool`.
+5. **A full playthrough fields 10+ hulls**, plus up to 125 aircraft across ~12 types. Maxing one or
+   two hulls at the expense of the rest is not a stable distribution even where it scores well.
 
-1. **Each hull's DPM-buying TP caps out well short of a real budget.** 120 TP shared across
-   Q-Torpedo / Io A / ST59 / Taurus Pulse / Carilion HC, best-marginal-first, lands on ST59 59 TP
-   (49%), Io A 50 (42%), Q-Torpedo 10 (8%), and **nothing** on Taurus Pulse or Carilion HC — total
-   56,776 DPM, against 50,427 for putting all 120 into Io A. **Spreading wins by +12.6%, purely
-   because Io A cannot absorb 120 TP of DPM.** That is a capacity argument, not a curvature one, and
-   it says concentrate on two or three hulls to their caps — not spread evenly.
-2. **Stranding risk under random blueprint arrival.** This is the argument the DPM model cannot
-   price, and it is the stronger one. With resets expensive and some basic-hull TP unremovable, TP in
-   a hull you later stop fielding is a loss, so the right objective is not maximum DPM today but
-   something closer to minimum regret across the blueprints you might draw. Nothing here measures
-   that yet.
+## Still open
 
-## The task, as it stands
-
-Open: **given a fleet plan and a TP budget, where should the TP go?** What is needed to answer it
-properly, in order:
-
-- **Score the fleet, not the hull.** `--roi` already picks fleets per route, and `data/upgrades.md`
-  established that fleet speed is the mean and that each battle minute costs ~2% of the hourly rate.
-  So a cruise level on a ballast frigate and a damage level on the core compete *in credits per hour*,
-  which is the only common currency — DPM/TP is a proxy that cannot see either.
-- **Price the defensive TP this curve ignores.** HP, armour, evasion and energy resistance are 50–100
-  TP a hull and currently score zero. Survival is worth credits too (lost hulls, and `data/upgrades.md`
-  section 6 for what the Carilion's evasion systems actually buy).
-- **Price the stranding risk.** Needs a blueprint arrival rate and the reset cost — neither recorded.
-  Which basic hulls carry unremovable TP is also not recorded, and that is a hard constraint, so it
-  should go in `data/ships.csv` notes as it is discovered.
-
-What is already usable today: if the question is narrowly "which hull converts TP into damage best",
-the answer is **Io A first, then Constantine, Chimera B and Conamara Plasma**, to roughly 50–75 TP
-each, and **the Carilion and the Taurus should get none of it** on damage grounds.
+- **Fighter and corvette TP cannot be priced at all.** They are 25% of the supply (10% + 15%), and
+  neither has a `playable_weapons` entry, so `tp_assign.py` has no mounts to work from. `craft.csv`
+  and `craft_matrix.csv` have the stats; the gap is a craft-shaped `hull()`.
+- **Battleship is not in the drop table.** FSV830 is `SHIP_TYPE` 7 and one of the best haulers on the
+  account, so where its points come from is unknown — folded into battlecruiser or carrier, or simply
+  not shown.
+- **Stranding risk is not priced.** It needs a blueprint arrival rate and the reset cost, neither
+  recorded, and a list of which basic hulls carry unremovable TP — a hard constraint.
+- **Combat and trade value are still separate scores.** `--roi` prices routes in credits per hour; a
+  cruise level and an armour level should ultimately compete in that same currency, not in BV/CP and
+  warp % side by side.

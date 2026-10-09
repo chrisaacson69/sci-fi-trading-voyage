@@ -1,0 +1,26 @@
+source,type,pct,notes
+general,Cruiser,12.0,"Chris's screenshots 2026-10-09. The overall type distribution: what a blueprint IS, given that you got one. TP is grouped by the SAME types and arrives in the SAME proportions (Chris), which is what makes it the supply curve for tech points, not just for hulls."
+general,Frigate,28.0,
+general,Destroyer,24.0,
+general,Corvette,15.0,
+general,Fighter,10.0,
+general,Battlecruiser,5.0,
+general,Auxiliary Ship,3.0,
+general,Carrier,3.0,
+standard,Cruiser,1.2,"The standard box, the '10% to get a BP' rule. Every row is EXACTLY 0.1000 x the general table to four decimals, so the standard box is P(blueprint) = 10% times the general type distribution, and the general table is the conditional. Remainder is TECH POINTS 90.0%."
+standard,Frigate,2.8,
+standard,Destroyer,2.4,
+standard,Corvette,1.5,
+standard,Fighter,1.0,
+standard,Battlecruiser,0.5,
+standard,Auxiliary Ship,0.3,
+standard,Carrier,0.3,
+standard,TECH POINTS,90.0,
+generic,Frigate,1.0,"The generic box, per item; the number of items is random (3+) by a rule not yet known. NOT 10% or any other multiple of the general table - it is a different, small-hull-skewed mix, and it drops Fighter and Auxiliary Ship entirely. Conditional on a blueprint (total 3.0%): Frigate 33.3%, Destroyer 33.3%, Corvette 20.0%, Cruiser 6.7%, Battlecruiser 3.3%, Carrier 3.3% - against 28/24/15/12/5/3 in the general table, i.e. cruiser halved and fighter+auxiliary's 13% pushed into the small hulls."
+generic,Destroyer,1.0,
+generic,Corvette,0.6,
+generic,Cruiser,0.2,
+generic,Battlecruiser,0.1,
+generic,Carrier,0.1,
+generic,WEAPON TECH,87.0,
+generic,TECH POINTS,10.0,
