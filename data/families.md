@@ -162,9 +162,23 @@ small / medium / large — and a bay accepts anything **at or below** its own si
 fits everywhere and a size-3 Stingray needs a large bay. It is a compatibility rule, not a cost.
 
 The bay declares both, packed `G CC` in `EFFECT_CARRIER`: leading digit the size it accepts, last two
-the **number of craft in the wing**. Wings run 1–8 (`data/carriers.csv`): CV3000 carries 18 fighters
-across four bays, Marshal Crux 10, ST59 two bays of 2. That wing size, not the craft, is what the
-scoring below gets wrong — see the triangle rule after the table.
+the **number of craft in the wing**. Wings run 1–8.
+
+**But a carrier's bay modules are mutually exclusive.** They sit in systems, systems are grouped by
+`GROUP`, and exactly one system is fielded per group — the same rule `maxout.build` documents for
+enhancements. Summing them counts alternatives that can never be fitted together. The CV3000 reads
+18 fighters that way; in fact group 101 is a **choice** of 5 fighters + 3 corvettes (the stock fit),
+5 fighters alone, or 8 fighters, and group 201 a choice of 3 corvettes or three non-hangar modules:
+
+| CV3000, 40 CP | fighters | corvettes |
+|---|---|---|
+| **stock** | 5 | 3 |
+| best, every module unlocked | 8 | 3 |
+
+And the alternatives are **not free** — a module has to be obtained, so the "best" column is a
+ceiling, not a loadout. `data/carriers.csv` now gives both columns and lists every group's options.
+(The stock CV3000 at 5 fighters + 3 corvettes is exactly what Chris described it as months before this
+was read out of the tables.)
 
 The figures below are **per craft**, which is what the blueprint detail screen shows; the overall
 screens show wing totals.
@@ -208,11 +222,10 @@ proportional to **T(n) = n(n+1)/2**:
 | 5 | 5 | 15 | 3.00 |
 | 8 | 8 | 36 | 4.50 |
 
-Chris's two figures were *"5 fighters is 10× as strong as an individual while 2 fighters is only 3×"*.
-**T(2) = 3 matches exactly, and 10 is T(4), not T(5)** — so both numbers are on the triangular curve
-and the pairing of 10 with 5 looks like a slip. If a 5-wing really measures 10× rather than 15×, the
-rule is not triangular and the model needs a different attrition assumption; **that is the one thing a
-battle report would settle**, by showing how many of a wing died and how much each did.
+Chris's two figures were *"5 fighters is 10× as strong as an individual while 2 fighters is only 3×"*,
+and then: *"I was doing n−1, not n+1"*. That settles it — n(n−1)/2 gives 10 at n=5, which is where the
+10 came from, while the 3 for a 2-wing is the n+1 form. **The rule is T(n) = n(n+1)/2**, so a 5-wing
+is 15×, not 10×.
 
 Consequence for scoring: **a craft in a 4-wing is worth 2.5× the same craft flying alone, and in a
 2-wing 1.5×** — so the carrier matters as much as the fighter. None of the per-craft figures above
