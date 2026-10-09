@@ -32,6 +32,7 @@ py -3 trade_routes.py --selftest               # values checked by hand
 - **`data/timings.csv`**: stopwatch leg times (`date,route_a,route_b,fleet,leg_seconds,notes`, one-way). `--timings` compares them with both speed models, and `--selftest` requires the default model within 2% of each.
 - **`data/craft.csv`**: the mobile account's **fighters and corvettes** — `name,ship_id,kind,cp,seats,group,hp,armor,ev,flight_speed,dpm_vs_*,role,limit,tp,tp_max,class,notes`. `kind` is FT (fighter) or CO (corvette). These are **carried craft, not fleet hulls**: they have no cargo and `flight_speed` is a flight speed, not a warp stat, which is why the columns deliberately differ from `ships.csv` and why `trade_routes.py` excludes FT and CO from route fleets (`NOT_FLEET_TYPES`). `seats` is the hangar size a fighter consumes (`EFFECT_CARRIER` = group × 100 + count); a corvette takes one boat seat (`EFFECT_CARRIER_BOAT`) and is written as 1. `group` is the hangar group that accepts it — fighters 2–5, corvettes 1. `class` is the **family**, read off the id (a craft id is family(3) + variant(2), so 126xx is BR050, 211xx M011, 209xx Nebula). `tp` is TP available to that variant as Chris read it in game, `tp_pool` is the family's shared pool (the max over its variants — see below), and `tp_max` is the most the variant's systems can absorb. Rebuild with `python tools/craft_csv.py --names <list> --out data/craft.csv` in `lagrange-combat`.
 - **`data/drops.csv`**: the blueprint/TP type drop tables, from Chris's screenshots 2026-10-09 — `general` (the type distribution given that you got a blueprint; **Auxiliary Ship** is `SHIP_TYPE` 7, which the tables call battleship — mobile bases, not combat hulls), `standard` (the "10% to get a BP" box, whose every row is **exactly 0.1000 ×** the general table, with TECH POINTS at 90%), and `generic` (per item, item count random 3+; a *different*, small-hull-skewed mix that drops Fighter and Auxiliary entirely). **TP is grouped by the same types and arrives in the same proportions**, so this is the supply curve for tech points, not just for hulls.
+- **`data/families.md`**: the Taurus, Eris and Ruby variant families upgraded side by side. **Eris Heavy Cannon more than doubles (+134%)** — the only hull of the nine that does — because its two guns share one system and its first 30 TP are a pure cooldown stack whose marginal value *rises* 2.6× along the way. Also records that **`40502` and `48701` are two different hulls both called "Taurus Assault"** in English (8 CP / edef 20 vs 11 CP / armour 30; the cheaper one ends 21% higher).
 - **`data/tp.md`** and **`data/tp_curves.csv`**: where to assign tech points. The CSV is 150 hulls with stock DPM, DPM at each quarter of the TP ladder, and the marginal DPM/TP in the first vs last quarter (`concavity`). TP is **typed and you do not choose the type**, so the question is never which hull in the game deserves points — it is "I have 100 cruiser points, which of MY cruisers get them". `tools/tp_assign.py "<hull>"` prints one hull's whole upgrade path in buy order and marks where the worthwhile buys stop; `--type <type> --tp <n> --ships <roster>` splits a type's points across hulls. Both score **sqrt(DPM × seconds survived) / CP** so that armour, evasion and HP compete with weapon levels, or warp with `--for trade`. On this account 100 cruiser points spread across four hulls beat all-in on the best by **+31%**, and Io A spends its first 50 points on defence before any damage — it fights in the front line, and its guns sit on **three separate systems**, so damage has to be bought three times. That last point is a general law: median TP to +50% DPM is 23 / 31 / 36 / 62 for hulls whose guns sit on 1 / 2 / 3 / 4 systems. Io A's full ladder is 104 TP, but the first 88 carry 99% of the gain. The CSV carries the per-hull DPM ladder for 150 hulls; `concavity` shows returns are **not** generally diminishing (median 0.95 — 73 diminish, 54 *increase*), so spreading rests on the good buys running out per hull (90–100 TP) and on the typed supply, not on curvature. Rebuild with `python tools/tp_curve.py <ship ids> --csv data/tp_curves.csv`.
 - **`data/upgrades.md`**: what tech points buy. Warp is a **+30% cap** and responds only to
   `EFFECT_SPEED`, not `EFFECT_CURVATURE_SPEED`, which shares the same propulsion slots; 40 hulls
@@ -217,6 +218,14 @@ The calculator shows both ports' alarms, and `--max-alarm` / `--by-alarm` filter
 **both** ends are at or below a level. Turning alarm levels into attack rate, pirate CP, battle time
 and losses needs more rows in `encounters.csv`.
 
+> **Scope: the speed findings here are EVENT-ONLY.** Chris, 2026-10-09: fleet speed is the mean of
+> every ship's cruise *in this trading event*, which ends in under a week. **In the normal game a
+> fleet travels at its slowest hull**, as physics would have it, and speed does not affect combat at
+> all. So everything that follows about cruise upgrades, speed ballast and fleet mean speed is a
+> temporary exploit of this event's rules, not general advice. In the normal game a cruise upgrade is
+> worth having but cannot be laundered into damage, and adding a fast cheap frigate to a slow fleet
+> does nothing.
+
 ## Spending a budget: `--roi`
 
 ```
@@ -251,7 +260,7 @@ million), then up the mid ladder, and **hard tier last and only as far as level 
 dominated at every level below 5: hard level 4 is 200 CP and +28% for 135M, while mid level 5 is 200 CP
 and +30% for 29.04M. Only hard level 5 sells something mid cannot — the 300 CP cap — at 279M.
 
-### FF as speed ballast: the biggest single lever found so far
+### FF as speed ballast: the biggest single lever found so far — and event-only
 
 Fleet speed is the **mean** cruise, so a cheap fast frigate is worth far more than its hold:
 
@@ -261,7 +270,9 @@ Fleet speed is the **mean** cruise, so a cheap fast frigate is worth far more th
 | **6× ST59 + 10× FG300 Recon (198 CP)** | 802,000 | **2.44** | **138.6 m** | **15,093,639** |
 
 Ten 3 CP frigates add 2.7% cargo and **+87% credits/hr**, because the ST59 is the slowest thing in the
-game that carries and the FG300 Recon (cruise 1,040) drags the mean up. `--roi` therefore fills every
+game that carries and the FG300 Recon (cruise 1,040) drags the mean up. **This works only because the
+event averages fleet speed.** In the normal game the fleet runs at the slowest hull, so the same ten
+frigates would buy nothing at all — the ST59 would still set the pace. `--roi` therefore fills every
 cap as a **core + ballast** mix rather than one hull type; `--route`'s one-ship-type table is a floor,
 not the answer. Best of each class on that route, single-type: BC 8.07M (ST59), CV 6.88M (CV3000), BB
 4.75M (FSV830), **DD 4.89M (15× AC721 Logistics, only 120 CP)**, CA 4.46M, FF 0.72M. DD are the best

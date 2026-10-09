@@ -1,5 +1,14 @@
 # Tech-point upgrades: what they actually buy
 
+> **Scope: the speed findings here are EVENT-ONLY.** Chris, 2026-10-09: fleet speed is the mean of
+> every ship's cruise *in this trading event*, which ends in under a week. **In the normal game a
+> fleet travels at its slowest hull**, as physics would have it, and speed does not affect combat at
+> all. So everything that follows about cruise upgrades, speed ballast and fleet mean speed is a
+> temporary exploit of this event's rules, not general advice. In the normal game a cruise upgrade is
+> worth having but cannot be laundered into damage, and adding a fast cheap frigate to a slow fleet
+> does nothing.
+
+
 Read from `Tb_cfg_ship_system` / `Tb_cfg_system_enhance` / `Tb_cfg_system_effect` in the client tables
 (`lagrange-combat/tools/maxout.py`, `dpm_curve.py`). Every figure below is computed from config, not
 from a battle report, except where an anchor is named.
@@ -32,7 +41,8 @@ hull that lists only ONE `EFFECT_SPEED` row is hard-capped at +15% however much 
 | +22% | 16 | Reliat Stealth |
 | +45% | 24 | one hull |
 
-**Consequence for fleet speed.** Fleet speed is the *mean* of every ship's cruise, not the slowest
+**Consequence for fleet speed (EVENT ONLY — the normal game uses the slowest hull).** In this event
+fleet speed is the *mean* of every ship's cruise, not the slowest
 (measured, see README), so a warp upgrade lifts the fleet only by its share — which means warp TP pays
 off when bought **fleet-wide**, and then +30% warp is +30% credits/hr. The counter-intuitive part: the
 **cruisers are the cheap speed buys (6 TP) and the cheap frigates are the ones that cannot go past

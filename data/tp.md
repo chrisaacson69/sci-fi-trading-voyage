@@ -33,7 +33,9 @@ strategies — so a score that only counts DPM cannot answer the question at all
 - **÷ CP**, because a fleet is capped in CP and never in hull count.
 
 `--for trade` scores warp instead: fleet speed is the **mean** cruise, so a cruise level is worth its
-share of the fleet's credits per hour (`data/upgrades.md`).
+share of the fleet's credits per hour (`data/upgrades.md`). **`--for trade` is event-only** — in the
+normal game a fleet travels at its slowest hull and speed does not affect combat, so a cruise level
+there is worth having but cannot be bought as a force multiplier (Chris, 2026-10-09).
 
 Points are bought one **level** at a time — the ladder is 2 TP a level, five levels an enhancement —
 always taking the level with the best value per TP.
@@ -96,7 +98,7 @@ by how many systems they sit on. `tp_assign.py` prints the count in the header f
 Io A's full ladder is 104 TP for +69% BV/CP, but **the first 88 carry 99% of the gain**. The last 16
 points buy 1%. That is the "good buys run out" effect in one line, and the tool marks the knee.
 
-### 60 frigate points, for trade
+### 60 frigate points, for trade (event-only)
 
 Cruise **runs out at 12 TP a hull** — that is the +30% `EFFECT_SPEED` ceiling from `data/upgrades.md`,
 and the tool rediscovers it from the ladder. So 60 frigate points buys cruise on **five** frigates and
