@@ -183,29 +183,62 @@ was read out of the tables.)
 The figures below are **per craft**, which is what the blueprint detail screen shows; the overall
 screens show wing totals.
 
-| fighter | id | size | grp | HP | ev | stock | maxed | TP | gain | pool | TP split |
-|---|---|---|---|---|---|---|---|---|---|---|---|
-| **Vitas B010** | 11601 | 3 | 2 | 5,860 | 0 | 114.8 | **173.7** | 76 | +51% | 15 | damage 58 / tank 42 |
-| **Strix** | 10901 | 2 | 3 | 4,920 | 0 | 87.7 | **130.7** | 82 | +49% | 14 | damage 61 / tank 39 |
-| Stingray | 11901 | 3 | 2 | 5,200 | 0 | 77.2 | 116.4 | 73 | +51% | 0 | damage 55 / tank 45 |
-| Balance Anderson | 11401 | 1 | 5 | 3,450 | 50 | 48.0 | 107.9 | 70 | **+125%** | 10 | tank 94 / damage 6 |
-| BR050 Basic | 12601 | 3 | 2 | 5,040 | 0 | 71.2 | 106.8 | 80 | +50% | 14 | damage 62 / tank 38 |
-| Bullfrog | 10801 | 3 | 2 | 4,740 | 0 | 63.7 | 94.0 | 70 | +48% | 0 | damage 57 / tank 43 |
-| BR050 Defense | 12602 | 3 | 2 | 5,040 | 10 | 61.0 | 92.0 | 80 | +51% | 14 | damage 62 / tank 38 |
-| AT021 Pulse | 12501 | 2 | 3 | 4,920 | 0 | 70.9 | 90.2 | 54 | +27% | 0 | damage 56 / tank 44 |
-| SC002 | 10201 | 1 | 5 | 2,850 | 50 | 34.5 | 68.9 | 70 | +100% | **38** | tank 94 / damage 6 |
-| *Vitas A021* | 11501 | 2 | 3 | 5,370 | 0 | 39.9 | 48.8 | 45 | +22% | 15 | tank 78 / damage 22 |
-| AT021 Interfer | 12502 | 2 | 3 | 4,920 | 40 | 29.2 | 43.7 | 53 | +49% | 0 | tank 89 / damage 11 |
-| *Newland* | 11701 | 2 | 3 | 4,680 | 0 | 26.6 | 32.7 | 45 | +23% | 0 | tank 71 / damage 29 |
-| BR050 Incendiary | 12603 | 3 | 2 | 5,040 | 0 | 13.3 | 16.5 | 50 | +24% | 14 | tank 60 / damage 40 |
-| *Spore* | 11801 | 2 | 5 | 3,550 | 0 | 3.1 | 4.0 | 45 | +26% | 14 | tank 100 |
+### Where the account's fighter TP should go
 
-> **The table above was computed per *seat* and is superseded.** Dividing by the size class was wrong
-> — it is a compatibility class, not a slot count. Per craft the order changes: the 3-size fighters
-> (Vitas B010, Stingray, BR050, Bullfrog) are worth 3× what is shown and the 1-size ones (Balance
-> Anderson, SC002) are unchanged, so **Vitas B010 521, Stingray 349, BR050 Basic 320, Bullfrog 282,
-> Strix 261, BR050 Defense 276** — Vitas B010 still leads, but Strix drops from 2nd to 5th and
-> Balance Anderson from 4th to last of the gun carriers.
+Scored **per craft** against the pirate team, then multiplied by the wing it will actually fly in.
+Compatibility does bind, but on the bay side: the account's cheapest wing platform, the **Predator
+Carrier at 4 fighters for 18 CP**, is a size≤2 bay, so the best fighters cannot fly from it.
+
+Fighter bays the account has, stock fits:
+
+| accepts | bays |
+|---|---|
+| size ≤ 2 | **Predator Carrier 4F (18 CP, ×2.5)**, Eternal Heavens 3F (40 CP, ×2.0), Tundra 2F (9 CP), Ceres 2F (8 CP) |
+| size ≤ 3 | **CV3000 5F (40 CP, ×3.0)**, KCCPV2.0 Carrier 2F (16 CP) |
+| size ≤ 3, needs unlocking | **CV3000 8F (×4.5)**, Solar Whale 8F (×4.5), Solar Whale 5F, Eternal Heavens 4F, Ediacaran 2F |
+
+**Size 3 — only the CV3000, Solar Whale, KCCPV2.0 or Ediacaran can carry these.** In a CV3000 5-wing:
+
+| fighter | stock | maxed | full TP | pool | **still needs** | in a 5-wing |
+|---|---|---|---|---|---|---|
+| **Vitas B010** | 344.4 | **521.2** | 76 | 15 | **61** | **1,563** |
+| **Stingray** | 231.6 | 349.1 | 73 | **0** | **73** | 1,047 |
+| BR050 Basic | 213.5 | 320.4 | 80 | 14 | 66 | 961 |
+| Bullfrog | 191.0 | 281.9 | 70 | 0 | 70 | 846 |
+| BR050 Defense | 183.1 | 276.0 | 80 | 14 | 66 | 828 |
+| BR050 Incendiary | 39.9 | 49.5 | 50 | 14 | 35 | 148 |
+
+**Size ≤ 2 — fits every bay, including the Predator.** In a Predator 4-wing:
+
+| fighter | stock | maxed | full TP | pool | still needs | in a 4-wing |
+|---|---|---|---|---|---|---|
+| **Strix** | 175.4 | **261.4** | 82 | 14 | **68** | **653** |
+| AT021 Pulse | 141.8 | 180.4 | 54 | 0 | 54 | 451 |
+| *Vitas A021* | 79.8 | 97.6 | 45 | 15 | 30 | 244 |
+| AT021 Interfer | 58.5 | 87.4 | 53 | 0 | 53 | 218 |
+| *Newland* | 53.1 | 65.3 | 45 | 0 | 45 | 163 |
+| *Spore* | 6.3 | 7.9 | 45 | 14 | 31 | 20 |
+
+**Size 1 — fits everywhere.** Balance Anderson 48.0 → 107.9 (pool 10, needs 60); SC002 34.5 → 68.9
+(pool **38**, needs 32).
+
+### The answer
+
+1. **Vitas B010 first.** 521 per craft, 49% clear of the next fighter, and it is the one the CV3000
+   exists to carry. Pool 15 of 76 — **61 points**.
+2. **Stingray second, and it has a pool of zero.** 349 per craft *and* three-way system damage
+   (primary weapon 35%/+125%, command 30%/+125%, propulsion 30%/+200%), so the hit-point score
+   understates it. **73 points.**
+3. **Strix is not a wasted investment** — it is the best fighter the Predator Carrier can take, and
+   the Predator is 4 fighters for 18 CP against the CV3000's 5 for 40. Keep going: **68 points.**
+4. **SC002 is the misallocation.** It holds **38 points, the largest fighter pool on the account**,
+   and finishes 13th of 14 per craft. Same shape as the Void Elfin: a reset candidate.
+5. The three *italicised* system-damage specialists hold 29 points between them that this score can
+   neither justify nor condemn — see below.
+
+**Before any of that, though: unlocking the CV3000's 8-fighter module takes its wing multiplier from
+×3.0 to ×4.5.** That is +50% on every fighter in it, more than any amount of TP buys, and it costs a
+module rather than points.
 
 ### The triangle rule: a wing is worth T(n), not n
 
@@ -257,17 +290,3 @@ not exist is a score that combines it with hit-point damage.
 **Stingray and BR050 Basic are the ones that do both** — a real gun *and* three-way system damage —
 and Stingray has a pool of 0.
 
-### Reading it against the account
-
-- **Vitas B010 is the best fighter per seat** and has 15 of the 76 it wants. Note that **Vitas A and
-  Vitas B are separate families** (115xx and 116xx), so their 15-point pools are independent — A's 15
-  is sitting on a propulsion-killer whose score here is meaningless, B's on the best gun fighter.
-- **Strix is second per seat on only 2 seats**, and does heavy command damage as well. Pool 14 of 82.
-- **Stingray has a pool of 0** and is third per seat while also doing three-way system damage — the
-  fighter equivalent of the SLevi9 gap.
-- **SC002 holds 38 points, the largest fighter pool on the account**, and ends 9th of 14 per seat.
-  Like Void Elfin, worth a second look: its +100% gain is almost entirely tank (94%), bought on a
-  1-seat 2,850-HP body with 50 evasion. That may well be the point of it, but it is not damage.
-- **Balance Anderson gains +125%, the most of any fighter**, but 94% of that is tank and the thing it
-  is actually for — interfering with enemy accuracy — is not scored at all. Its 107.9 means "survives
-  well for one seat", not "the interference works". This is the open EW question in `data/tp.md`.
