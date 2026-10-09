@@ -400,3 +400,72 @@ not exist is a score that combines it with hit-point damage.
 **Stingray and BR050 Basic are the ones that do both** — a real gun *and* three-way system damage —
 and Stingray has a pool of 0.
 
+
+## Three new families on the oldest account (2026-10-09)
+
+### Pangu — a bodyguard capital, not a gunship
+
+**Megrez / Pangu Phecda** (61301, 盘古天权), battlecruiser, 35 CP, **191,970 HP**, armour 240 — the
+highest hit points of any battlecruiser in the tables, against a single 200-damage ×4 missile mount.
+That imbalance is the point. It carries the game's **escort mechanic**, which nothing else on the
+account has:
+
+| effect | what it is |
+|---|---|
+| `EFFECT_SHIP_PANGU_ESCORT_COVER` ×3 | three separate *cover* skills (95600, 95660, 95670) |
+| `EFFECT_SHIP_PANGU_ESCORT_ADD_SELF_BUFF` ×2 | buffs itself while covering |
+| `EFFECT_SHIP_PANGU_ESCORT_ADD_TARGET_BUFF` | buffs the ship it is covering |
+| elsewhere in the tables | `..._ADD_COUNT`, `..._ADD_TIME`, `..._REPAIR_TARGET_ADD`, `..._STAGE`, `EFFECT_PANGU_SHARE_REPAIR_EFFICIENCY` |
+
+So a Pangu hull **takes damage aimed at another ship** and buffs both ends of that arrangement, with
+upgrades that extend how many ships it covers, for how long, and whether it repairs them. It is the
+properly-designed version of what the Carilion Special tank was being asked to do: a hull that soaks
+damage *for someone else* rather than merely surviving itself. It also brings 3 corvettes, a drone,
+and +70/+80% aircraft attack.
+
+The one thing not readable here is the magnitude — the parameters are skill ids (95600, 956201 …) and
+the skill table has not been extracted, so how much it covers and for how long is unknown. Only
+**Alioth-class Type B** (52002) shares the mechanic, at a smaller scale.
+
+### Ranger — an anti-aircraft cruiser, a gun cruiser, and a cruise liner
+
+| variant | id | CP | what it is |
+|---|---|---|---|
+| **Ranger Composite** | 51301 | 16 | **anti-aircraft**: `WEAPON_ATK_AIRCRAFT_HIT_RATE_INC` **+100%**, +40, +63 and `AIRCRAFT_WEAPON_ATTKACK_ADD` +85, +50, on four guns (450×2, 225, 85, 25×2) |
+| Ranger Ion | 51302 | 18 | a straight gun cruiser: 750 ion + 700 energy, armour-ignoring, no AA |
+| Ranger Cruiser | 51303 | 18 | 游骑兵**游轮** — 游轮 is a *cruise liner*. **No weapons at all**, armour 0, energy resist 0, 73,260 HP. Not a warship. |
+
+All three are 73,260 HP cruisers. The **Composite is the interesting one**: +100% hit rate against
+aircraft is the largest anti-air modifier seen so far, and the 98 CP pirate team fields four
+Stingrays, which is the threat `data/tp.md` has had open as "ship-vs-aircraft AA not decoded".
+
+### "Thassa EW" — best match is the Antontas Command Ship, unconfirmed
+
+**Antontas Command Ship** (60801, 安东塔斯指挥舰 — the 塔斯 reads "tas"), battlecruiser, 35 CP,
+173,600 HP, armour 240. Not a jammer: it is a **command hull**, carrying **3 drones + 3 corvettes**,
+`AIRCRAFT_WEAPON_ATTKACK_ADD` +40 and +60, `EFFECT_BURST_INJURY_DEC 30` (takes 30% less *crit*
+damage), `ENERGY_INJURY_DEC 20`, `SHIP_ARMOR_REPAIR_INC 25`, and a skill-on-attack, with a
+1,000-damage railgun as its main gun.
+
+**This identification is a guess from the transliteration and should be checked** — no hull in the
+tables is named Thassa under any of the four name fields. If it is a different ship, say so and it can
+be looked up properly.
+
+## Resets cap at 50 points
+
+Chris's AC721, 2026-10-09: **205 TP on the family, 184 committed, and a reset returns only 50.** So
+21 points are the unremovable kind — and, far more importantly, **a reset is capped at 50 points
+however much is in the hull**. On a 184-point investment that recovers 27%.
+
+That makes resets much worse than `data/tp.md` assumed. They are not "expensive but a clean slate";
+they are expensive *and* partial, and the more a hull has absorbed the worse the ratio gets. On this
+account the practical conclusion is that committed TP is close to permanent and the only real decision
+is where the next points go.
+
+**The 184 also confirms the pool model.** No single AC721 variant can absorb 184 — the tools give
+Logistics 118, Missile 134, Amphibious 123, Ion 131 — so the 184 is **split across variants**, which
+is exactly what Chris does with this family: *"you can use both the A and B models, as the A is the
+hauler and helps mining while the B is the corvette carrier, a cheap way to bring in corvettes
+early."* So a family pool can be **concentrated** on one variant (NebulaChaser, 44 all in the Pulse)
+or **split** across several (AC721, 184 over at least two), and the per-variant capacity the tools
+compute is consistent with the game's own number.

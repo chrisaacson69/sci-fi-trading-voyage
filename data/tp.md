@@ -142,9 +142,12 @@ table covers all eight types after all, and nothing is missing.
    (066), KCCP, ST59, CV3K, CVM (the M011 corvettes), 11003 (II003)**. SC002 was assumed to be one
    and turns out not to be — a reset on it would free 25 of its 38 points. This list is read off the
    game, not derived, and is the hard constraint on any reallocation plan.
-4. **A reset is not actually available.** Chris, 2026-10-09: he has none, and buying one is too
-   expensive to justify for a side event. So every recommendation here is about where the NEXT points
-   go, not about moving the ones already committed.
+4. **A reset is capped at 50 points, and none is available anyway.** Chris's AC721, 2026-10-09:
+   205 TP on the family, 184 committed, and a reset returns **only 50** — 27% of what is in it, with
+   21 of the rest being the unremovable kind. So a reset is not a clean slate but a partial refund
+   that gets worse the more a hull has absorbed. He has none and buying one is not worth it for a
+   side event, so **every recommendation here is about where the NEXT points go**, never about
+   recovering committed ones.
 5. **A family's pool is shared and can be directed at one variant** — see the README on `tp` vs
    `tp_pool`.
 6. **A full playthrough fields 10+ hulls**, plus up to 125 aircraft across ~12 types. Maxing one or
