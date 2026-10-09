@@ -35,7 +35,10 @@ py -3 trade_routes.py --selftest               # values checked by hand
   (Carilion, Reliat, FG300, Trader, Mare\*) are hard-capped at +15%, while every 16-20 CP cruiser
   reaches +30% for **6 TP**. Since fleet speed is the mean, that is +30% credits/hr for 6-12 TP a
   ship against 106-150 TP for a weapon max, so engines come first. Also holds the Quaoar
-  railgun-vs-torpedo A/B and the maxed Io / Carilion figures.
+  railgun-vs-torpedo A/B, the maxed Io / Carilion figures, and the **cost of battle time**: each
+  battle minute is ~2% of the hourly rate, so a 30-minute fight costs 38% of the hour. That is why
+  a maxed Carilion Special tank fleet loses despite halving incoming damage - it needs 135 minutes
+  to kill the 98 CP pirate team, against 2.5 minutes for 5x Io A.
 - **`data/encounters.csv`** logs pirate attacks, one line per trip or attack. Safe trips count too. Nothing reads it yet; it's the evidence a pirate model will be calibrated from.
 
 In the price files:
