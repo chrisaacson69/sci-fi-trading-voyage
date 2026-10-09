@@ -155,6 +155,61 @@ Reading it against what the account has actually done:
   the skill they grant (9158 targeting confusion vs 9159 early warning) and nothing here scores
   skills. The model cannot tell them apart; do not read the tie as "they are the same hull".
 
+## Where the account's corvette TP should go
+
+Corvettes have **no size class** — they take boat seats (`EFFECT_CARRIER_BOAT`), and any corvette fits
+any boat bay. So unlike the fighters there is no compatibility split; there is only the wing size.
+
+Boat bays the account has:
+
+| carrier | CP | stock | unlocked | wing ×(n+1)/2 |
+|---|---|---|---|---|
+| **Solar Whale** | 55 | **6** | 6 | **×3.5** |
+| Jaeger Carrier | 20 | 4 | 4 | ×2.5 |
+| XT 20 Escort | 18 | 4 | 4 | ×2.5 |
+| CV3000 | 40 | 3 | 3 | ×2.0 |
+| AC721 Amphibious | 12 | 2 | 2 | ×1.5 |
+| Guardian Amphibious | 14 | 2 | 2 | ×1.5 |
+| 066 Carrier | 18 | 2 | 2 | ×1.5 |
+| Spear of Uranus / FSV830 / Ediacaran / Megrez | 35–40 | **none** | 3 | — |
+
+The **Jaeger Carrier at 4 seats for 20 CP** is the efficient platform; the Solar Whale's 6-seat bay is
+the biggest multiplier but costs 55 CP. Four hulls carry no boats at all until the module is unlocked.
+
+| corvette | stock | maxed | full TP | pool | **still needs** | in a 6-wing |
+|---|---|---|---|---|---|---|
+| **Cellular Defender** | 182.3 | **311.5** | 79 | 36 | **43** | **1,090** |
+| **NebulaChaser Pulse** | 176.2 | 280.9 | 77 | 44 | **32** | 983 |
+| CVT800 | 179.9 | 261.3 | 78 | 37 | 41 | 914 |
+| **SLevi9** | 157.0 | 248.1 | **118** | **0** | **118** | 868 |
+| RedBeast | 110.2 | 204.6 | 106 | 35 | 71 | 716 |
+| Void Elfin | 78.7 | 129.4 | 76 | 34 | 41 | 453 |
+| NebulaChaser Ball | 63.9 | 94.0 | 63 | 44 | 19 | 329 |
+| CVM011 Miss / Can / HS | 68.9 / 71.1 / 45.0 | 89.8 / 87.3 / 58.2 | 51 / 40 / 62 | 6 | 45 / 34 / 56 | 314 / 306 / 204 |
+| CV-11003 | 49.9 | 71.4 | 66 | 19 | 47 | 250 |
+| Silent Assassin (Ray) | 51.0 | 71.2 | 66 | 10 | 56 | 249 |
+| *Tempel Intf / Alert* | 42.4 | 65.8 | 76 | 0 | 76 | 230 |
+| *HaleBopp MR / Dock* | 3.8 | 4.8 | 46 | 0 | 46 | 17 |
+
+### Where the Void Elfin's 34 points actually do most good
+
+The plan was Void Elfin → SLevi9. SLevi9 is the right long-term target — 248 maxed, pool of zero — but
+its ladder is **118 TP**, the longest of any corvette, so 34 points is 29% of the way and buys the
+shallowest part of someone else's curve:
+
+| 34 points into… | before | after | gain | in a 6-wing | |
+|---|---|---|---|---|---|
+| **Cellular Defender** | 248.7 | 310.6 | **+61.9** | **+217** | 9 short of finished |
+| **NebulaChaser Pulse** | 231.2 | 280.9 | +49.6 | +174 | **finishes it** |
+| CVT800 | 218.1 | 254.8 | +36.7 | +128 | 7 short |
+| SLevi9 | 157.0 | 189.1 | +32.1 | +112 | 84 still needed |
+
+**SLevi9 is the worst of the four**, by nearly 2× against Cellular Defender — not because it is a weak
+hull, but because the other three are already 35–45 points up their curves and the steep part of
+SLevi9's is still ahead of it. Finishing Cellular Defender or NebulaChaser Pulse first, then starting
+SLevi9 with a later pool, beats splitting the difference. (If the 9 points to finish Cellular Defender
+can come from anywhere, that is the single best corvette buy on the account.)
+
 ## The mobile account's fighters
 
 **Every craft takes exactly one slot** (Chris, 2026-10-09). The 1/2/3 on a craft is a **size class** —
