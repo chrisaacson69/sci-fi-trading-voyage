@@ -31,6 +31,7 @@ py -3 trade_routes.py --selftest               # values checked by hand
 - **`data/oracle.csv`**: the game's own $/hr figure for a fleet on a route (`date,route_a,route_b,fleet,game_per_hr,bonus_pct,global_pct,notes`, fleet written like `--ships`; `bonus_pct` is the route's bonus and `global_pct` the global bonus *at the time*, since both change). `--oracle` compares each row against separate vs pooled holds, and mean vs slowest-ship fleet speed, using that day's prices (or the latest before it). Rows from another account are skipped unless you pass its `--ships-file`. `--selftest` checks the rows whose notes say CLEAN.
 - **`data/timings.csv`**: stopwatch leg times (`date,route_a,route_b,fleet,leg_seconds,notes`, one-way). `--timings` compares them with both speed models, and `--selftest` requires the default model within 2% of each.
 - **`data/craft.csv`**: the mobile account's **fighters and corvettes** — `name,ship_id,kind,cp,seats,group,hp,armor,ev,flight_speed,dpm_vs_*,role,limit,tp,tp_max,class,notes`. `kind` is FT (fighter) or CO (corvette). These are **carried craft, not fleet hulls**: they have no cargo and `flight_speed` is a flight speed, not a warp stat, which is why the columns deliberately differ from `ships.csv` and why `trade_routes.py` excludes FT and CO from route fleets (`NOT_FLEET_TYPES`). `seats` is the hangar size a fighter consumes (`EFFECT_CARRIER` = group × 100 + count); a corvette takes one boat seat (`EFFECT_CARRIER_BOAT`) and is written as 1. `group` is the hangar group that accepts it — fighters 2–5, corvettes 1. `class` is the **family**, read off the id (a craft id is family(3) + variant(2), so 126xx is BR050, 211xx M011, 209xx Nebula). `tp` is TP available to that variant as Chris read it in game, `tp_pool` is the family's shared pool (the max over its variants — see below), and `tp_max` is the most the variant's systems can absorb. Rebuild with `python tools/craft_csv.py --names <list> --out data/craft.csv` in `lagrange-combat`.
+- **`data/tp.md`** and **`data/tp_curves.csv`**: where to assign tech points. The CSV is 150 hulls with stock DPM, DPM at each quarter of the TP ladder, and the marginal DPM/TP in the first vs last quarter (`concavity`). The headline: **TP returns are NOT generally diminishing** (median concavity 0.95 — 73 hulls diminish, 54 *increase*), so what matters is *which* hull you spend on, which varies by 38× in DPM/TP — Io A is the best buy in the game per CP, the Carilion and Taurus should get none. `data/tp.md` has the game constraints (random blueprints, expensive resets, unremovable TP on some basic hulls), the two real arguments for spreading, and what is still needed to answer the assignment question in credits rather than DPM. Rebuild with `python tools/tp_curve.py <ship ids> --csv data/tp_curves.csv` in `lagrange-combat`.
 - **`data/upgrades.md`**: what tech points buy. Warp is a **+30% cap** and responds only to
   `EFFECT_SPEED`, not `EFFECT_CURVATURE_SPEED`, which shares the same propulsion slots; 40 hulls
   (Carilion, Reliat, FG300, Trader, Mare\*) are hard-capped at +15%, while every 16-20 CP cruiser
@@ -328,6 +329,14 @@ NebulaChaser 39%, CVT800 33%, RedBeast 33%, Cellular Defender 32%, Void Elfin 29
 M011 5%. Nine of the thirty rows have no pool at all.
 
 ## Not modelled yet
+
+- **TP assignment in credits.** `data/tp.md` scores TP in DPM per hull, which cannot compare a cruise
+  level on a ballast frigate against a damage level on the core. Both need to be priced in credits per
+  hour, which `--roi` and the battle-time cost in `data/upgrades.md` now make possible. Defensive TP
+  (HP, armour, evasion, energy resistance — 50–100 TP a hull) still scores zero.
+- **Stranding risk.** Blueprints arrive randomly and resets are expensive, so TP in a hull you later
+  stop fielding is a loss. Pricing that needs a blueprint arrival rate and the reset cost; neither is
+  recorded. Nor is *which* basic hulls carry unremovable TP, and that is a hard constraint.
 
 - **Pirate attacks:** how often, how strong, how long a battle takes, and what is lost (see above).
 - **Fleet selection.** Fleets are capped at 100 CP, so the goal is to maximise cargo/CP × speed,
