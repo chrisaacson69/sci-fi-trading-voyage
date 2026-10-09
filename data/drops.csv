@@ -5,7 +5,7 @@ general,Destroyer,24.0,
 general,Corvette,15.0,
 general,Fighter,10.0,
 general,Battlecruiser,5.0,
-general,Auxiliary Ship,3.0,
+general,Auxiliary Ship,3.0,"= Tb_cfg_ship.SHIP_TYPE 7, which the tables call battleship (FSV830, Ganymede, Ediacaran). Chris 2026-10-09: the English game calls them auxiliary ships and they are not combat hulls - they are mobile bases that build small ships and aircraft for replacements. Expensive to make useful and expensive to run, and rarely seen in play."
 general,Carrier,3.0,
 standard,Cruiser,1.2,"The standard box, the '10% to get a BP' rule. Every row is EXACTLY 0.1000 x the general table to four decimals, so the standard box is P(blueprint) = 10% times the general type distribution, and the general table is the conditional. Remainder is TECH POINTS 90.0%."
 standard,Frigate,2.8,

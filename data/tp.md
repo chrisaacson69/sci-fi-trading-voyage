@@ -7,11 +7,14 @@ frigate points, destroyer points, and so on, in the proportions the blueprint dr
 `data/drops.csv`. So there is no decision to make about *which* type to invest in; the only decision
 is, given 100 cruiser points, which of **your** cruisers they go into and in what order.
 
-`lagrange-combat/tools/tp_assign.py` answers exactly that:
+And it starts with **one hull**: what order do its upgrades go in, and where do the worthwhile ones
+stop. Splitting a type's points across hulls is the second question, not the first.
 
 ```
-python tools/tp_assign.py cruiser 100 --ships <roster.csv>
-python tools/tp_assign.py frigate 60 --for trade --fleet 14 --ships <roster.csv>
+python tools/tp_assign.py "Io A"                  # the whole ladder, in buy order
+python tools/tp_assign.py 50301 --tp 40           # only what 40 points buy
+python tools/tp_assign.py "Io A" --for trade
+python tools/tp_assign.py --type cruiser --tp 100 --ships <roster.csv>   # across a type
 ```
 
 ## How value is scored
@@ -63,10 +66,35 @@ Io A spends its first 50 points on **defence**, not weapons:
 | 18–26 | hit rate vs type |
 | 27–35 | HP |
 | 37–42 | armour +30 |
-| 50+ | damage |
+| 50+ | damage, then cooldown |
 
-Because the Io already has the biggest guns in its class, another 2% of damage is worth less than not
-dying — which only shows up once survival is in the score.
+Two reasons, and Chris named both:
+
+1. **The Io lives in the front line, so lasting longer is doing its job longer.** Another 2% of damage
+   on a hull that already has the biggest guns in its class is worth less than not dying — which only
+   shows up once survival is in the score.
+2. **Its guns are spread over three systems, so damage has to be bought three times.** An enhancement
+   belongs to one system, and the Io A carries three mounts on three separate system groups
+   (5030101, group 2, group 3). The Quaoar Torpedo has both its guns on one system, so a single
+   cooldown stack lifts both.
+
+That second one is a general law, not an Io quirk. Median TP to **+50% DPM**, by how many system
+groups carry the hull's guns:
+
+| weapon systems | hulls | median TP |
+|---|---|---|
+| 1 | 26 | 23 |
+| 2 | 44 | 31 |
+| 3 | 9 | 36 |
+| 4 | 1 (Spear of Uranus) | 62 |
+
+So "how expensive is damage on this hull" is largely answered before you look at the weapons at all —
+by how many systems they sit on. `tp_assign.py` prints the count in the header for that reason.
+
+### And the tail is nearly worthless
+
+Io A's full ladder is 104 TP for +69% BV/CP, but **the first 88 carry 99% of the gain**. The last 16
+points buy 1%. That is the "good buys run out" effect in one line, and the tool marks the knee.
 
 ### 60 frigate points, for trade
 
@@ -86,6 +114,14 @@ and **54 increasing** (ST59 ×1.20, Carilion Heavy Cannon ×1.40). Curve shape i
 hull, not a law. What spreading really rests on is the two things above — the good buys run out per
 hull, and the supply is typed — plus stranding risk, below.
 
+## What the types are
+
+`SHIP_TYPE` 7 — which the client tables call *battleship*, and which holds FSV830, Ganymede and
+Ediacaran — is the drop table's **Auxiliary Ship** (3%). Chris, 2026-10-09: in the English game these
+are not combat hulls at all but **mobile bases**, used to build small ships and aircraft as
+replacements. Expensive to make useful and expensive to run, and rarely worth it in play. So the drop
+table covers all eight types after all, and nothing is missing.
+
 ## Constraints this has to respect (told, not derived)
 
 1. **Blueprints arrive randomly**, so TP committed to the best design you have now is stranded when a
@@ -103,9 +139,12 @@ hull, and the supply is typed — plus stranding risk, below.
 - **Fighter and corvette TP cannot be priced at all.** They are 25% of the supply (10% + 15%), and
   neither has a `playable_weapons` entry, so `tp_assign.py` has no mounts to work from. `craft.csv`
   and `craft_matrix.csv` have the stats; the gap is a craft-shaped `hull()`.
-- **Battleship is not in the drop table.** FSV830 is `SHIP_TYPE` 7 and one of the best haulers on the
-  account, so where its points come from is unknown — folded into battlecruiser or carrier, or simply
-  not shown.
+- **Are the electronic-warfare and support hulls worth their CP at all?** The Balance Anderson is
+  meant to interfere with opposing ships' accuracy, and others raise your own. Chris, 2026-10-09:
+  they pick targets randomly, and even where that randomness can be narrowed it is not clear they
+  earn their cost — "right now, these seem like they are not worth it". Settling it needs the
+  targeting model extended to the accuracy effects and a measured engagement, which is real work.
+  Until then nothing in these tools scores them, and they should not be assumed to be worth a slot.
 - **Stranding risk is not priced.** It needs a blueprint arrival rate and the reset cost, neither
   recorded, and a list of which basic hulls carry unremovable TP — a hard constraint.
 - **Combat and trade value are still separate scores.** `--roi` prices routes in credits per hour; a
