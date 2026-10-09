@@ -155,6 +155,61 @@ Reading it against what the account has actually done:
   the skill they grant (9158 targeting confusion vs 9159 early warning) and nothing here scores
   skills. The model cannot tell them apart; do not read the tie as "they are the same hull".
 
+## Scored against the right enemy: two recommendations reverse
+
+Everything above this section scores against the **large** pirate team (1010801, 98 CP: a
+battlecruiser, four cruisers, four Stingrays). The other agent's point, via Chris: *"we tend to only
+hit BC at the larger fleet sizes"* — a small fleet meets team **1010501** instead (30 CP: 4× Rager
+Torpedo, a frigate, plus a Frost Missile), and that changes the ranking enormously. `tp_assign.py
+--vs small|large`.
+
+| fighter | **small** | large | rank S | rank L | pool | |
+|---|---|---|---|---|---|---|
+| **Vitas B010** | **719.8** | **399.3** | 1 | 1 | 15 | best in both |
+| **Balance Anderson** | **592.0** | 106.1 | **2** | 8 | 10 | +6 places small |
+| **SC002** | **527.9** | 71.4 | **3** | 10 | **38** | +7 places small |
+| BR050 Basic | 513.5 | 256.8 | 4 | 3 | 14 | |
+| Stingray | 492.3 | 278.1 | 5 | 2 | 0 | |
+| AT021 Interfer | 473.4 | 71.0 | 6 | 11 | 0 | +5 places small |
+| Bullfrog | 435.1 | 221.4 | 8 | 4 | 0 | |
+| Strix | 402.3 | 201.4 | 10 | 6 | 14 | |
+
+| corvette | **small** | large | rank S | rank L | pool | |
+|---|---|---|---|---|---|---|
+| **Void Elfin** | **745.5** | 207.1 | **1** | 3 | 34 | +2 places small |
+| **Cellular Defender** | 512.5 | **255.3** | 2 | 1 | 36 | strong in both |
+| NebulaChaser Ball | 429.7 | 83.3 | 3 | 8 | 44 | +5 places small |
+| CVM011 Miss | 410.1 | 98.7 | 4 | 7 | 6 | |
+| NebulaChaser Pulse | 403.5 | 212.5 | 5 | 2 | 44 | |
+| CVT800 | 376.1 | 197.4 | 7 | 4 | 37 | |
+| SLevi9 | 360.9 | 193.8 | 9 | 5 | 0 | |
+
+### What this reverses
+
+- **The Void Elfin is not a misallocation — it is the best corvette on the account against a small
+  fleet**, 745.5 and 46% clear of the next. Its 35 evasion, and the evasion-by-weapon-type rows its
+  ladder opens with, are exactly what beats a team of four torpedo frigates and a missile destroyer.
+  Against the large team, which fields fighters with good hit rates against small hulls, that defence
+  collapses and it falls to third. **Do not reset it.**
+- **SC002's 38 points are not the misallocation either.** Third of fourteen against a small fleet,
+  tenth against a large one. Same mechanism: 50 evasion on a 1-size body. (And per Chris it is not
+  after all one of the fixed-TP hulls, so a reset would free 25 of the 38 — but there is no reset to
+  spend.)
+- **Balance Anderson jumps from 8th to 2nd**, and that is *before* counting the accuracy interference
+  it exists for, which nothing here scores. The open EW question in `data/tp.md` now looks more
+  likely to resolve in its favour than against it.
+
+Both of my "misallocation" calls were artefacts of scoring an escort against a battlecruiser.
+
+### What it does not explain: Strix
+
+Strix sits **10th against small and 6th against large** — below BR050 Basic and Bullfrog in both. So
+the by-type view does not explain preferring it over them. **Bay compatibility does**: Strix is
+size 2 and BR050 and Bullfrog are size 3, so on the account's size≤2 bays — the Predator Carrier at
+4 fighters for 18 CP, Eternal Heavens, Tundra, Ceres — neither of the other two can fly at all. Strix
+is the best fighter those bays can take, which is a correct recommendation reached by a different
+route than enemy type.
+
 ## Where the account's corvette TP should go
 
 Corvettes have **no size class** — they take boat seats (`EFFECT_CARRIER_BOAT`), and any corvette fits

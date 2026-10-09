@@ -32,6 +32,14 @@ strategies — so a score that only counts DPM cannot answer the question at all
   a weapon level.
 - **÷ CP**, because a fleet is capped in CP and never in hull count.
 
+**Which enemy you score against changes the answer more than anything else.** The other agent's
+point, which Chris relayed: *"we tend to only hit BC at the larger fleet sizes"*. So `--vs small`
+scores against pirate team 1010501 (30 CP: 4× Rager Torpedo, a frigate, plus a Frost Missile) and
+`--vs large` against 1010801 (98 CP: an Indomitable battlecruiser, two KCCPV2.0 and two 066 cruisers,
+four Stingrays). Each supplies both the thing you shoot at and the thing shooting back. Scoring a
+small-fleet escort against a 120-armour battlecruiser is simply the wrong question, and it reversed
+two of the recommendations in `data/families.md`.
+
 `--for trade` scores warp instead: fleet speed is the **mean** cruise, so a cruise level is worth its
 share of the fleet's credits per hour (`data/upgrades.md`). **`--for trade` is event-only** — in the
 normal game a fleet travels at its slowest hull and speed does not affect combat, so a cruise level
@@ -129,11 +137,17 @@ table covers all eight types after all, and nothing is missing.
 1. **Blueprints arrive randomly**, so TP committed to the best design you have now is stranded when a
    better one turns up.
 2. **Resets exist but are expensive** — not a routine move.
-3. **Some TP cannot be removed at all.** Rare, and only on the **basic hulls**; that TP survives a
-   reset, so assignment there is irreversible.
-4. **A family's pool is shared and can be directed at one variant** — see the README on `tp` vs
+3. **Some TP cannot be removed at all.** It survives a reset, so assignment there is irreversible.
+   The blueprints Chris has identified as carrying fixed TP, 2026-10-09: **FG300, AC721, CAS066
+   (066), KCCP, ST59, CV3K, CVM (the M011 corvettes), 11003 (II003)**. SC002 was assumed to be one
+   and turns out not to be — a reset on it would free 25 of its 38 points. This list is read off the
+   game, not derived, and is the hard constraint on any reallocation plan.
+4. **A reset is not actually available.** Chris, 2026-10-09: he has none, and buying one is too
+   expensive to justify for a side event. So every recommendation here is about where the NEXT points
+   go, not about moving the ones already committed.
+5. **A family's pool is shared and can be directed at one variant** — see the README on `tp` vs
    `tp_pool`.
-5. **A full playthrough fields 10+ hulls**, plus up to 125 aircraft across ~12 types. Maxing one or
+6. **A full playthrough fields 10+ hulls**, plus up to 125 aircraft across ~12 types. Maxing one or
    two hulls at the expense of the rest is not a stable distribution even where it scores well.
 
 ## Still open
