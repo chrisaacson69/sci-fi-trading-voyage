@@ -154,3 +154,71 @@ Reading it against what the account has actually done:
 - **Tempel Intf and Alert are identical at 42.4 → 65.8**, because the only thing separating them is
   the skill they grant (9158 targeting confusion vs 9159 early warning) and nothing here scores
   skills. The model cannot tell them apart; do not read the tie as "they are the same hull".
+
+## The mobile account's fighters
+
+**Scored per HANGAR SEAT, not per CP.** A fighter is 1 CP but takes 1–3 slots of a carrier's hangar
+(`seats` in `craft.csv`, and `EFFECT_CARRIER` packs group × 100 + count), so hangar size is the scarce
+resource. Per CP a 3-seat Bullfrog and a 1-seat SC002 look equally cheap, which is wrong — Vitas B010
+reads 521 per CP against 174 per seat.
+
+A fighter also only fits a hangar of its own **group** (2, 3 or 5 here), so these are not freely
+interchangeable: a carrier with group-2 bays cannot take a group-3 Strix.
+
+| fighter | id | seats | grp | HP | ev | stock | maxed | TP | gain | pool | TP split |
+|---|---|---|---|---|---|---|---|---|---|---|---|
+| **Vitas B010** | 11601 | 3 | 2 | 5,860 | 0 | 114.8 | **173.7** | 76 | +51% | 15 | damage 58 / tank 42 |
+| **Strix** | 10901 | 2 | 3 | 4,920 | 0 | 87.7 | **130.7** | 82 | +49% | 14 | damage 61 / tank 39 |
+| Stingray | 11901 | 3 | 2 | 5,200 | 0 | 77.2 | 116.4 | 73 | +51% | 0 | damage 55 / tank 45 |
+| Balance Anderson | 11401 | 1 | 5 | 3,450 | 50 | 48.0 | 107.9 | 70 | **+125%** | 10 | tank 94 / damage 6 |
+| BR050 Basic | 12601 | 3 | 2 | 5,040 | 0 | 71.2 | 106.8 | 80 | +50% | 14 | damage 62 / tank 38 |
+| Bullfrog | 10801 | 3 | 2 | 4,740 | 0 | 63.7 | 94.0 | 70 | +48% | 0 | damage 57 / tank 43 |
+| BR050 Defense | 12602 | 3 | 2 | 5,040 | 10 | 61.0 | 92.0 | 80 | +51% | 14 | damage 62 / tank 38 |
+| AT021 Pulse | 12501 | 2 | 3 | 4,920 | 0 | 70.9 | 90.2 | 54 | +27% | 0 | damage 56 / tank 44 |
+| SC002 | 10201 | 1 | 5 | 2,850 | 50 | 34.5 | 68.9 | 70 | +100% | **38** | tank 94 / damage 6 |
+| *Vitas A021* | 11501 | 2 | 3 | 5,370 | 0 | 39.9 | 48.8 | 45 | +22% | 15 | tank 78 / damage 22 |
+| AT021 Interfer | 12502 | 2 | 3 | 4,920 | 40 | 29.2 | 43.7 | 53 | +49% | 0 | tank 89 / damage 11 |
+| *Newland* | 11701 | 2 | 3 | 4,680 | 0 | 26.6 | 32.7 | 45 | +23% | 0 | tank 71 / damage 29 |
+| BR050 Incendiary | 12603 | 3 | 2 | 5,040 | 0 | 13.3 | 16.5 | 50 | +24% | 14 | tank 60 / damage 40 |
+| *Spore* | 11801 | 2 | 5 | 3,550 | 0 | 3.1 | 4.0 | 45 | +26% | 14 | tank 100 |
+
+### Four of these rows are meaningless, and it is the same failure as HaleBopp
+
+*Italicised* rows are **system-damage specialists**: their gun is a rounding error and their job is
+knocking out an enemy's modules, which a hit-point score cannot see. Decoding
+`EFFECT_SYSTEM_BURST_DAMAGE` as `G CCC MMM` (group, chance %, bonus %) — the groups Chris confirmed
+from his battle report, 1 = primary weapon, 3 = command, 5 = propulsion:
+
+| fighter | gun | system damage |
+|---|---|---|
+| Spore | **5** | primary weapon **50%/+200%**, command 15%/+100%, propulsion 30%/+200% |
+| Newland | **35** | primary weapon **60%/+250%**, command 25%/+200%, propulsion 30%/+200% |
+| Vitas A021 | **65** | propulsion **75%/+150%**, grp2 20%/+150%, primary weapon 30%/+200% |
+| Strix | 130 | command 35%/+200%, grp2 30%/+200%, primary weapon 30%/+200% |
+| Bullfrog | 250 | command 35%/+150%, grp2 35%/+100%, primary weapon 30%/+200% |
+| Stingray | 400 | primary weapon 35%/+125%, command 30%/+125%, propulsion 30%/+200% |
+| BR050 Basic / Defense | 450 | command 20%/+200%, propulsion 30%/+200%, grp2 30%/+200% |
+
+So **Spore scoring 4.0 is not a verdict** — it carries the second-highest weapon-knockout chance in
+the roster on a 5-damage gun. **Newland at 32.7** has the highest of all, 60%/+250% against primary
+weapons. **Vitas A021 at 48.8** disables propulsion 75% of the time. These are the bombers Chris
+described doing system damage to the AC721s, and `data/system_damage.md` has the mechanic; what does
+not exist is a score that combines it with hit-point damage.
+
+**Stingray and BR050 Basic are the ones that do both** — a real gun *and* three-way system damage —
+and Stingray has a pool of 0.
+
+### Reading it against the account
+
+- **Vitas B010 is the best fighter per seat** and has 15 of the 76 it wants. Note that **Vitas A and
+  Vitas B are separate families** (115xx and 116xx), so their 15-point pools are independent — A's 15
+  is sitting on a propulsion-killer whose score here is meaningless, B's on the best gun fighter.
+- **Strix is second per seat on only 2 seats**, and does heavy command damage as well. Pool 14 of 82.
+- **Stingray has a pool of 0** and is third per seat while also doing three-way system damage — the
+  fighter equivalent of the SLevi9 gap.
+- **SC002 holds 38 points, the largest fighter pool on the account**, and ends 9th of 14 per seat.
+  Like Void Elfin, worth a second look: its +100% gain is almost entirely tank (94%), bought on a
+  1-seat 2,850-HP body with 50 evasion. That may well be the point of it, but it is not damage.
+- **Balance Anderson gains +125%, the most of any fighter**, but 94% of that is tank and the thing it
+  is actually for — interfering with enemy accuracy — is not scored at all. Its 107.9 means "survives
+  well for one seat", not "the interference works". This is the open EW question in `data/tp.md`.
