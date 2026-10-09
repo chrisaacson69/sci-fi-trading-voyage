@@ -1,0 +1,129 @@
+name,cost,limit,cp,cargo,dpm,hp,cruise_min,cruise_max,warp,type,class,tp,row,notes
+大工程船,,20,40,95000,,32190,250,,1250,,大工程船,0,2,id 90301; owned blueprint; base hp; 0 extra slots unlocked; dpm/cost/upgraded hp from game UI
+中工程船,,20,20,8000,,12180,300,,1500,,中工程船,0,2,id 90201; owned blueprint; base hp; 0 extra slots unlocked; dpm/cost/upgraded hp from game UI
+小工程船,,20,10,1500,,4590,400,,2000,,小工程船,0,2,id 90101; owned blueprint; base hp; 0 extra slots unlocked; dpm/cost/upgraded hp from game UI
+Ediacaran,,2,40,105000,,240460,420,,2100,BB,Ediacaran,36,1,id 70501; owned blueprint; base hp; 1 extra slots unlocked; dpm/cost/upgraded hp from game UI
+FSV830,,2,40,185000,,180470,560,,2800,BB,FSV830,11,2,id 70301; owned blueprint; base hp; 6 extra slots unlocked; dpm/cost/upgraded hp from game UI
+Constantine the Great,,6,35,125000,,141550,400,,2000,BC,Constantine,123,1,id 60401; owned blueprint; base hp; 1 extra slots unlocked; dpm/cost/upgraded hp from game UI
+Shield of Plutus,,6,35,115000,,185720,250,,1250,BC,Shield,0,1,id 60701; owned blueprint; base hp; 0 extra slots unlocked; dpm/cost/upgraded hp from game UI
+Spear of Uranus,,6,35,115000,,180470,250,,1250,BC,Spear,0,0,id 60501; owned blueprint; base hp; 3 extra slots unlocked; dpm/cost/upgraded hp from game UI
+Eternal Storm,,6,32,120000,,146740,450,,2250,BC,Eternal,2,1,id 60201; owned blueprint; base hp; 4 extra slots unlocked; dpm/cost/upgraded hp from game UI
+Thunderbolt,,3,32,120000,,146740,400,,2000,BC,Thunderbolt,0,1,id 60601; owned blueprint; base hp; 2 extra slots unlocked; dpm/cost/upgraded hp from game UI
+ST59,,6,28,130000,,136510,450,,2250,BC,ST59,6,1,id 60301; owned blueprint; base hp; 10 extra slots unlocked; dpm/cost/upgraded hp from game UI
+Callisto Heavy,,8,20,21000,,79630,400,,2000,CA,Callisto,11,2,id 50402; owned blueprint; base hp; 0 extra slots unlocked; dpm/cost/upgraded hp from game UI
+Chimera B,,8,20,25000,,89390,450,,2250,CA,Chimera,97,0,id 50602; owned blueprint; base hp; 0 extra slots unlocked; dpm/cost/upgraded hp from game UI
+Chimera Defense,,8,20,25000,,97270,450,,2250,CA,Chimera,97,1,id 50603; owned blueprint; base hp; 0 extra slots unlocked; dpm/cost/upgraded hp from game UI
+Conamara Chaos Plasma,,8,20,20000,,71600,450,,2250,CA,Conamara,99,2,id 51202; owned blueprint; base hp; 0 extra slots unlocked; dpm/cost/upgraded hp from game UI
+Jaeger Carrier,,8,20,26000,,76190,500,,2500,CA,Jaeger,19,2,id 51101; owned blueprint; base hp; 0 extra slots unlocked; dpm/cost/upgraded hp from game UI
+Light Cone Area AA,,8,20,26000,,69570,450,,2250,CA,Light,0,1,id 50502; owned blueprint; base hp; 0 extra slots unlocked; dpm/cost/upgraded hp from game UI
+Light Cone Attack C,,8,20,25000,,69570,450,,2250,CA,Light,0,1,id 50503; owned blueprint; base hp; 0 extra slots unlocked; dpm/cost/upgraded hp from game UI
+Light Cone Composite A,,8,20,26000,,69570,450,,2250,CA,Light,0,1,id 50501; owned blueprint; base hp; 0 extra slots unlocked; dpm/cost/upgraded hp from game UI
+066 Bombardment,,12,18,25000,,63340,500,,2500,CA,066,106,1,id 50202; owned blueprint; base hp; 0 extra slots unlocked; dpm/cost/upgraded hp from game UI
+066 Carrier,,12,18,26000,,66400,500,,2500,CA,066,106,1,id 50203; owned blueprint; base hp; 0 extra slots unlocked; dpm/cost/upgraded hp from game UI
+066 General,,12,18,26000,,71600,500,,2500,CA,066,106,0,id 50201; owned blueprint; base hp; 0 extra slots unlocked; dpm/cost/upgraded hp from game UI
+066 Support,,12,18,26000,,66400,500,,2500,CA,066,106,1,id 50204; owned blueprint; base hp; 0 extra slots unlocked; dpm/cost/upgraded hp from game UI
+Callisto A,,8,18,21000,,79630,400,,2000,CA,Callisto,11,2,id 50401; owned blueprint; base hp; 0 extra slots unlocked; dpm/cost/upgraded hp from game UI
+Chimera A,,8,18,20000,,89390,450,,2250,CA,Chimera,97,0,id 50601; owned blueprint; base hp; 0 extra slots unlocked; dpm/cost/upgraded hp from game UI
+Io A,,8,18,20000,,62120,650,,3250,CA,Io,77,0,id 50301; owned blueprint; base hp; 0 extra slots unlocked; dpm/cost/upgraded hp from game UI
+Io B,,8,18,20000,,62120,650,,3250,CA,Io,77,0,id 50302; owned blueprint; base hp; 0 extra slots unlocked; dpm/cost/upgraded hp from game UI
+Io Siege,,8,18,20000,,62120,650,,3250,CA,Io,77,0,id 50303; owned blueprint; base hp; 0 extra slots unlocked; dpm/cost/upgraded hp from game UI
+Jaeger Cannon,,8,18,27000,,76190,500,,2500,CA,Jaeger,19,2,id 51102; owned blueprint; base hp; 0 extra slots unlocked; dpm/cost/upgraded hp from game UI
+Predator AA Carrier,,8,18,27000,,76190,500,,2500,CA,Predator,10,2,id 51003; owned blueprint; base hp; 0 extra slots unlocked; dpm/cost/upgraded hp from game UI
+Predator Carrier,,8,18,26000,,76190,500,,2500,CA,Predator,10,2,id 51001; owned blueprint; base hp; 0 extra slots unlocked; dpm/cost/upgraded hp from game UI
+Predator Tactical Carrier,,8,18,25000,,76190,500,,2500,CA,Predator,10,2,id 51002; owned blueprint; base hp; 0 extra slots unlocked; dpm/cost/upgraded hp from game UI
+Callisto Drone,,8,16,25000,,79630,400,,2000,CA,Callisto,11,2,id 50403; owned blueprint; base hp; 0 extra slots unlocked; dpm/cost/upgraded hp from game UI
+Conamara Chaos Railgun,,8,16,20000,,71600,450,,2250,CA,Conamara,99,1,id 51201; owned blueprint; base hp; 0 extra slots unlocked; dpm/cost/upgraded hp from game UI
+KCCPV2.0 Carrier,,12,16,22000,,52040,650,,3250,CA,KCCPV2.0,23,2,id 50104; owned blueprint; base hp; 0 extra slots unlocked; dpm/cost/upgraded hp from game UI
+KCPV Pulse,,12,16,22000,,52040,650,,3250,CA,KCPV,23,1,id 50102; owned blueprint; base hp; 0 extra slots unlocked; dpm/cost/upgraded hp from game UI
+KCPV Railgun,,12,16,25000,,52040,650,,3250,CA,KCPV,23,1,id 50103; owned blueprint; base hp; 0 extra slots unlocked; dpm/cost/upgraded hp from game UI
+KCPV-A,,12,16,25000,,52040,650,,3250,CA,KCPV-A,23,2,id 50101; owned blueprint; base hp; 0 extra slots unlocked; dpm/cost/upgraded hp from game UI
+Solar Whale,,5,55,130000,,329430,250,,1250,CV,Solar,25,1,id 80101; owned blueprint; base hp; 4 extra slots unlocked; dpm/cost/upgraded hp from game UI
+CV3000,,5,40,150000,,278340,400,,2000,CV,CV3000,75,2,id 80201; owned blueprint; base hp; 6 extra slots unlocked; dpm/cost/upgraded hp from game UI
+Marshal Crux,,5,40,150000,,278340,400,,2000,CV,Marshal,0,2,id 80301; owned blueprint; base hp; 1 extra slots unlocked; dpm/cost/upgraded hp from game UI
+天枢-TE,,5,40,150000,,311390,250,,1250,CV,天枢-TE,50,1,id 88501; owned blueprint; base hp; 3 extra slots unlocked; dpm/cost/upgraded hp from game UI
+AC721 Amphibious,,15,12,11500,,30730,800,,4000,DD,AC721,205,2,id 40104; owned blueprint; base hp; 0 extra slots unlocked; dpm/cost/upgraded hp from game UI
+Taurus Assault,,10,11,7500,,40030,650,,3250,DD,Taurus,131,0,id 40502; owned blueprint; base hp; 0 extra slots unlocked; dpm/cost/upgraded hp from game UI
+Taurus Pulse,,10,11,7000,,36040,650,,3250,DD,Taurus,131,0,id 40501; owned blueprint; base hp; 0 extra slots unlocked; dpm/cost/upgraded hp from game UI
+Eris Heavy Cannon,,10,9,8500,,30540,850,,4250,DD,Eris,108,0,id 40202; owned blueprint; base hp; 0 extra slots unlocked; dpm/cost/upgraded hp from game UI
+Guardian Pulse,,10,9,8500,,25650,650,,3250,DD,Guardian,125,0,id 41003; owned blueprint; base hp; 0 extra slots unlocked; dpm/cost/upgraded hp from game UI
+Guardian Support,,10,9,10000,,25650,650,,3250,DD,Guardian,125,1,id 41001; owned blueprint; base hp; 0 extra slots unlocked; dpm/cost/upgraded hp from game UI
+Tundra Carrier,,10,9,10000,,40030,700,,3500,DD,Tundra,128,2,id 40702; owned blueprint; base hp; 0 extra slots unlocked; dpm/cost/upgraded hp from game UI
+Tundra Tactical,,10,9,10000,,41190,700,,3500,DD,Tundra,128,2,id 40701; owned blueprint; base hp; 0 extra slots unlocked; dpm/cost/upgraded hp from game UI
+AC721 Logistics,,15,8,18000,,34140,800,,4000,DD,AC721,205,1,id 40101; owned blueprint; base hp; 0 extra slots unlocked; dpm/cost/upgraded hp from game UI
+AC721 Missile,,15,8,13000,,34140,800,,4000,DD,AC721,205,2,id 40102; owned blueprint; base hp; 0 extra slots unlocked; dpm/cost/upgraded hp from game UI
+Aldabra A,,10,8,7000,,37090,650,,3250,DD,Aldabra,143,0,id 41201; owned blueprint; base hp; 0 extra slots unlocked; dpm/cost/upgraded hp from game UI
+Aldabra B,,10,8,7000,,37090,650,,3250,DD,Aldabra,143,0,id 41202; owned blueprint; base hp; 0 extra slots unlocked; dpm/cost/upgraded hp from game UI
+Ceres Carrier,,10,8,10000,,32310,850,,4250,DD,Ceres,130,2,id 40401; owned blueprint; base hp; 0 extra slots unlocked; dpm/cost/upgraded hp from game UI
+Ceres Support,,10,8,9000,,32310,850,,4250,DD,Ceres,130,2,id 40402; owned blueprint; base hp; 0 extra slots unlocked; dpm/cost/upgraded hp from game UI
+Ceres Tactical,,10,8,9000,,32310,850,,4250,DD,Ceres,130,2,id 40403; owned blueprint; base hp; 0 extra slots unlocked; dpm/cost/upgraded hp from game UI
+Taurus Defense,,10,8,7000,,40030,650,,3250,DD,Taurus,131,0,id 40503; owned blueprint; base hp; 0 extra slots unlocked; dpm/cost/upgraded hp from game UI
+Eris Armor,,10,7,9500,,35140,850,,4250,DD,Eris,108,0,id 40203; owned blueprint; base hp; 0 extra slots unlocked; dpm/cost/upgraded hp from game UI
+Eris Cannon,,10,7,9000,,30540,900,,4500,DD,Eris,108,0,id 40201; owned blueprint; base hp; 0 extra slots unlocked; dpm/cost/upgraded hp from game UI
+Fluorite-class Info,,10,7,11000,,27960,650,,3250,DD,Fluorite-class,4,2,id 41401; owned blueprint; base hp; 0 extra slots unlocked; dpm/cost/upgraded hp from game UI
+Quaoar Railgun,,10,6,8500,,30540,850,,4250,DD,Quaoar,118,1,id 41101; owned blueprint; base hp; 0 extra slots unlocked; dpm/cost/upgraded hp from game UI
+Quaoar Torpedo,,10,6,8500,,30540,850,,4250,DD,Quaoar,118,1,id 41102; owned blueprint; base hp; 0 extra slots unlocked; dpm/cost/upgraded hp from game UI
+Winged Hussar A,,10,6,8500,,22710,700,,3500,DD,Winged,123,1,id 40801; owned blueprint; base hp; 0 extra slots unlocked; dpm/cost/upgraded hp from game UI
+Winged Hussar B,,10,6,8500,,22710,850,,4250,DD,Winged,123,2,id 40802; owned blueprint; base hp; 0 extra slots unlocked; dpm/cost/upgraded hp from game UI
+Winged Hussar 区域防空,,10,6,9000,,22710,850,,4250,DD,Winged,123,0,id 40803; owned blueprint; base hp; 0 extra slots unlocked; dpm/cost/upgraded hp from game UI
+Inostrancevia 攻坚护卫舰,,10,8,1200,,14480,800,,4000,FF,Inostrancevia,0,0,id 31803; owned blueprint; base hp; 0 extra slots unlocked; dpm/cost/upgraded hp from game UI
+Mare Imbrium Pulse,,10,8,1800,,14480,900,,4500,FF,Mare,147,1,id 31302; owned blueprint; base hp; 0 extra slots unlocked; dpm/cost/upgraded hp from game UI
+Ruby Ion Cannon,,10,8,1000,,14970,900,,4500,FF,Ruby,114,1,id 30502; owned blueprint; base hp; 0 extra slots unlocked; dpm/cost/upgraded hp from game UI
+XenoStinger Tactical,,10,8,1200,,10530,800,,4000,FF,XenoStinger,114,2,id 30401; owned blueprint; base hp; 0 extra slots unlocked; dpm/cost/upgraded hp from game UI
+Zircon,,10,8,1200,,13400,900,,4500,FF,Zircon,72,1,id 31901; owned blueprint; base hp; 0 extra slots unlocked; dpm/cost/upgraded hp from game UI
+Zircon,,10,8,1200,,13400,900,,4500,FF,Zircon,72,1,id 31902; owned blueprint; base hp; 0 extra slots unlocked; dpm/cost/upgraded hp from game UI
+M470 AA,,10,6,2000,,14000,800,,4000,FF,M470,166,2,id 30703; owned blueprint; base hp; 0 extra slots unlocked; dpm/cost/upgraded hp from game UI
+M470 Siege,,10,6,2200,,14000,800,,4000,FF,M470,166,2,id 30701; owned blueprint; base hp; 0 extra slots unlocked; dpm/cost/upgraded hp from game UI
+M470 Support,,10,6,2000,,14000,800,,4000,FF,M470,166,2,id 30702; owned blueprint; base hp; 0 extra slots unlocked; dpm/cost/upgraded hp from game UI
+XenoStinger AA,,10,6,1200,,10530,800,,4000,FF,XenoStinger,114,2,id 30402; owned blueprint; base hp; 0 extra slots unlocked; dpm/cost/upgraded hp from game UI
+Carilion Heavy Cannon,,10,5,1500,,9840,950,,4750,FF,Carilion,155,1,id 30802; owned blueprint; base hp; 0 extra slots unlocked; dpm/cost/upgraded hp from game UI
+Carilion Special,,10,5,1200,,9770,1040,,5200,FF,Carilion,155,0,id 30803; owned blueprint; base hp; 0 extra slots unlocked; dpm/cost/upgraded hp from game UI
+Mare Imbrium Basic,,10,5,1800,,14480,900,,4500,FF,Mare,147,0,id 31301; owned blueprint; base hp; 0 extra slots unlocked; dpm/cost/upgraded hp from game UI
+Mare Serenitatis A,,10,5,2000,,14970,900,,4500,FF,Mare,126,2,id 31201; owned blueprint; base hp; 0 extra slots unlocked; dpm/cost/upgraded hp from game UI
+Mare Serenitatis AA,,10,5,2200,,14970,900,,4500,FF,Mare,126,2,id 31203; owned blueprint; base hp; 0 extra slots unlocked; dpm/cost/upgraded hp from game UI
+Mare Serenitatis Missile,,10,5,1800,,14970,900,,4500,FF,Mare,126,2,id 31202; owned blueprint; base hp; 0 extra slots unlocked; dpm/cost/upgraded hp from game UI
+Ruby Defense,,10,5,1400,,17550,900,,4500,FF,Ruby,114,0,id 30503; owned blueprint; base hp; 0 extra slots unlocked; dpm/cost/upgraded hp from game UI
+Ruby Railgun,,10,5,1200,,16520,900,,4500,FF,Ruby,114,1,id 30501; owned blueprint; base hp; 0 extra slots unlocked; dpm/cost/upgraded hp from game UI
+Carilion Recon,,10,4,1800,,8340,1040,,5200,FF,Carilion,155,0,id 30801; owned blueprint; base hp; 0 extra slots unlocked; dpm/cost/upgraded hp from game UI
+Mare Nubium AA,,10,4,1800,,9030,900,,4500,FF,Mare,150,1,id 30302; owned blueprint; base hp; 0 extra slots unlocked; dpm/cost/upgraded hp from game UI
+Mare Nubium Siege,,10,4,1700,,9030,900,,4500,FF,Mare,150,2,id 30301; owned blueprint; base hp; 0 extra slots unlocked; dpm/cost/upgraded hp from game UI
+Mare Tranquillitatis Interceptor,,10,4,2000,,12360,1000,,5000,FF,Mare,105,1,id 30203; owned blueprint; base hp; 0 extra slots unlocked; dpm/cost/upgraded hp from game UI
+Mare Tranquillitatis Missile,,10,4,1800,,12360,1000,,5000,FF,Mare,105,1,id 30201; owned blueprint; base hp; 0 extra slots unlocked; dpm/cost/upgraded hp from game UI
+Mare Tranquillitatis Pulse,,10,4,1500,,12360,1000,,5000,FF,Mare,105,1,id 30202; owned blueprint; base hp; 0 extra slots unlocked; dpm/cost/upgraded hp from game UI
+Reliat A,,10,4,2000,,10530,800,,4000,FF,Reliat,127,1,id 31601; owned blueprint; base hp; 0 extra slots unlocked; dpm/cost/upgraded hp from game UI
+Reliat Energy,,10,4,1800,,10530,800,,4000,FF,Reliat,127,1,id 31602; owned blueprint; base hp; 0 extra slots unlocked; dpm/cost/upgraded hp from game UI
+Reliat Stealth,,10,4,1500,,10530,800,,4000,FF,Reliat,127,1,id 31603; owned blueprint; base hp; 0 extra slots unlocked; dpm/cost/upgraded hp from game UI
+FG300 Armored,,15,3,1500,,12540,900,,4500,FF,FG300,148,0,id 30102; owned blueprint; base hp; 0 extra slots unlocked; dpm/cost/upgraded hp from game UI
+FG300 Multipurpose,,15,3,2000,,10530,1000,,5000,FF,FG300,148,1,id 30101; owned blueprint; base hp; 0 extra slots unlocked; dpm/cost/upgraded hp from game UI
+FG300 Recon,,15,3,2200,,12540,1040,,5200,FF,FG300,148,1,id 30103; owned blueprint; base hp; 0 extra slots unlocked; dpm/cost/upgraded hp from game UI
+II003,,15,2,0,,4900,2500,,12500,FF,II003,77,0,id 20401; owned blueprint; base hp; 0 extra slots unlocked; dpm/cost/upgraded hp from game UI
+M011导弹,,15,2,0,,7500,2500,,12500,FF,M011导弹,29,0,id 21101; owned blueprint; base hp; 0 extra slots unlocked; dpm/cost/upgraded hp from game UI
+M011重炮,,15,2,0,,7500,2500,,12500,FF,M011重炮,29,0,id 21102; owned blueprint; base hp; 0 extra slots unlocked; dpm/cost/upgraded hp from game UI
+M011高速,,15,2,0,,7500,2500,,12500,FF,M011高速,29,0,id 21103; owned blueprint; base hp; 0 extra slots unlocked; dpm/cost/upgraded hp from game UI
+RB7,,10,2,0,,5200,2500,,12500,FF,RB7,92,0,id 20701; owned blueprint; base hp; 0 extra slots unlocked; dpm/cost/upgraded hp from game UI
+S-列维9,,10,2,0,,6000,2400,,12000,FF,S-列维9,106,0,id 21401; owned blueprint; base hp; 0 extra slots unlocked; dpm/cost/upgraded hp from game UI
+T800,,15,2,0,,7500,2500,,12500,FF,T800,104,0,id 21301; owned blueprint; base hp; 0 extra slots unlocked; dpm/cost/upgraded hp from game UI
+坦普尔,,10,2,0,,7100,2400,,12000,FF,坦普尔,0,0,id 21601; owned blueprint; base hp; 0 extra slots unlocked; dpm/cost/upgraded hp from game UI
+坦普尔,,10,2,0,,7100,2400,,12000,FF,坦普尔,0,0,id 21602; owned blueprint; base hp; 0 extra slots unlocked; dpm/cost/upgraded hp from game UI
+星云A,,10,2,0,,6300,2500,,12500,FF,星云A,99,0,id 20901; owned blueprint; base hp; 0 extra slots unlocked; dpm/cost/upgraded hp from game UI
+星云脉冲,,10,2,0,,5400,2500,,12500,FF,星云脉冲,99,0,id 20902; owned blueprint; base hp; 0 extra slots unlocked; dpm/cost/upgraded hp from game UI
+海尔波普,,10,2,0,,7000,2400,,12000,FF,海尔波普,0,0,id 21501; owned blueprint; base hp; 0 extra slots unlocked; dpm/cost/upgraded hp from game UI
+海尔波普,,10,2,0,,7000,2400,,12000,FF,海尔波普,0,0,id 21502; owned blueprint; base hp; 0 extra slots unlocked; dpm/cost/upgraded hp from game UI
+虚灵,,10,2,0,,5200,2500,,12500,FF,虚灵,88,0,id 21001; owned blueprint; base hp; 0 extra slots unlocked; dpm/cost/upgraded hp from game UI
+蜂巢,,10,2,0,,6650,2500,,12500,FF,蜂巢,97,0,id 20801; owned blueprint; base hp; 0 extra slots unlocked; dpm/cost/upgraded hp from game UI
+鳐,,10,2,0,,5350,2500,,12500,FF,鳐,20,0,id 20301; owned blueprint; base hp; 0 extra slots unlocked; dpm/cost/upgraded hp from game UI
+AT021-攻击,,15,1,0,,4920,3000,,15000,FT,AT021-攻击,0,0,id 12503; owned blueprint; base hp; 0 extra slots unlocked; dpm/cost/upgraded hp from game UI
+AT021-脉冲,,15,1,0,,4920,3000,,15000,FT,AT021-脉冲,0,0,id 12501; owned blueprint; base hp; 0 extra slots unlocked; dpm/cost/upgraded hp from game UI
+SC002,,15,1,0,,2850,2800,,14000,FT,SC002,91,0,id 10201; owned blueprint; base hp; 0 extra slots unlocked; dpm/cost/upgraded hp from game UI
+佩刀,,10,1,0,,4050,3500,,17500,FT,佩刀,43,0,id 12001; owned blueprint; base hp; 0 extra slots unlocked; dpm/cost/upgraded hp from game UI
+刺鳐,,10,1,0,,5200,3200,,16000,FT,刺鳐,36,0,id 11901; owned blueprint; base hp; 0 extra slots unlocked; dpm/cost/upgraded hp from game UI
+天璇战机A,,10,1,0,,5600,2400,,12000,FT,天璇战机A,0,0,id 15701; owned blueprint; base hp; 0 extra slots unlocked; dpm/cost/upgraded hp from game UI
+孢子,,10,1,0,,3550,3100,,15500,FT,孢子,47,0,id 11801; owned blueprint; base hp; 0 extra slots unlocked; dpm/cost/upgraded hp from game UI
+安德森,,10,1,0,,3450,2800,,14000,FT,安德森,20,0,id 11401; owned blueprint; base hp; 0 extra slots unlocked; dpm/cost/upgraded hp from game UI
+新大地,,10,1,0,,4680,3300,,16500,FT,新大地,39,0,id 11701; owned blueprint; base hp; 0 extra slots unlocked; dpm/cost/upgraded hp from game UI
+林鸮,,10,1,0,,4920,2800,,14000,FT,林鸮,61,0,id 10901; owned blueprint; base hp; 0 extra slots unlocked; dpm/cost/upgraded hp from game UI
+海氏,,8,1,0,,6480,3000,,15000,FT,海氏,50,0,id 11301; owned blueprint; base hp; 0 extra slots unlocked; dpm/cost/upgraded hp from game UI
+牛蛙,,10,1,0,,4740,2800,,14000,FT,牛蛙,10,0,id 10801; owned blueprint; base hp; 0 extra slots unlocked; dpm/cost/upgraded hp from game UI
+砂龙,,10,1,0,,4200,2800,,14000,FT,砂龙,16,0,id 10701; owned blueprint; base hp; 0 extra slots unlocked; dpm/cost/upgraded hp from game UI
+米斯特拉,,10,1,0,,5400,3100,,15500,FT,米斯特拉,30,0,id 12401; owned blueprint; base hp; 0 extra slots unlocked; dpm/cost/upgraded hp from game UI
+维A,,10,1,0,,5370,3300,,16500,FT,维A,56,0,id 11501; owned blueprint; base hp; 0 extra slots unlocked; dpm/cost/upgraded hp from game UI
+维B,,10,1,0,,5860,2500,,12500,FT,维B,47,0,id 11601; owned blueprint; base hp; 0 extra slots unlocked; dpm/cost/upgraded hp from game UI
