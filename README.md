@@ -30,6 +30,7 @@ py -3 trade_routes.py --selftest               # values checked by hand
 - **`data/ships.csv`**: ship types from the game's ship list: `name,cost,limit,cp,cargo,dpm,hp,cruise_min,cruise_max,warp,type,tp,notes`. `type` is the hull class (FF, DD small; CA, BC, CV cruiser and capital): a fleet mixing the two gets a warning (see Pirates). `tp` is upgrade points, shared within a class (the first word of the name) and spent on one variant; `dpm` is stock. `limit` is the build limit, a total across all your fleets, and `dpm` is damage per minute. In every row, `warp` is exactly 5 × `cruise_min`. `--ships` accepts these names, e.g. `ST59x3,FG300x2`, and then knows the fleet's CP, DPM, HP, cost and speed, and warns if you're over a build limit.
 - **`data/oracle.csv`**: the game's own $/hr figure for a fleet on a route (`date,route_a,route_b,fleet,game_per_hr,bonus_pct,global_pct,notes`, fleet written like `--ships`; `bonus_pct` is the route's bonus and `global_pct` the global bonus *at the time*, since both change). `--oracle` compares each row against separate vs pooled holds, and mean vs slowest-ship fleet speed, using that day's prices (or the latest before it). Rows from another account are skipped unless you pass its `--ships-file`. `--selftest` checks the rows whose notes say CLEAN.
 - **`data/timings.csv`**: stopwatch leg times (`date,route_a,route_b,fleet,leg_seconds,notes`, one-way). `--timings` compares them with both speed models, and `--selftest` requires the default model within 2% of each.
+- **`data/craft.csv`**: the mobile account's **fighters and corvettes** — `name,ship_id,kind,cp,seats,group,hp,armor,ev,flight_speed,dpm_vs_*,role,limit,tp,tp_max,class,notes`. `kind` is FT (fighter) or CO (corvette). These are **carried craft, not fleet hulls**: they have no cargo and `flight_speed` is a flight speed, not a warp stat, which is why the columns deliberately differ from `ships.csv` and why `trade_routes.py` excludes FT and CO from route fleets (`NOT_FLEET_TYPES`). `seats` is the hangar size a fighter consumes (`EFFECT_CARRIER` = group × 100 + count); a corvette takes one boat seat (`EFFECT_CARRIER_BOAT`) and is written as 1. `group` is the hangar group that accepts it — fighters 2–5, corvettes 1. `class` is the **family**, read off the id (a craft id is family(3) + variant(2), so 126xx is BR050, 211xx M011, 209xx Nebula). `tp` is TP available as Chris read it in game; `tp_max` is the most the variant's systems can absorb. Rebuild with `python tools/craft_csv.py --names <list> --out data/craft.csv` in `lagrange-combat`.
 - **`data/upgrades.md`**: what tech points buy. Warp is a **+30% cap** and responds only to
   `EFFECT_SPEED`, not `EFFECT_CURVATURE_SPEED`, which shares the same propulsion slots; 40 hulls
   (Carilion, Reliat, FG300, Trader, Mare\*) are hard-capped at +15%, while every 16-20 CP cruiser
@@ -267,6 +268,40 @@ not the answer. Best of each class on that route, single-type: BC 8.07M (ST59), 
 Two things this needs before the numbers are trustworthy: pirate attack rates (so `--battle-min` is
 measured rather than assumed) and confirmation that the game has no ship-count cap per fleet — the
 plans above run 13 to 16 ships, and 22 has been seen in game.
+
+## Craft names: what the account calls them vs the tables
+
+The client has no official English names for craft, so `ship_variants.csv` carries literal
+translations of the Chinese. Thirteen of the account's names needed identifying, and each was settled
+against the data rather than spelling (`ALIAS` in `tools/craft_csv.py` records the reason per row):
+
+| account name | id | how it was identified |
+|---|---|---|
+| Newland | 11701 | cn 新大地 = new land/earth; `name_en` "New Earth" |
+| Strix | 10901 | cn 林鸮 = wood owl; *Strix* is the owl genus |
+| Balance Anderson | 11401 | cn 安德森 = Anderson, the only one |
+| Vitas A021 / B010 | 11501 / 11601 | cn 维A / 维B; 维 transliterates Vee/Vita |
+| **AT021 Interfer** | **12502** | AT021-战术 has no real gun (25 dmg) but `AVOID_PROB_INC` 30 + `PRIORITY_ATTACK` 1 — an unarmed decoy, i.e. interference |
+| **HaleBopp MR / Dock** | **21501 / 21502** | the 海尔波普 pair is identical on stats; 21501 has `SHIP_PROB_ACTIVE_ON_CYCLE`, 21502 has `WEAPON_ADD_SKILL_ON_REPAIR` — repair-triggered is the dock |
+| **Tempel Intf / Alert** | **21601 / 21602** | the 坦普尔 pair differs only in the skill it grants: 21601 → 9158 `EFFECT_TARGET_PRIORITY_CONFUSION` (interference), 21602 → 9159 `EFFECT_EARLY_WARN_EFFI_ADD` 20 (alert) |
+| CV-11003 | 20401 | cn II003, read as 11003; CV = corvette |
+| RedBeast | 20701 | cn RB7 = Red Beast 7 |
+| Cellular Defender | 20801 | cn 蜂巢 = hive/honeycomb, i.e. cells |
+| NebulaChaser Ball / Pulse | 20901 / 20902 | cn 星云A (ballistic) / 星云脉冲 (pulse) |
+| Void Elfin | 21001 | cn 虚灵 = void spirit |
+
+**`Silent Assassin` is unresolved and is NOT in `data/craft.csv`.** No craft in the tables carries that
+name under any of the four name fields, and guessing one would put a wrong ship id in a file another
+agent reads. The unclaimed corvettes it must be one of: 20301 Ray (鳐), 20302 Ray SP, 20702 RB7SP,
+21201 Wildfire (野火, 240 torpedo, crit 15%/+320%), 21701 Wildfire A, 21702 Wildfire B, 22101 Shadow of
+the Somme (索姆河之影, one 550-damage direct-fire shot — the closest on flavour), 22201/22202 Megrez A/B
+(天玑A/B), 22301/22302 Sky Lance A/B (天枪A/B).
+
+**Open question: is the TP pool per variant or per family?** The account shows NebulaChaser Ball 0 and
+NebulaChaser Pulse 44 — same 209xx family, different numbers, which says per variant. But M011 reads
+6/6/6 and Vitas A/B both read 15, which fits either. BR050 came as a single number (14), so all three
+of its rows carry it. `ships.csv` says TP is "shared within a class and spent on one variant", and the
+Nebula pair contradicts that; worth one look at the game's research screen.
 
 ## Not modelled yet
 
