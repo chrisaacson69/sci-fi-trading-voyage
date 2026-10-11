@@ -245,3 +245,41 @@ systems scored zero and `maxout` left them unbought — they are its entire purp
 `EFFECT_ENERGY_INJURY_DEC` (so no hull could buy energy resistance, the only defence that exists against
 plasma and ion, armour being bypassed). `per_shot` now takes evasion per **attacking weapon type**.
 `EFFECT_BALLISTIC_INJURY_SUB` needed nothing — it is id 10033, which the model already reads as armour.
+
+## 7. The model reconstructed against a real maxed hull
+
+Chris's maxed Quaoar Railgun, 2026-10-10, with the build he actually bought — 2× damage, 3× frequency
+(the third being prefix 115 "full firepower"), the target-count row, and his two free adjustments:
+
+| | model | in game |
+|---|---|---|
+| railgun damage | 450 × (1 + 0.20 + 0.05) = **562.5** | 562 |
+| turret damage | 60 × (1 + 0.20 + 0.05) = **75.0** | 75 |
+| railgun cycle | 16.0s × (1 − 0.70) = **4.80s** | 4.8s |
+| HP | 30,540 × (1 + 0.24 + 0.05) + 40/TP × 111 = **43,836** | 43,836 |
+| railgun DPM | (562.5 − 10) × 2 × 60 / 4.8 = **13,812.5** | 13,812 |
+
+Every figure. Getting there took four corrections and produced one new convention:
+
+1. **Blank HP rows are 2.4%/level, not 2.0.** Chris's absolute numbers settle it: each of the two
+   blank HP rows adds exactly **3,664** on a 30,540 base = 12.00% at level 5.
+2. **Blank damage rows stay at 2.0%/level.** The earlier Hussar measurement (5/5 = +10%, 3/5 = +6%)
+   was right, and the apparent conflict — 562 against a predicted 540 — was the free **gun
+   adjustment** at +5%, which Chris has and which the hand-built comparison had left out. So the two
+   families genuinely use different rates, and `matrix.py` now carries both constants.
+3. **`EFFECT_ID` 1010 is `EFFECT_SHIP_SYSTEM_HP`, not ship HP.** The model was adding it to the hull's
+   hit points. It is the *per-system* pool from `data/system_damage.md`, which is why the Quaoar's
+   prefix 401 (+35%) contributes nothing to Chris's HP decomposition.
+4. **Prefix 115 counts as one of the three frequency upgrades**, which is what makes the stack −70%
+   and takes a 16.0s cycle to exactly 4.8s.
+
+**The in-game DPM display subtracts 10 points of armour.** `(damage − 10) × shots × 60 / cycle`
+reproduces 13,812 from 13,812.5. So every DPM the game shows is quoted against a 10-armour target —
+which flatters low-damage, high-rate weapons and understates big single shots, and is a different
+convention again from the "full firepower" accuracy problem in section 4. Chris also reports roughly
+2% shield in the display; the railgun line fits without it, so it is not pinned down.
+
+**Still open: 5 tech points.** His total is 111, the tools compute 106 for the same six weapon rows,
+and the gap is exactly explained if the target-count row (prefix 401) costs **15 TP rather than 10**.
+`Tb_cfg_system_enhance` gives it `ENHANCE_COST (2, 2, 2, 2, 2)` = 10, so either that field is not the
+whole price for this row or the row is not the one being read. Worth one look at the upgrade screen.
