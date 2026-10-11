@@ -119,9 +119,16 @@ spreading is not a preference, it is forced. (For combat instead, Reliat Stealth
 DPM at each quarter of the ladder, and `concavity` = marginal DPM/TP in the last quarter over the
 first.
 
-**Returns are not generally diminishing**: median concavity 0.95, with 73 hulls diminishing, 23 flat
-and **54 increasing** (ST59 ×1.20, Carilion Heavy Cannon ×1.40). Curve shape is a property of the
-hull, not a law. What spreading really rests on is the two things above — the good buys run out per
+**Returns usually do diminish, but far from always**: median concavity **0.79**, with **87 hulls
+diminishing, 23 flat and 40 increasing**. Curve shape is a property of the hull rather than a law, but
+the majority runs Chris's way.
+
+An earlier version of this file said the opposite — median 0.95, 73 against 54 — and that was a
+pricing bug, not a finding. The tools were charging an *average* cost per level where **23% of
+enhancement rows have a non-uniform cost ladder** and `1,1,2,2,2` is the second commonest shape in the
+game. Averaging it overpriced the cheap opening rungs by 60%, which flattened the early part of every
+such curve and made the late part look relatively better. Pricing the real rung steepens the openings
+and moves the median from 0.95 to 0.79. What spreading really rests on is the two things above — the good buys run out per
 hull, and the supply is typed — plus stranding risk, below.
 
 ## What the types are
@@ -131,6 +138,20 @@ Ediacaran — is the drop table's **Auxiliary Ship** (3%). Chris, 2026-10-09: in
 are not combat hulls at all but **mobile bases**, used to build small ships and aircraft as
 replacements. Expensive to make useful and expensive to run, and rarely worth it in play. So the drop
 table covers all eight types after all, and nothing is missing.
+
+## The two ladders are independent
+
+Chris, 2026-10-10: *"TP cost ≠ effect increase. I have seen +2% on 5 levels with costs like
+1,1,2,2,2."* Every enhancement carries **two** per-level sequences and they are unrelated:
+
+| | field | example | notes |
+|---|---|---|---|
+| **cost** | `ENHANCE_COST` on the enhancement row | `(1, 1, 2, 2, 2)` = 8 TP | **23% of 26,351 rows are non-uniform**; `1,1,2,2,2` is the second commonest shape at 2,416 rows |
+| **effect** | `EFFECT_PARAM_LEVEL` on the effect row | `1,200;2,400;3,600;4,900;5,1200;` = 12% | cumulative, in the units `EFFECT_PARAM` would use; **1,014 rows carry one**, and the steps are often uneven (2,2,2,3,3) |
+
+Both had been collapsed to averages, and both are now read per rung — `maxout.cost_ladder()` and
+`matrix.ladder_at()`. This matters most to the greedy allocators: the cheapest rungs on a hull are
+exactly what they should buy first, and an average hid them.
 
 ## Constraints this has to respect (told, not derived)
 
