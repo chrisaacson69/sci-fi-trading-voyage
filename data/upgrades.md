@@ -256,17 +256,28 @@ Chris's maxed Quaoar Railgun, 2026-10-10, with the build he actually bought — 
 | railgun damage | 450 × (1 + 0.20 + 0.05) = **562.5** | 562 |
 | turret damage | 60 × (1 + 0.20 + 0.05) = **75.0** | 75 |
 | railgun cycle | 16.0s × (1 − 0.70) = **4.80s** | 4.8s |
-| HP | 30,540 × (1 + 0.24 + 0.05) + 40/TP × 111 = **43,836** | 43,836 |
+| HP | 30,540 × (1 + 0.12 + 0.12 + 0.05) + 40/TP × 111 = **43,836** | 43,836 |
 | railgun DPM | (562.5 − 10) × 2 × 60 / 4.8 = **13,812.5** | 13,812 |
 
 Every figure. Getting there took four corrections and produced one new convention:
 
-1. **Blank HP rows are 2.4%/level, not 2.0.** Chris's absolute numbers settle it: each of the two
-   blank HP rows adds exactly **3,664** on a 30,540 base = 12.00% at level 5.
-2. **Blank damage rows stay at 2.0%/level.** The earlier Hussar measurement (5/5 = +10%, 3/5 = +6%)
-   was right, and the apparent conflict — 562 against a predicted 540 — was the free **gun
-   adjustment** at +5%, which Chris has and which the hand-built comparison had left out. So the two
-   families genuinely use different rates, and `matrix.py` now carries both constants.
+1. **The per-level values are in the table and must be read, not assumed.** `EFFECT_PARAM_LEVEL`
+   carries an explicit ladder — the Quaoar's HP rows are `1,200;2,400;3,600;4,900;5,1200;`, i.e.
+   level/value pairs ending at 1200 = **12%**. **The steps are not uniform**: 2, 2, 2, 3, 3, exactly
+   as Chris described. 1,014 effect rows ship one.
+
+   This is the correction that matters most, and it is his catch. My first pass fitted a constant of
+   2.4%/level to this one hull and was about to generalise it across every hull in the model — a
+   number that is right nowhere except here. `matrix.ladder_at()` now reads the row's own ladder and
+   only falls back to a constant when a row has neither ladder nor parameter.
+
+   Worth noting against his recollection that "most HP increases are +10%": across the playable
+   hulls the HP ladders run **5% ×106 rows, 7.5% ×3, 12% ×265, 14% ×46, 15% ×2** — no 10% at all, and
+   12% is the commonest. The 5% rows look like the free adjustments. The 10% figure fits the
+   **damage** rows instead, which carry no ladder and do use 2%/level over five levels.
+2. **Damage rows have no ladder and stay at 2.0%/level.** The earlier Hussar measurement (5/5 =
+   +10%, 3/5 = +6%) was right, and the apparent conflict — 562 against a predicted 540 — was the free
+   **gun adjustment** at +5%, which Chris has and which the hand-built comparison had left out.
 3. **`EFFECT_ID` 1010 is `EFFECT_SHIP_SYSTEM_HP`, not ship HP.** The model was adding it to the hull's
    hit points. It is the *per-system* pool from `data/system_damage.md`, which is why the Quaoar's
    prefix 401 (+35%) contributes nothing to Chris's HP decomposition.
