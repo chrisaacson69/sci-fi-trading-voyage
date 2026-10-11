@@ -25,13 +25,28 @@ two different effects:
 | 2103 | 1 + 2 | both, at +7% | |
 | 2106 | 10001 | `EFFECT_BATTLE_SHIP_SPEED_INC` +75% | in-combat movement only |
 
-**Anchor:** the Io A reads 650 → 845 warp in game = +30% = exactly two `EFFECT_SPEED` rows at +15%.
-So warp responds to effect id 1 only, and +30% is the ceiling — there is no third row to buy.
+**Anchors, and they separate the two stats cleanly:**
+
+- The Io A reads **650 → 845** in game: its `SPEED` stat, +30%, exactly two `EFFECT_SPEED` rows.
+- Chris's maxed Quaoar Railgun, 2026-10-10, shows **both numbers at once** — speed **850 → 1105**
+  (×1.3000, two `EFFECT_SPEED` rows) and warp **4,250 → 4,887** (×1.1499, **one**
+  `EFFECT_CURVATURE_SPEED` row). Its propulsion limit is 3, and 2 + 1 = 3. Every digit fits.
+
+So the in-game **"speed" figure is the `SPEED` stat that `EFFECT_SPEED` raises, and the separate
+"warp" figure is the curvature stat** — they are only equal (warp = 5 × speed) on a stock hull, and an
+upgrade splits them. +30% is the ceiling on `SPEED`; there is no third row to buy. Trade travel
+follows `SPEED`, which the Io stopwatch test established independently.
+
+An earlier version of this file called the `EFFECT_SPEED` gain a "warp" gain and tabulated the Quaoar
+as 4,250 → 5,525. That was the two stats conflated: the hull's *speed* goes 850 → 1,105 and its
+*displayed warp* only 4,250 → 4,887, because the three propulsion slots cannot hold two of each.
 
 The propulsion system has an `ENHANCEMENTS_LIMIT`, so the two stats compete for the same slots, and a
 hull that lists only ONE `EFFECT_SPEED` row is hard-capped at +15% however much TP you throw at it.
 
 ### What each hull can reach
+
+Reachable `EFFECT_SPEED` gain (the *speed* stat, not the displayed warp):
 
 | reachable | TP | hulls |
 |---|---|---|
