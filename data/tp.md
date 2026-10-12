@@ -131,6 +131,32 @@ such curve and made the late part look relatively better. Pricing the real rung 
 and moves the median from 0.95 to 0.79. What spreading really rests on is the two things above — the good buys run out per
 hull, and the supply is typed — plus stranding risk, below.
 
+## Reading an account's blueprint list (Chris, 2026-10-12)
+
+The format Chris uses for an account's blueprints. `py -3 blueprints.py <account>` parses the verbatim
+`data/blueprints/<account>_raw.txt` into `data/blueprints/<account>.csv`; an optional third column gives the class.
+
+- **Name + letter** (`KCCPA`, `IO A`): the family and its variant, A-D. A is the base hull and the
+  letters follow ship-id order (Taurus A = id 40501, B = 40502, ...). Variants of a family **share
+  one TP pool**, so the number repeats across them; count it once per family.
+- **A whole number** is the family's available TP, and means the variant is **owned**.
+- **A decimal** (`0.35`) means the variant is **not owned yet**: the fraction of its unlock done.
+  When a drop picks a family, you always get the base hull; each variant has a 20-100% chance per pick,
+  and the decimal is the progress toward it.
+- **Capital ships read `TP/modules`** (`16/9`): TP awarded, then modules owned. A repeat pick of a
+  capital gives an extra module, not a second hull. Every capital starts with 2 modules, except the
+  Solar Whale and Thunderbolt with 3. So ST59 `16/9` is 16 TP and 7 earned modules: **8 BP** (the hull plus 7).
+
+BP per account = owned non-capital variants + for each capital (1 + modules earned). On DelA5Hades
+that gives 89 BP against 1,091 TP, about 1:12 (Cnc04Cavalry: 81 BP, 572 TP, about 1:7), not the 1:9 the boxes suggest
+(`drops.csv`: a box is 10% blueprint, 90% TP). Repeat picks are the reason: a duplicate variant is not
+a new BP.
+
+**TP/BP rises with account age (Chris).** 11 BP come from play rather than boxes, so a young
+account sits below the boxes' 9:1 (Cnc04Cavalry, 7.1). As it ages, repeat picks add TP or modules but
+no new BP, so the ratio climbs (DelA5Hades, 12.3). Total TP is a fair measure of an account's age
+and strength. Six accounts in all; two are recorded so far.
+
 ## What the types are
 
 `SHIP_TYPE` 7 — which the client tables call *battleship*, and which holds FSV830, Ganymede and
