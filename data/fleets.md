@@ -520,3 +520,39 @@ account's only route to a size-3 bay.
 
 Craft still unused after both fleets and the Whales: 10 Bullfrog, 15 AT021 Attack, 10 Wood Owl,
 15 AT021 Pulse, 10 Vee A, and the rest of the low tail. **The binding constraint is bays, not craft.**
+
+## Yes — swapping out weaker ships to spend the stranded CP is worth +5.3%
+
+Chris's suggestion, tested by local search from the greedy solution: try every (drop n of X, add m of
+Y) that fits the cap and the build limits, keep anything that raises `total DPM × total HP`.
+
+**CA fleet: +5.26%, and it is exactly the swap he proposed.**
+
+| | change | CP |
+|---|---|---|
+| 066 Bombardment | 4 → **2** | −36 |
+| **Ranger Composite** | 0 → **3** | +48 |
+| | | **400 CP used, nothing stranded** |
+
+Strength **3.48e11 → 3.66e11**. The 066 has the higher BV/CP (1,153 against the Ranger's 1,088), which
+is why the greedy preferred it — but the greedy maximises value per point one ship at a time, and the
+fleet is scored on the *product* of its totals. The Ranger Composite carries 632,968 HP across 8 hulls
+against the 066's narrower profile, and shifting the balance toward hit points raises the product even
+at slightly lower BV/CP. **BV/CP ranking is a good heuristic, not the optimum.**
+
+**FF/DD fleet: the +1.3% the search found is an artefact — ignore it.** It proposed dropping 7 Winged
+Hussar A for 6 Eris Armor, having given the Eris Armor the family pool that the Eris Heavy Cannon
+already holds. Under the real rule, with the pool committed to the Heavy Cannon:
+
+| | BV/CP with the pool | **at 0 TP** |
+|---|---|---|
+| Eris Heavy Cannon (9 CP) | 1,209 | 644 |
+| Eris Armor (7 CP) | 1,060 | **564** |
+| Winged Hussar A (6 CP) | — | **1,195** |
+
+Eris Armor at 564 against the Winged Hussar's 1,195: the swap is less than half as good, not better.
+The greedy FF/DD fleet stands as it is.
+
+That is the same trap as the original composition, and it is worth stating as a rule: **any candidate
+sharing a family with a hull already in the fleet must be valued at zero TP**, and a search that
+forgets it will keep proposing the same bad swap.
