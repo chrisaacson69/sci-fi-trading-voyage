@@ -174,3 +174,70 @@ Two things to watch:
 - **The Quaoar Railgun is the best DD buy and is not in the fleet.** It is the highest BV/CP hull on
   Cnc04Cavalry (1706) and sits at 0 TP here; 38 points may well promote it into the composition, so
   the fleet is worth re-running after that spend rather than before.
+
+## DelA5Hades, after the DD spend
+
+**38 DD points on the Quaoar Railgun promote it from absent to the best hull in the fleet**, and the
+whole composition improves by **+19%**:
+
+| | ships | strength | top hull |
+|---|---|---|---|
+| Quaoar at 0 TP | 63 | 2.18e11 | Reliat Energy, BV/CP 1214 |
+| **Quaoar at 38 TP** | 62 | **2.60e11** | **Quaoar Railgun, BV/CP 1765** |
+
+Final FF/DD fleet: **10× Quaoar Railgun** (1765), 10× Reliat Energy (1214), 10× Eris Heavy Cannon
+(1209), 10× Winged Hussar A (1195), 10× Guardian Pulse (1168), 10× Ruby Railgun (1099), 2× Mare
+Serenitatis A — six hulls at their build limit.
+
+## Filling the Solar Whales: 30 corvette seats, 3 blueprints
+
+5× Solar Whale is **30 corvette seats**, and corvette build limits are 10–15, so Chris is right that it
+takes **three good corvette blueprints**. DelA5Hades has exactly three:
+
+| corvette | limit | pool | now | maxed | of |
+|---|---|---|---|---|---|
+| **Hive** | 10 | 19 | **183.2** | 261.3 | 103 |
+| **Nebula Pulse** | 10 | 23 | 156.7 | 215.0 | 79 |
+| **T800** | 15 | 14 | 150.0 | 202.0 | 80 |
+
+**10 + 10 + 10 = exactly 30.** The next one down, the Wraith at 117.0, is not needed — though it has
+the highest ceiling of the four at 210.5 from a 107-point ladder, so it is the better long-term
+target if a seat opens.
+
+## Fighters: size 2 only, and two of them are free
+
+With only a Solar Whale, every fighter bay on the account comes from a **Predator Carrier (4F, limit 8)**
+or a **Ceres Carrier (2F, limit 10)** placed in a fleet — and **both are size ≤ 2**:
+
+| fighter | size | limit | pool | now | maxed |
+|---|---|---|---|---|---|
+| **Follower** | 2 | 10 | **0** | 253.9 | 395.2 |
+| **Hayredin's Loyal** | 2 | 8 | **0** | 246.0 | 400.9 |
+| Bullfrog | **3** | 10 | 0 | 154.2 | 233.8 |
+
+**The Bullfrog cannot fly from either bay.** It is the account's third-best fighter on paper and
+unusable in practice until a size-3 bay exists — which on this account means unlocking the Solar
+Whale's 8-fighter module.
+
+The two that *can* fly are the two best, and both sit at **zero TP** against 81- and 108-point ladders.
+The 15 FT points go to the Follower (+31.3).
+
+## Reset candidates
+
+A reset moves **up to 50 TP out of one hull back into its typed pool** (Chris). Four families on
+DelA5Hades hold large pools that **no fleet hull and no craft plan uses**:
+
+| family | type | pool | recoverable |
+|---|---|---|---|
+| FG300 Recon | FF | 79 | **50** |
+| AC721 Missile | DD | 76 | **50** |
+| M470 Support | FF | 56 | **50** |
+| Mare Imbrium Pulse | FF | 48 | 48 |
+| | | | **198 TP** |
+
+That is **five times the spend that just improved the fleet by 19%**, and it is sitting in hulls the
+account does not field. Taurus Pulse (62) is a fifth candidate but appears in the fleet as a single
+ship, so check before resetting it.
+
+**Do not reset Nebula Pulse (23) or RB7 (23)** — Nebula Pulse is the second of the three corvettes
+filling the Whale seats, and RB7 is the reserve.
