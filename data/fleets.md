@@ -620,3 +620,57 @@ Every BV and BV/CP number in this file is computed against **one** enemy templat
 differ in shot size — a few big hits against many small ones — their ranking is a function of target
 armour and can invert inside the range that actually occurs. The flat-DPM energy hulls (Nebula Pulse,
 T800, Io A) are the ones whose ranking is stable.
+
+## Correction: curving only against a cruiser was unfair to the corvettes
+
+The sweep above ran the corvettes against **a cruiser out to armour 240**, which is battleship armour
+and not a target a corvette meets. Per target class, at the armour each class actually carries:
+
+| corvette | FF (arm 20) | DD (arm 30) | CA (arm 80) | BC (arm 120) |
+|---|---|---|---|---|
+| **Hive** | 3,321 | **3,562** | **3,504** | 3,194 |
+| **Nebula Pulse** | 2,838 | 2,838 | 3,172 | **3,339** |
+| **Wraith** | **2,930** | 2,601 | 1,310 | 392 |
+| RB7 | 2,397 | 2,295 | 1,995 | 1,620 |
+| T800 | 2,217 | 2,217 | 2,478 | 2,609 |
+
+**Chris on both, and both hold:**
+
+- *"the Wraith is an anti-FF/DD ship"* — 2,930 and 2,601 against frigates and destroyers, collapsing
+  to 1,310 and 392 against cruisers and battlecruisers. It is a specialist, and judging it on a
+  cruiser curve was judging it at the wrong job. Its kit says the same thing: +20 evasion vs missiles,
+  **+30 vs torpedoes**, +35 flat evasion — built to survive the small-hull weapons that frigates and
+  destroyers carry.
+- *"the RB7 has unique abilities vs CA, of all things, so it isn't so bad"* — right, and my "loses
+  91%" was an artefact of sweeping to armour 240. Across the classes it is the **flattest ballistic
+  corvette on the account**: 2,397 → 1,620 from frigate to battlecruiser, where the Wraith goes
+  2,930 → 392. Against a cruiser at 80 it still does 1,995. Its priority row also carries a **95% hit
+  rate against cruisers** (class 500), the highest in its table, against rank-1 priority on frigates
+  and destroyers — so it shoots small things first but hits big things hard when it does.
+
+So the corvette picks are **role picks, not a ranking**: Hive and Nebula Pulse are the generalists,
+the T800 is armour-proof filler, the Wraith is for small-hull content and the RB7 for mixed.
+
+## The builds agree
+
+Chris: *"the fleets you came up with are close to my builds. I did not try to squeeze 1 Ceres into the
+fleet to absorb all the fighters, and I used Taurus instead of the Guardians, and I don't think I was
+using the Q."*
+
+Three differences, and the model's case for each:
+
+| | model | Chris's build |
+|---|---|---|
+| **Quaoar Railgun** | 10×, BV/CP **1,765**, the best hull in the fleet | not used |
+| **Guardian Pulse** | 10×, 1,168 | Taurus instead |
+| **1× Ceres + 2 Follower** | 8 CP, 1,362 | not used |
+
+The Quaoar is the one that matters — it is worth 38 DD points and **+19% fleet strength**, and it was
+absent from the composition until those points were spent. The Ceres is 8 CP for a package above the
+fleet's own cutoff. The Taurus-versus-Guardian call is close enough to be taste: Taurus Pulse is 1,074
+against Guardian Pulse's 1,168, within 9%.
+
+And on armour, Chris's own framing settles the 066 question: *"it isn't bad making extra CAS066 to
+substitute when going up against higher armour — the small fleet is pretty anti-armour by design."*
+So the 066s are a **swap-in against hard targets** rather than a permanent fixture, and the Ranger swap
+is the soft-target configuration.
