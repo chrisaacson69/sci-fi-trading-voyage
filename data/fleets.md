@@ -556,3 +556,67 @@ The greedy FF/DD fleet stands as it is.
 That is the same trap as the original composition, and it is worth stating as a rule: **any candidate
 sharing a family with a hull already in the fleet must be valued at zero TP**, and a search that
 forgets it will keep proposing the same bad swap.
+
+## Armour sweep: the swap inverts, and it bites the corvettes harder
+
+Chris: *"the Ranger is kind of a small ship killer, so losing the alpha of the CAS might mean it does
+worse vs high armour… this might bite the corvettes too."* Both correct. Ballistic damage is
+`floor(max(atk − armour, 10% of table damage))`, so a hull firing many small shots loses a far larger
+share to armour than one firing few big ones, and BV/CP was computed against a single enemy template.
+
+### The 066 → Ranger swap
+
+DPM against a cruiser, at the TP each holds:
+
+| hull | CP | arm 0 | 40 | **80** | 120 | 200 | 240 |
+|---|---|---|---|---|---|---|---|
+| 066 Bombardment | 18 | 13,177 | 11,518 | 11,235 | 10,953 | 10,388 | 10,106 |
+| Ranger Composite | 16 | **13,759** | 10,115 | 6,941 | 5,637 | 3,822 | 3,056 |
+| **net fleet DPM, −2× 066 +3× Ranger** | | **+14,922** | **+7,310** | **−1,647** | **−4,995** | **−9,312** | **−11,044** |
+
+**The swap crosses over at roughly armour 65–70.** The 066 loses only 23% of its damage from armour 0
+to 240; the Ranger loses **78%**. The +5.26% the search found is real on the product metric — the
+Ranger brings enough hull to make up for it — but it is **bought against soft targets and it reverses
+against hard ones**. The pirate cruisers in the large team sit at armour 80, i.e. right at the
+crossover, so this swap is a coin-flip against the enemy it was scored on and a clear loss against
+anything tougher.
+
+**Verdict: keep the 4× 066 Bombardment unless the content is known-soft.** The 12 stranded CP is
+cheaper than the alpha.
+
+### And the corvettes flip harder
+
+| corvette | arm 0 | 40 | **80** | 120 | 200 | 240 |
+|---|---|---|---|---|---|---|
+| Hive | 5,243 | 4,204 | 3,504 | 3,021 | 2,055 | 1,572 |
+| **Nebula Pulse** | 3,172 | **3,172** | **3,172** | **3,172** | **3,172** | **3,172** |
+| **T800** | 2,478 | **2,478** | **2,478** | **2,478** | **2,478** | **2,478** |
+| RB7 | 2,907 | 2,451 | 1,995 | 1,539 | 627 | **251** |
+| Wraith | 4,009 | 2,540 | 1,310 | 372 | 372 | **372** |
+
+**The Nebula Pulse and the T800 are completely flat** — energy weapons, which the armour term does not
+touch at all. Everything else falls off a cliff: the **RB7 loses 91%** and the **Wraith 91%, flooring
+out by armour 120**.
+
+Ranked per unit, the order inverts:
+
+| at armour… | best four |
+|---|---|
+| 0 | Hive, Nebula A, Wraith, T800 |
+| 80 | Hive, **T800**, **Nebula Pulse**, RB7 |
+| 200 | **T800**, **Nebula Pulse**, Hive, RB7 |
+
+So the Whale fill — 10 Hive, 15 T800, 5 Nebula Pulse — holds up well by luck, since the T800 is
+armour-immune. But **the Jaeger wings do not**: 8 RB7 and 8 Wraith are the two worst corvettes against
+armour, and at 200 they are doing 627 and 372 against the Nebula Pulse's 3,172.
+
+**The 1 spare Nebula Pulse should be in a Jaeger before any Wraith is**, and against hard targets the
+right Jaeger wings are Nebula Pulse and T800, not RB7 and Wraith — which means trading seats with the
+Whales rather than taking what they left.
+
+### The lesson for every figure above
+
+Every BV and BV/CP number in this file is computed against **one** enemy template. Where two hulls
+differ in shot size — a few big hits against many small ones — their ranking is a function of target
+armour and can invert inside the range that actually occurs. The flat-DPM energy hulls (Nebula Pulse,
+T800, Io A) are the ones whose ranking is stable.
