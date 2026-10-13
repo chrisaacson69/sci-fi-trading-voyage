@@ -379,3 +379,57 @@ real bite — but at 1,649 BV/CP today it displaces Ranger Composite (1,088) and
 Maxing the Follower takes its package from **1,649 to 2,199, +33%**, across four Predators. Its ladder
 is 81 TP and its pool is **zero**; the 15 FT points in hand are the start of that, and it is the
 highest-leverage craft spend on the account.
+
+## Correction: reinforcements are capital CV, and the C-carriers were never priced
+
+Chris: *"capital ship CV, not ALL carriers. Why? Because 5×55 CP isn't good to squeeze into a 400 CP
+plight, while 400 CP + 5×55 CP = 675 CP. The point was that capital ships go in the reinforce slots
+— not that we can't add aircraft to standard hulls."*
+
+So the five reinforcement slots are for **capital CVs specifically**, and the reason is arithmetic:
+5× Solar Whale is **275 CP** that would never fit inside 400, and in the free slots it makes the fleet
+**effectively 675 CP**. Putting cheap carriers there would waste the slots. Adding Predators and Ceres
+to the main fleet is a separate and still-valid move — which is what the section above prices.
+
+### What survives the Whales
+
+Ranked on the fleet metric, `sqrt(DPM × HP)` per unit, the 30 Whale seats take **10 Hive + 15 T800 +
+5 Nebula Pulse**. (An earlier version of this page said 10/10/10 using the `tp_assign` scoring instead;
+the T800's limit of 15 and its 8,400 HP put it second here.)
+
+That leaves **5 Nebula Pulse, 10 RB7, 10 Wraith, 10 Nebula A, 15 M011 Missile, 15 M011 High-Speed** —
+so yes, there is plenty left for corvette carriers in the main fleet, which had not been checked.
+
+### The Jaeger is the best package on the account
+
+| package | CP | pkg DPM | pkg HP | **BV/CP** |
+|---|---|---|---|---|
+| **Jaeger Carrier + 4 Nebula Pulse** | 20 | 16,516 | 100,382 | **2,036** |
+| **Jaeger Carrier + 4 RB7** | 20 | 11,340 | 99,486 | **1,679** |
+| Jaeger Carrier + 4 Wraith | 20 | 6,779 | 99,694 | 1,300 |
+| AC721 Amphibious + 2 Nebula Pulse | 12 | 4,961 | 42,826 | 1,215 |
+| AC721 Amphibious + 2 RB7 | 12 | 3,409 | 42,378 | 1,002 |
+
+**Jaeger + 4 Nebula Pulse at 2,036 beats every line hull on the account** — the Quaoar Railgun is
+1,765 and the Io A 1,563 — and beats the best fighter package too. The AC721 Amphibious is a DD, so it
+belongs in the FF/DD fleet, and at 1,215 it clears that fleet's 1,083 cutoff.
+
+### The CA fleet, rebuilt with carriers competing
+
+| | CP | BV/CP |
+|---|---|---|
+| Jaeger Carrier + 4 Nebula Pulse | 20 | 2,036 |
+| Jaeger Carrier + 4 RB7 | 2× = 40 | 1,679 |
+| Predator Carrier + 4 Follower | 2× = 36 | 1,649 |
+| Io A | 8× = 144 | 1,563 |
+| Predator Carrier + 4 Hayredin's Loyal | 2× = 36 | 1,424 |
+| Jaeger Carrier + 4 Wraith | 2× = 40 | 1,300 |
+| 066 Bombardment | 4× = 72 | 1,153 |
+| **TOTAL** | **388** | **strength 3.48e11** |
+
+Against **2.69e11** for the carrier-free version — **+29%**. Nine carriers, 176 of the 388 CP, carrying
+**20 corvettes and 16 fighters**, and the Ranger Composite drops out entirely.
+
+So the CA fleet is close to half carriers, and that is before the five Solar Whales in the
+reinforcement slots. The thing that was missing from every earlier version of this page is that a
+carrier is not a tax on the line — **with a wing aboard it is the line.**
