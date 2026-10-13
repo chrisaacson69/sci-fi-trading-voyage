@@ -139,23 +139,100 @@ The format Chris uses for an account's blueprints. `py -3 blueprints.py <account
 - **Name + letter** (`KCCPA`, `IO A`): the family and its variant, A-D. A is the base hull and the
   letters follow ship-id order (Taurus A = id 40501, B = 40502, ...). Variants of a family **share
   one TP pool**, so the number repeats across them; count it once per family.
-- **A whole number** is the family's available TP, and means the variant is **owned**.
+- **A whole number** is the TP spent on the family (unspent TP is not in the list), and means the variant is **owned**.
 - **A decimal** (`0.35`) means the variant is **not owned yet**: the fraction of its unlock done.
-  When a drop picks a family, you always get the base hull; each variant has a 20-100% chance per pick,
-  and the decimal is the progress toward it.
+  A blueprint for a family you lack gives the base hull; a variant has a 15-100% chance per hit
+  that **accumulates** across hits; the decimal is the progress so far (0.6-0.7 is usually 2-3 hits).
+  See "How a box pick works" below.
 - **Capital ships read `TP/modules`** (`16/9`): TP awarded, then modules owned. A repeat pick of a
   capital gives an extra module, not a second hull. Every capital starts with 2 modules, except the
-  Solar Whale and Thunderbolt with 3. So ST59 `16/9` is 16 TP and 7 earned modules: **8 BP** (the hull plus 7).
+  Solar Whale, Thunderbolt, Ediacaran and Marshal Crux with 3. So ST59 `16/9` is 16 TP and 7 earned modules: **8 BP** (the hull plus 7).
 
-BP per account = owned non-capital variants + for each capital (1 + modules earned). On DelA5Hades
-that gives 89 BP against 1,091 TP, about 1:12 (Cnc04Cavalry: 81 BP, 572 TP, about 1:7), not the 1:9 the boxes suggest
+BP per account = owned non-capital variants + for each capital (1 + modules earned). On Del05Hades
+that gives 89 BP against 1,091 TP, about 1:12 (CnC04Cavalry: 81 BP, 572 TP, about 1:7; Countlesmoney: 110 BP, 1,444 TP, about 1:13; Count DeMonet: 162 BP, 4,034 TP, about 1:25; CountDeMonet: 157 BP, 4,617 TP, about 1:29), not the 1:9 the boxes suggest
 (`drops.csv`: a box is 10% blueprint, 90% TP). Repeat picks are the reason: a duplicate variant is not
 a new BP.
 
 **TP/BP rises with account age (Chris).** 11 BP come from play rather than boxes, so a young
-account sits below the boxes' 9:1 (Cnc04Cavalry, 7.1). As it ages, repeat picks add TP or modules but
-no new BP, so the ratio climbs (DelA5Hades, 12.3). Total TP is a fair measure of an account's age
-and strength. Six accounts in all; two are recorded so far.
+account sits below the boxes' 9:1 (CnC04Cavalry, 7.1). As it ages, repeat picks add TP or modules but
+no new BP, so the ratio climbs (Del05Hades, 12.3; Countlesmoney, 13.1; Count DeMonet, the first account, 24.9; CountDeMonet, 29.4). Total TP is a fair measure of an account's age
+and strength, or more exactly of how much it has been played: CnC04Cavalry started on server 425, before
+Del05Hades on 432, but missed a season or two and sits lowest. TP and boxes are earned only by logging in and taking part: side events
+(like the trading event) give some, but most TP comes from season play. So "age" here means seasons played. The player id (player screen, 11 digits) ends in
+the starting server; `data/accounts.csv` records it as `player_id`. Six accounts in all; five are recorded so far.
+
+### How a box pick works (Chris, 2026-10-13)
+
+Told, not derived; this replaces earlier guesses here (Claude assumed class changes and a 10 TP
+repeat that Chris does not use or the game does not give).
+
+**Sources.** Boxes come from playing (season play mostly; side events like the trading event some).
+TP can also be **bought**, which is how an account reaches, say, 20K TP. Most boxes are the
+**standard box**, the default below; other boxes differ in which blueprints they offer or add extras
+such as double TP.
+
+**Standard box.** It holds 2+ items. Most are in-game goods (ship experience, upgrade technologies)
+and can be ignored for blueprints. Each item rolls separately, and long ago a big box could rarely give
+more than one blueprint; not seen recently. The blueprint/TP roll:
+
+1. **Roll the class** on the type table (`drops.csv`, general row: FF 28, DD 24, CO 15, CA 12, FT 10,
+   BC 5, auxiliary 3, CV 3).
+2. **90%: one TP for that class.** You also get **one research point (RP)**.
+3. **10%: a blueprint** of that class. Then:
+   - you lack the family's **base (A) hull** → you get it, free. For a capital, you get the capital.
+   - you have the A → **choose**: a variant you lack, **+5 TP** for that hull, or **+5 RP**.
+     With every variant owned, only +5 TP / +5 RP.
+   - capital you already have → a **module** you lack, **+10 TP** for that hull, or **+5 RP**.
+   - **Variants are not automatic:** choosing one adds 15-100% toward it, and the progress
+     **accumulates** until it reaches 100%, so a variant can take several hits.
+
+**Guaranteed-blueprint box, for 15+ RP.** Same class ratios, always a blueprint, then the same choice
+as above. Before choosing you may (a) spend in-game currency to **change the class**, or (b) spend
+**5 more RP to reroll** from a narrower list, up to **twice**. Bad rolls can still leave only
+duplicates and maxed variants, forcing +5 TP / +5 RP.
+
+Chris has **never** spent currency on a class change, and nearly always takes a capital's **module**
+over its +10 TP, since few of his capitals have all their modules.
+
+**Capitals look rare in TP.** Spent TP gives capitals 4.5-7.5% on all five lists (CnC04Cavalry 7.5,
+Del05Hades 4.6, Countlesmoney 7.2, Count DeMonet 4.5, CountDeMonet 6.0) against 11% in the table. Under the rules above
+there are two reasons that is expected, before any question of luck:
+- a capital blueprint repeat becomes a **module** (BP), while a non-capital repeat chosen as TP adds
+  **+5 TP** to its class, so non-capital TP is inflated relative to capital TP;
+- TP **spent** (the list numbers) is not TP **earned** where TP was bought or came from double-TP or
+  event boxes, and those need not follow the table.
+How far the first can push capitals below 11% depends on how many +5 TP choices were taken.
+
+**TP per roll and box purchases (Chris, 2026-10-13).** Most boxes give **1 TP** per roll. Event boxes
+can give **2x TP**, and capital boxes have given 2+ TP, not always in the capital class (possibly left
+over from the older system, where a box held X items that each rolled separately). A standard box
+costs **300 proxima** (in-game currency) and is offered at **half price twice a day**; Chris buys at
+least one half-price box daily. Event boxes at **450 proxima** add extras (2x TP, a better chance at a
+particular hull); Chris usually buys the first, which is often half price (225). These are rare and,
+in Chris's view, **do not shift the odds much**, so the spent TP on the lists is close to box-earned TP,
+though how much of it was bought cannot be separated.
+
+**Season boxes and where the "excess" TP comes from (Chris, 2026-10-13).** Most season rewards are a
+**guaranteed-blueprint box**, like the RP box but with no reroll or class change on a duplicate. That
+is a large source of blueprint outcomes beyond the 10% roll, which closes the gap a box-rolls-only count
+leaves: on Count DeMonet, rolls and RP boxes alone give about 300 blueprint outcomes, while the +5 TP
+choices plus owned BP needed to dilute capitals to 4.5% come to about 650. Within a class **every
+hull is equally likely** (worked out by players elsewhere; clearer in the older system, where RP bought
+blueprints directly), so the class table is the built-in rarity. Common hulls (FG300, AC721) are hit
+over and over; with every variant owned, the choice is +5 TP or +5 RP, and Chris takes **+5 TP**
+(spending 15-25 RP on a pick to get 5 RP back feels bad). **Duplicates are therefore most of the TP
+beyond the 1-TP rolls**, and they land on the common classes, which is why capitals look rare in TP.
+**Variant misses** (a hit that only adds progress) soak up blueprint hits too, giving neither a BP nor TP.
+
+**+5 TP or +5 RP on a duplicate? (2026-10-13, unsettled)** The theory: always take RP, because capitals
+are the limit and every RP is a try at one; the small classes' TP arrives anyway. In numbers, 5 RP is a
+third of a guaranteed box, which rolls a capital 11% of the time, so **about 27 duplicates taken as RP
+buy one capital pick** (before rerolls or a class change). The question is whether 5 TP on a hull is
+worth 1/27 of a capital pick. Chris: an FG300 variant costs about **130 TP to max**, so about 400 for
+the family (Count DeMonet has spent 178), so even his biggest account is not at "useless TP" yet, and
+the FG300 would reach 400 long before a BC maxes, likely even taking RP. Full TP-to-max per hull is not
+in this repo (`tp_curves.csv` `max_tp` is the DPM ladder only); it would come from
+`lagrange-combat/tools/maxout.py`.
 
 ## What the types are
 

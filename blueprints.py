@@ -8,11 +8,11 @@ fields separated by two or more spaces (or tabs):
 
   * <name> is the family plus a variant letter, A-D (KCCPA, IO A). A is the base hull, B-D the
     variants, in ship-id order (Taurus A = id 40501). No letter = a single-variant family.
-  * <value>, a whole number: the family's available TP; the variant is owned (1 BP).
+  * <value>, a whole number: the TP spent on the family; the variant is owned (1 BP). Unspent TP is not in the list.
     Variants of a family share one TP pool, so count it once per family.
   * <value>, a decimal: the variant is NOT owned yet; the decimal is the unlock progress (0 BP).
   * <value>, TP/modules (capital ships): TP awarded, then modules owned. Repeat picks give modules,
-    so BP = 1 + modules beyond the base set (3 for the Solar Whale and Thunderbolt, 2 for the rest).
+    so BP = 1 + modules beyond the base set (3 for the Solar Whale, Thunderbolt, Ediacaran and Marshal Crux, 2 for the rest).
   * <class>, optional, first or last: FF, DD, CA, BC, CV, AUX, or F/Fighter and C/Corvette for craft.
     Without it, the type comes from KNOWN_TYPES (families already recorded in this repo).
 
@@ -28,8 +28,8 @@ from collections import OrderedDict
 from pathlib import Path
 
 DIR = Path(__file__).resolve().parent / "data" / "blueprints"
-CAPITAL_BASE_MODULES = {"Solar Whale": 3, "Thunderbolt": 3}  # every other capital starts with 2
-SPELLING = {"Mere": "Mare"}                                # MereSeren/MereTranq are the Mare families
+CAPITAL_BASE_MODULES = {"Solar Whale": 3, "Thunderbolt": 3, "Ediacaran": 3, "MarshalCrux": 3}  # every other capital starts with 2
+SPELLING = {"Mere": "Mare", "Edicaran": "Ediacaran"}                              # MereSeren/MereTranq are the Mare families
 CLASS_ALIASES = {"FIGHTER": "FT", "F": "FT", "CORVETTE": "CO", "C": "CO"}
 CLASSES = {"FF", "DD", "CA", "BC", "CV", "AUX", "FT", "CO", *CLASS_ALIASES}
 # hull type by family (variants never change type): the mobile account's roster, data/craft.csv,
@@ -60,7 +60,7 @@ NOTES = {
 
 
 def parse(lines):
-    rows, family_tp = [], OrderedDict()
+    rows, family_tp, family_seen = [], OrderedDict(), set()
     for line in lines:
         if not line.strip():
             continue
@@ -75,13 +75,17 @@ def parse(lines):
             if fixed.startswith(wrong):
                 fixed = right + fixed[len(wrong):]
         m = re.match(r"^(.*?)\s?([A-D])$", fixed)
-        family, variant = (m.group(1), m.group(2)) if m else (fixed, "")
+        lower = re.match(r"^(.*?)\s?([a-d])$", fixed)   # 'Carilionb': a lowercase letter counts only
+        if not m and lower and lower.group(1) in family_seen:  # when the family is already listed
+            m = lower
+        family, variant = (m.group(1), m.group(2).upper()) if m else (fixed, "")
+        family_seen.add(family)
         hull_type = CLASS_ALIASES.get(given_class, given_class) or KNOWN_TYPES.get(family, "")
         r = {"family": family, "variant": variant, "name_as_given": name,
              "kind": "craft" if hull_type in CRAFT else "hull", "type": hull_type, "owned": "", "unlock_pct": "",
              "tp": "", "modules": "", "base_modules": "", "modules_earned": "", "bp_earned": "",
              "notes": NOTES.get(family, "")}
-        if name != fixed:
+        if name != fixed or (variant and not name.endswith(variant)):
             r["notes"] = (r["notes"] + "; " if r["notes"] else "") + f"spelled '{name}' in the list"
         if "/" in value:
             tp, mods = map(int, value.split("/"))
