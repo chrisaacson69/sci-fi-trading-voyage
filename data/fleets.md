@@ -816,3 +816,48 @@ Three times now a composition has been wrong for the same reason: **a per-ship n
 fleet.** Standalone BV/CP ignores the fleet's DPM/HP balance; the family-pool rule ignores what the
 rest of the fleet already holds; the single-enemy score ignores target armour. The gradient fixes the
 first, the claim table the second, and the armour sweep is the check for the third.
+
+## The Mizar — a TP sink that pays, **if it is permanent**
+
+`-TE` means **temporary**, not a duplicate (Chris, 2026-10-12). That is a correction to how these
+tools read the tables — every `-TE` row was being filtered as a copy — and it also means the earlier
+Alkaid evaluation was of the right hull after all.
+
+The Mizar (开阳) is a **12 CP destroyer** and the tables hold three rows: **42001** and **42002**, the
+permanent A and B, and **49601**, the temporary one.
+
+| | CP | HP | armour | edef | weapon | DPM |
+|---|---|---|---|---|---|---|
+| Mizar A | 12 | **46,930** | **45** | 3 | one 450 torpedo | 1,834 |
+| Mizar B | 12 | 42,600 | **45** | 3 | one **550** torpedo | 2,034 |
+
+Armour 45 on a destroyer is very high — the Taurus Assault has 30, the Quaoar Railgun 20 — and the
+weapon is `WEAPON_TYPE` 6, a torpedo, so it is a projectile a screen cannot block.
+
+### At zero points it does not make the fleet; maxed it is second best
+
+Marginal value in Cnc04Cavalry's FF/DD fleet (which runs 1 DPM : 10.2 HP):
+
+| hull | CP | BV/CP | marginal per CP |
+|---|---|---|---|
+| **Mizar B, maxed (114 TP)** | 12 | **1,397** | **0.00662** |
+| XenoStinger Tactical | 8 | 824 | 0.00470 |
+| Taurus Assault (0 TP) | 11 | 832 | 0.00412 |
+| **Mizar A, 0 TP** | 12 | 773 | 0.00403 |
+| **Mizar B, 0 TP** | 12 | 776 | 0.00389 |
+
+**Untouched it is below the fleet's cutoff** — 0.00389 against the Xeno's 0.00470 — because it is even
+more hit-point-heavy than a fleet that is already HP-rich. **Maxed it is 41% above the Xeno** and
+second only to the Quaoar Railgun, at 1,397 BV/CP.
+
+So it is the sharpest TP sink on either account: **a 114-point ladder that takes it from unplayable to
+the number two hull.** Its armour profile is mid — 4,290 → 2,418 DPM from armour 0 to 240, a 44% loss,
+better than the Quaoar's 66% but nothing like the flat Xeno or Taurus Assault.
+
+### The decision rests entirely on whether this one is temporary
+
+**If the bonus Mizar is the `-TE` temporary hull, do not put a point into it.** 114 TP is more than
+the entire unspent DD pool on DelA5Hades, and it would expire with the hull. If it is the permanent
+42001/42002, it is the best destroyer-class target either account has.
+
+Worth checking which it is before anything else, because the two answers are opposite.
