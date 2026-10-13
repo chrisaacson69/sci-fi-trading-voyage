@@ -208,27 +208,44 @@ Chris settled all three on 2026-10-12, and the first two were my search being to
 **Both accounts now resolve completely — 79 of 79 and 73 of 73 — at 1,091 and 572 TP, agreeing to the
 point with the other agent's independent counts from the raw lists.**
 
-## Open: does a weapon's cycle include its lock-on?
+## Settled: the lock-on is NOT in the cycle
 
-Chris's Saber figures, 2026-10-12, match `Tb_cfg_weapon_action` field for field — the missile at 75
-damage, 1×4, 20s duration, 9s cooldown, 10s lock-on, and the AA gun at 5 damage, 3×4, 16s, 10s, 10s.
-He also reports a different DPM from the model, and there is an obvious candidate: **the cycle used
-everywhere in these tools is `duration + cooldown + flight`, and omits the lock-on entirely.**
+Chris, 2026-10-12: the Saber's AS weapon shows a **single-ship DPM of 445, computed at 10 armour**.
+That is decisive, because the two candidate cycles are far apart:
 
-| | model cycle | with lock-on | DPM today | DPM with |
-|---|---|---|---|---|
-| missile | 35s | 45s | 514 | 400 |
-| AA gun | 26s | 36s | 277 | 200 |
-| total | | | **791** | **600** |
+| cycle | formula | DPM |
+|---|---|---|
+| **35s** — duration + cooldown + flight, the model's | (75 − 10) × 1 × 4 × 60 / 35 | **445.7** ✓ |
+| 45s — the same plus the 10s lock-on | (75 − 10) × 1 × 4 × 60 / 45 | 346.7 |
 
-**225 of 344 mounts (65%) carry a non-zero lock-on**, so if it belongs in the cycle every DPM figure
-in this repo is overstated by 20–40%, and the hulls with long lock-ons are overstated worst — which
-would change rankings, not just magnitudes. The counter-argument is that a lock-on may be paid once
-when a weapon acquires its target rather than on every volley, in which case the current formula is
-right for a sustained fight and wrong only for the opening seconds.
+**445.7 against a displayed 445.** So the cycle the tools already use is right, the lock-on is paid on
+acquiring a target rather than on every volley, and **no DPM figure or ranking in this repo moves** —
+which is the good outcome, since 65% of mounts carry a lock-on and the alternative would have shifted
+everything by 20–40%.
 
-This is the single biggest open question in the model. **One number settles it: the DPM the game
-shows for either of the Saber's two weapons.** 514 or 400 for the missile, 277 or 200 for the AA.
+It also confirms the **10-armour display convention** on a second hull, independently of the Quaoar
+Railgun in `data/upgrades.md` §7. Two hulls, two weapon types, same convention.
+
+Worth recording that this went against the expectation — Chris's read was that "lock-on is always
+counted in the cycle time for fighters, but not corvettes", and his own number says otherwise for a
+fighter. The arithmetic is unambiguous.
+
+### Still unexplained: the AA gun's 398
+
+The Saber's cross AA gun reads **398 nominal per fighter**, with 15 damage total to aircraft — and 15
+is exactly 5 damage × 3 shots, one action of one launcher. The gun is `install_num` 2, 5 damage, 3×4,
+16s duration, 10s cooldown and no flight time, which gives:
+
+| | install 1 | install 2 |
+|---|---|---|
+| 26s cycle (no lock-on) | 138 | **277** |
+| 36s cycle (with) | 100 | 200 |
+
+None of them is 398. To reach it from 60 damage a cycle the cycle would have to be **9.0 seconds** —
+and 9s is exactly the *missile's* cooldown, which may be a coincidence or may mean the AA fires on a
+shared cycle. Aircraft also have "AA special armour" per Chris, which the model does not represent at
+all. The AS weapon is the one that settles the cycle question; this is a separate puzzle about how
+anti-air is counted, and it does not affect ship-to-ship DPM.
 
 ### Where the pools already in hand should go
 

@@ -284,7 +284,9 @@ Every figure. Getting there took four corrections and produced one new conventio
 4. **Prefix 115 counts as one of the three frequency upgrades**, which is what makes the stack −70%
    and takes a 16.0s cycle to exactly 4.8s.
 
-**The in-game DPM display subtracts 10 points of armour.** `(damage − 10) × shots × 60 / cycle`
+**The in-game DPM display subtracts 10 points of armour** — confirmed twice, here and independently on
+the Saber's AS weapon, whose 445 is `(75 − 10) × 4 × 60 / 35` to a tenth (`data/tp.md`). That second
+check also settled whether a weapon's lock-on belongs in its cycle: it does not. `(damage − 10) × shots × 60 / cycle`
 reproduces 13,812 from 13,812.5. So every DPM the game shows is quoted against a 10-armour target —
 which flatters low-damage, high-rate weapons and understates big single shots, and is a different
 convention again from the "full firepower" accuracy problem in section 4. Chris also reports roughly
