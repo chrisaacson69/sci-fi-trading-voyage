@@ -451,6 +451,10 @@ their place: not as carriers, but as free bodies in the second reinforcement gro
 
 ### CA fleet — 388 CP, strength 3.48e11
 
+**Reading the rows:** `2× Jaeger Carrier + 4 RB7` means **two separate Jaegers, each with a full wing
+of four** — eight RB7 in total, not four shared between them. Every bay is filled to its own capacity.
+
+
 | | CP | BV/CP |
 |---|---|---|
 | 1× Jaeger Carrier + 4 Nebula Pulse | 20 | **2,036** |
@@ -483,6 +487,29 @@ and 16 fighters**.
 
 The AC721 Amphibious never appears. At 1,215 with Nebula Pulse it clears the FF/DD cutoff on its own,
 but the corvettes it would carry are worth more in a Jaeger, and the shared pool is what decides it.
+
+### Craft accounting, checked
+
+| craft | limit | to Whales | to carriers | to the Ceres | left |
+|---|---|---|---|---|---|
+| Nebula Pulse | 10 | 5 | 4 (1 Jaeger) | — | 1 |
+| RB7 | 10 | — | 8 (2 Jaegers) | — | 2 |
+| Wraith | 10 | — | 8 (2 Jaegers) | — | 2 |
+| Follower | 10 | — | 8 (2 Predators) | 2 | **0** |
+| Hayredin's Loyal | 8 | — | 8 (2 Predators) | — | **0** |
+
+Both good fighters are fully committed; the corvettes have a handful spare.
+
+### The spare CP is stranded
+
+The CA fleet uses **388 of 400** and the FF/DD fleet **398 of 400** — and neither remainder can be
+spent. The **cheapest CA hull on the account is 16 CP** (KCCPV2.0 Carrier, KCPV ×3), so 12 CP buys
+nothing; the cheapest FF/DD is a 3 CP FG300 against 2 CP left. Trading down does not help either:
+dropping an 18 CP 066 Bombardment (BV/CP 1,153) to afford a fifth Jaeger at 20 CP would have to carry
+Nebula A at 868, which is worse.
+
+So the answer to "do we have more CP here?" is **no — 12 and 2 CP are genuinely unusable**, and the
+way to grow these fleets is more bays, not more points.
 
 ### 10 Bullfrogs are stranded
 
