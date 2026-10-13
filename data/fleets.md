@@ -325,3 +325,57 @@ the base hull. If the event's TE version has different stats, none of the above 
 checking its damage figure on the blueprint screen, since one 240-damage gun is the whole problem.
 
 The 20 TP that came with them is FF-class and should go where the FF points were already headed.
+
+## Pricing the fighter bays properly: they beat the line
+
+The earlier section costed 3 Ceres or 2 Predators for 5–6 craft. The real question is the **18
+fighters** DelA5Hades can actually field — the Follower's build limit of 10 plus Hayredin's Loyal's 8 —
+and those were never priced.
+
+Costed as **carrier + its wing as one package**, with the wing multiplier T(n)/n on the craft's damage
+(a 4-bay gives each fighter 2.5×, a 2-bay 1.5×):
+
+| package | CP | craft | pkg DPM | pkg HP | **BV/CP** |
+|---|---|---|---|---|---|
+| **Predator + 4 Follower, maxed** | 18 | 4 | 13,757 | 113,890 | **2,199** |
+| **Ceres + 2 Follower, maxed** | 8 | 2 | 4,157 | 51,160 | **1,823** |
+| Predator + 4 Hayredin's, maxed | 18 | 4 | 9,271 | 108,330 | 1,761 |
+| **Predator + 4 Follower, today** | 18 | 4 | 8,474 | 103,910 | **1,649** |
+| Ceres + 2 Hayredin's, maxed | 8 | 2 | 2,812 | 48,380 | 1,458 |
+| Predator + 4 Hayredin's, today | 18 | 4 | 6,431 | 102,110 | 1,424 |
+| Ceres + 2 Follower, today | 8 | 2 | 2,572 | 46,170 | 1,362 |
+| Ceres + 2 Hayredin's, today | 8 | 2 | 1,960 | 45,270 | 1,177 |
+
+Line hulls for comparison: **Quaoar Railgun 1,765** (best in the fleet), Reliat Energy 1,214, Eris
+Heavy Cannon 1,209, Ruby Railgun 1,099, **Mare Serenitatis A 1,083 (the cutoff)**.
+
+**Every one of the eight packages beats the cutoff, and the best beats the best line hull.** A maxed
+Predator-plus-Followers at 2,199 is 25% above the Quaoar. So carriers are not a tax on the fleet —
+**they are being under-fielded**, and should displace line hulls rather than be squeezed in after them.
+
+### Predators first, not Ceres
+
+Per CP the Ceres looks cheaper — 4.0 CP a fighter against 4.5 — but that ignores the wing. A 4-bay
+multiplies each fighter's damage by **2.5×** against a 2-bay's **1.5×**, so the Predator package is
+worth more per CP at every TP level. Chris's "4× Ceres + 2× Predator if we only want the best F" is
+the right instinct applied the wrong way round: put the **best fighters in the biggest wings**.
+
+| filling all 18 | CP | fighters | per fighter |
+|---|---|---|---|
+| **4× Predator + 1× Ceres** | **80** | **18** | 4.4 |
+| 9× Ceres | 72 | 18 | 4.0 |
+| 4× Predator | 72 | 16 | 4.5 |
+| 4× Ceres + 2× Predator | 68 | 16 | 4.2 |
+
+**4× Predator + 1× Ceres, 80 CP, all 18 fighters.** Put the 10 Followers in two Predators and the
+Ceres, and Hayredin's 8 in the other two Predators.
+
+One constraint from the hull classes: the **Predator is a CA** and the **Ceres a DD**, so the Predators
+come out of the CA fleet's 400 CP and the Ceres out of the FF/DD fleet's. 72 CP of the CA fleet is a
+real bite — but at 1,649 BV/CP today it displaces Ranger Composite (1,088) and sits just under Io A.
+
+### And this is where the FT points go
+
+Maxing the Follower takes its package from **1,649 to 2,199, +33%**, across four Predators. Its ladder
+is 81 TP and its pool is **zero**; the 15 FT points in hand are the start of that, and it is the
+highest-leverage craft spend on the account.
