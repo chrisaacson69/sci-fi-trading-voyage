@@ -861,3 +861,27 @@ the entire unspent DD pool on DelA5Hades, and it would expire with the hull. If 
 42001/42002, it is the best destroyer-class target either account has.
 
 Worth checking which it is before anything else, because the two answers are opposite.
+
+### Does the free +20 TP change it? Almost, but no
+
+Chris: *"they are giving tryouts of these types of ships, so I am not putting real TP into anything."*
+Right call, and the numbers say the tryout TP is deliberately just short.
+
+Marginal value per CP in Cnc04Cavalry's FF/DD fleet, against the XenoStinger cutoff of **0.00470**:
+
+| | 0 TP | **+20 (the tryout)** | 40 TP | maxed, 114 |
+|---|---|---|---|---|
+| Mizar A | 0.00403 | **0.00458** | 0.00484 | 0.00666 |
+| Mizar B | 0.00389 | **0.00433** | 0.00476 | 0.00662 |
+| | below | **just below** | **in fleet** | second-best hull |
+
+**+20 TP lands it at 0.00458 against a 0.00470 cutoff** — a near miss. It crosses at **40**.
+
+And the free points are spent on the wrong axis. The first 20 buy **evasion at 1 TP, evasion vs weapon
+type at 3, HP at 5**, with the first damage-side upgrade (hit vs type) not arriving until 12. The Mizar
+is already 1 DPM : 21 HP in a fleet running 1 : 10.2 — **more hit points is the one thing it does not
+need**, and that is exactly what the cheap end of its ladder sells.
+
+So the tryout shows you the hull and stops one rung short of making it fieldable, which is a
+reasonable thing for a trial to do. **Try it, do not invest**: 20 more points would get it in, but on
+a temporary hull those are 20 points that leave with it.
