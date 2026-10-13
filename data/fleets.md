@@ -674,3 +674,88 @@ And on armour, Chris's own framing settles the 066 question: *"it isn't bad maki
 substitute when going up against higher armour — the small fleet is pretty anti-armour by design."*
 So the 066s are a **swap-in against hard targets** rather than a permanent fixture, and the Ranger swap
 is the soft-target configuration.
+
+# Cnc04Cavalry
+
+Same treatment, and the account behaves completely differently — Chris: *"this one is short on hulls."*
+Built with `lagrange-combat/tools/fleet_plan.py`, which now does the whole pass in one go.
+
+## Reinforcements swallow every good craft
+
+It owns **both** capital CVs, so the ten free slots are 5× Solar Whale and 5× CV3000:
+
+| | ships | CP (free) | carries |
+|---|---|---|---|
+| Solar Whale | 5 | 275 | 30 corvettes |
+| CV3000 | 5 | 200 | **25 fighters + 15 corvettes** |
+| | | **475 CP** | **25F + 45C** |
+
+Seventy craft seats, and the account's best craft fill them **exactly**: 10 Follower, 8 Hayredin's
+Loyal, 7 Stingray for the fighters; 15 T800, 10 S Levi 9, 10 RB7, 10 Wraith for the corvettes.
+
+**So no carrier package appears in either fleet** — there is nothing left to put in a Jaeger or a
+Predator. That is the exact opposite of DelA5Hades, where the reinforcements took 30 corvettes and the
+CA fleet became half carriers. The difference is the CV3000: it carries fighters where the Whale does
+not, and five of them absorb every fighter worth flying.
+
+## CA fleet — 388 of 400 CP, strength 2.67e11
+
+| | CP | BV/CP |
+|---|---|---|
+| 8× Io A | 144 | **1,481** |
+| 8× Chimera A | 144 | 1,239 |
+| 5× Light Cone Composite A | 100 | 1,086 |
+
+## FF/DD fleet — 400 of 400 CP, strength 2.19e11
+
+| | CP | BV/CP |
+|---|---|---|
+| 10× Quaoar Railgun | 60 | **1,706** |
+| 10× Taurus Defense | 80 | 1,363 |
+| 10× Winged Hussar A | 60 | 1,115 |
+| 10× Mare Serenitatis A | 50 | 971 |
+| 10× Taurus Assault | 110 | 832 **(0 TP — Defense holds the family pool)** |
+| 5× XenoStinger Tactical | 40 | 824 |
+
+## Where "short on hulls" actually bites: the CA fleet
+
+**12 CA hulls against 31 FF/DD hulls**, and the CA list falls off a cliff after the top five:
+
+| CA hull | CP | BV/CP |
+|---|---|---|
+| Io A | 18 | 1,481 |
+| Chimera A | 18 | 1,239 |
+| Light Cone Composite A | 20 | 1,086 |
+| Conamara Chaos Railgun | 16 | 1,074 |
+| Ranger Composite | 16 | 1,044 |
+| **066 General** | 18 | **893** |
+| KCPV-A | 16 | 690 |
+
+Only three types make the fleet, 12 CP strands again, and the sixth-best CA is already 40% below the
+first. On DelA5Hades the equivalent fleet had seven entries including five carrier packages.
+
+## And the CA fleet is badly armour-exposed
+
+DPM against a cruiser as its armour rises:
+
+| hull | arm 0 | 80 | 160 | **240** | loss |
+|---|---|---|---|---|---|
+| **Io A** | 25,099 | 21,136 | 20,844 | **20,844** | **−17%** |
+| Chimera A | 12,350 | 8,080 | 5,375 | 2,670 | −78% |
+| Light Cone Composite A | 17,032 | 10,953 | 6,633 | 2,313 | −86% |
+| Ranger Composite | 11,569 | 5,223 | 3,535 | 2,350 | −80% |
+
+**Only the Io A holds**, because it is energy and the armour term does not touch it. The other three
+lose 78–86%, so against hard targets this fleet is **eight Io A and some hulls**. That is a much
+sharper exposure than DelA5Hades, whose CA fleet kept the 066 Bombardment at −23%.
+
+The practical conclusion for this account: **the 066 General is the armour answer it already owns**
+(limit 12, pool 4) even at 893 BV/CP, exactly as Chris described building extra 066s to substitute.
+Here it is not a refinement, it is the only ballistic alternative with a flat profile.
+
+## The Taurus pool costs more here than anywhere
+
+Taurus Defense holds the family's 47 points at **1,363**; Taurus Assault is fielded alongside it at
+**832 instead of 1,145** — the sibling penalty is 27% of that hull's value across ten ships, and it is
+the fifth entry in a six-entry fleet. On an account this short of hulls there is no third Taurus-tier
+option to replace it with, so the penalty simply has to be paid.
