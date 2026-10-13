@@ -32,7 +32,7 @@ Aldabra A,,10,8,,,37090,650,,3250,DD,412,0,,id 41201; blueprint list 'Aladabra' 
 Ceres Carrier,,10,8,,,32310,850,,4250,DD,404,0,,id 40401; blueprint list 'Ceres' variant 'A'; family resolved by alias
 Ceres Support,,10,8,,,32310,850,,4250,DD,404,0,,id 40402; blueprint list 'Ceres' variant 'B'; family resolved by alias
 Ceres Tactical,,10,8,,,32310,850,,4250,DD,404,0,,id 40403; blueprint list 'Ceres' variant 'C'; family resolved by alias
-Quaoar Railgun,,10,6,,,30540,850,,4250,DD,411,0,,id 41101; blueprint list 'Quaoar' variant 'A'; family resolved by name
+Quaoar Railgun,,10,6,,,30540,850,,4250,DD,411,38,,id 41101; blueprint list 'Quaoar' variant 'A'; family resolved by name; 38 DD points spent here 2026-10-12 (Chris)
 M470 Siege,,10,6,,,14000,800,,4000,FF,307,56,,id 30701; blueprint list 'NOMA' variant 'A'; family resolved by alias
 M470 Support,,10,6,,,14000,800,,4000,FF,307,56,,id 30702; blueprint list 'NOMA' variant 'B'; family resolved by alias
 M470 AA,,10,6,,,14000,800,,4000,FF,307,56,,id 30703; blueprint list 'NOMA' variant 'C'; family resolved by alias

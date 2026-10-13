@@ -759,3 +759,60 @@ Taurus Defense holds the family's 47 points at **1,363**; Taurus Assault is fiel
 **832 instead of 1,145** — the sibling penalty is 27% of that hull's value across ten ships, and it is
 the fifth entry in a six-entry fleet. On an account this short of hulls there is no third Taurus-tier
 option to replace it with, so the penalty simply has to be paid.
+
+## Chris was right about the Xeno, and it exposed a flaw in the builder
+
+*"Surprised the Taurus Assault got in. I would think 10× Xeno would be better."*
+
+Checked, and it is — **+1.60%** on Cnc04Cavalry's FF/DD fleet, for 4 CP less:
+
+| | CP | strength |
+|---|---|---|
+| as built: 10× Taurus Assault + 5× Xeno | 400 | 2.193e11 |
+| **10× Xeno + 6× Taurus Assault** | **396** | **2.228e11** |
+| 10× Xeno + 6× Taurus Pulse | 396 | 2.193e11 |
+| 10× Xeno + 10× Ruby Railgun | 380 | 2.087e11 |
+
+The builder had been ranking hulls by **standalone BV/CP** — Taurus Assault 832 against the Xeno's
+824 — which is the wrong comparison. The fleet is scored on `sqrt(D × H)`, so a hull's worth depends
+on the D and H **already in the fleet**. The marginal value of one more ship is `d/D + h/H`:
+
+| hull | CP | d/D | h/H | sum | **per CP** |
+|---|---|---|---|---|---|
+| **XenoStinger Tactical** | 8 | 0.0295 | 0.0067 | 0.0362 | **0.00453** |
+| Taurus Pulse | 11 | 0.0220 | 0.0247 | 0.0468 | 0.00425 |
+| Taurus Assault | 11 | 0.0159 | 0.0241 | 0.0399 | 0.00363 |
+
+The fleet runs **1 DPM : 12.6 HP**; the Xeno is 1 : 2.9 and the Taurus Assault 1 : 19.1. So the Xeno
+is the DPM the fleet is short of, and it is worth 25% more per CP at the margin than its standalone
+number says.
+
+`fleet_plan.py` now scores **marginally** — the gain in `sqrt((D+d)(H+h))` per CP, re-priced at every
+pick — while still printing BV/CP, which is the number read off a hull. Results across both accounts:
+
+| fleet | standalone BV/CP | **marginal** | |
+|---|---|---|---|
+| Cnc04 CA | 2.67e11 (388 CP) | **2.82e11 (400 CP)** | **+5.6%** |
+| Cnc04 FF/DD | 2.19e11 | **2.29e11** | **+4.6%** |
+| DelA5Hades CA | 3.48e11 | **3.53e11** | +1.4% |
+| DelA5Hades FF/DD | 2.61e11 | 2.61e11 | — |
+
+### The revised fleets
+
+**Cnc04 CA** — 400 CP, 2.82e11: 8× Io A, 8× Chimera A, **6× Ranger Composite**, 1× Conamara Chaos
+Railgun. The stranded 12 CP is gone.
+
+**Cnc04 FF/DD** — 400 CP, 2.29e11: 10× Quaoar Railgun, 10× Taurus Defense, 10× Winged Hussar A,
+10× Mare Serenitatis A, **10× XenoStinger Tactical**, 1× Taurus Assault, 7× Ceres + 2 AT021 Pulse,
+1× FG300. Chris's composition, reached from the gradient.
+
+**DelA5Hades** is unchanged, because its fleets were already balanced enough that the two rankings
+agree. Its roster now records the **38 DD points spent on the Quaoar** (`data/ships/dela5hades.csv`),
+so the 1,765 BV/CP is the account's real state rather than a hypothetical.
+
+### Why this kept happening
+
+Three times now a composition has been wrong for the same reason: **a per-ship number cannot see the
+fleet.** Standalone BV/CP ignores the fleet's DPM/HP balance; the family-pool rule ignores what the
+rest of the fleet already holds; the single-enemy score ignores target armour. The gradient fixes the
+first, the claim table the second, and the armour sweep is the check for the third.
