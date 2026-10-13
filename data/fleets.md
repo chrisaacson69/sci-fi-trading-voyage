@@ -433,3 +433,63 @@ Against **2.69e11** for the carrier-free version — **+29%**. Nine carriers, 17
 So the CA fleet is close to half carriers, and that is before the five Solar Whales in the
 reinforcement slots. The thing that was missing from every earlier version of this page is that a
 carrier is not a tax on the line — **with a wing aboard it is the line.**
+
+## Both DelA5Hades fleets, one shared craft pool
+
+The craft pool is shared, so the fleets cannot be optimised separately. Allocating jointly — packages
+and line hulls competing in one pool per fleet, craft drawn once — gives:
+
+### Reinforcements, 10 free ships across the two fleets
+
+| group | ships | CP (free) |
+|---|---|---|
+| **1** | **5× Solar Whale** — 30 corvette seats: 10 Hive, 15 T800, 5 Nebula Pulse | 275 |
+| **2** | **5× Constantine the Great** — BV/CP 1,387, the best capital left | 175 |
+
+That is **450 CP of ships at no cost to either cap**, and it is where the battlecruisers finally earn
+their place: not as carriers, but as free bodies in the second reinforcement group.
+
+### CA fleet — 388 CP, strength 3.48e11
+
+| | CP | BV/CP |
+|---|---|---|
+| 1× Jaeger Carrier + 4 Nebula Pulse | 20 | **2,036** |
+| 2× Jaeger Carrier + 4 RB7 | 40 | 1,679 |
+| 2× Predator Carrier + 4 Follower | 36 | 1,649 |
+| 8× Io A | 144 | 1,563 |
+| 2× Predator Carrier + 4 Hayredin's Loyal | 36 | 1,424 |
+| 2× Jaeger Carrier + 4 Wraith | 40 | 1,300 |
+| 4× 066 Bombardment | 72 | 1,153 |
+
+### FF/DD fleet — 398 CP, strength 2.61e11
+
+| | CP | BV/CP |
+|---|---|---|
+| 10× Quaoar Railgun | 60 | **1,765** |
+| 1× Ceres Carrier + 2 Follower | 8 | 1,362 |
+| 10× Reliat Energy | 40 | 1,214 |
+| 10× Eris Heavy Cannon | 90 | 1,209 |
+| 10× Winged Hussar A | 60 | 1,195 |
+| 10× Guardian Pulse | 90 | 1,168 |
+| 10× Ruby Railgun | 50 | 1,099 |
+
+### The CA fleet wins the craft, which is the opposite of the guess
+
+Chris expected that isolating the FF/DD fleet would fill it with AC721s and Ceres. Sharing the pool
+does the reverse: **a 4-bay multiplies each craft's damage by 2.5× where a 2-bay gives 1.5×**, so every
+Jaeger and Predator outbids every AC721 and Ceres for the same craft. The FF/DD fleet ends up with a
+single Ceres and is otherwise pure line, while the CA fleet is **seven carriers carrying 20 corvettes
+and 16 fighters**.
+
+The AC721 Amphibious never appears. At 1,215 with Nebula Pulse it clears the FF/DD cutoff on its own,
+but the corvettes it would carry are worth more in a Jaeger, and the shared pool is what decides it.
+
+### 10 Bullfrogs are stranded
+
+With the size gate enforced — Predator and Ceres are **size ≤ 2** — the size-3 Bullfrog has nowhere to
+fly, and 10 of them sit unused. (An earlier pass of this allocation put them in Predators, which is
+simply illegal.) That is a third argument for the **Solar Whale's 8-fighter module**: it is the
+account's only route to a size-3 bay.
+
+Craft still unused after both fleets and the Whales: 10 Bullfrog, 15 AT021 Attack, 10 Wood Owl,
+15 AT021 Pulse, 10 Vee A, and the rest of the low tail. **The binding constraint is bays, not craft.**
