@@ -189,33 +189,46 @@ ships in **ship-id order** (A = `...01`, the base hull), and variants of a famil
 python tools/bp_roster.py dela5hades --out data/ships/dela5hades.csv
 ```
 
-**DelA5Hades** 78 of 79 owned blueprints resolved, 1,073 TP over 32 families.
-**Cnc04Cavalry** 72 of 73, **572 TP — exactly the other agent's figure**, which is an independent
+**DelA5Hades** 79 of 79 owned blueprints resolved, 1,091 TP over 33 families.
+**Cnc04Cavalry** 73 of 73, **572 TP — exactly the other agent's figure**, which is an independent
 check on the pool arithmetic from a completely different direction.
 
-Chris settled two of the four on 2026-10-12, and both were my search being too literal:
+Chris settled all three on 2026-10-12, and the first two were my search being too literal:
 
 - **Swordbearer is the Antontas** (608). Family 608 holds one hull, 60801, whose Chinese name
   安东塔斯指挥舰 the tables translate as "Antontas Command Ship" — the English client calls it the
-  **Antontas Swordbearer**. Same ship, and the blueprint list carries it as a capital at `0/2`.
+  **Antontas Swordbearer**. Same ship, already identified days earlier under the other name.
 - **NOMA is the NOMA M470** (307), not the NOMA 330 — several ships carry the NOMA name. Its B is a
   **healer** and C is **AA**, which is 30702 M470 Support and 30703 M470 AA exactly, in id order
   behind 30701 M470 Siege.
+- **Janbiya is the Saber** (120). Two fighters sit at exactly 4,050 HP, 1 CP, size 2, group 3; the
+  Saber is the 3,500-speed one carrying the heavy system-damage profile (primary weapon 60%/+250%),
+  against the Reason A101 at 2,800 speed with almost none. Speed and system damage both matched.
 
-That leaves **Janbiya**, and it is now the only unresolved blueprint on either account — **its 18 TP
-is exactly the gap** between this file's 1,073 and the other agent's 1,091, so everything else
-reconciles to the point. Chris describes it as a 4,050 HP fighter with 3 craft in a wing, which gives
-two candidates, both 1 CP size-2 group-3 fighters at exactly 4,050 HP:
+**Both accounts now resolve completely — 79 of 79 and 73 of 73 — at 1,091 and 572 TP, agreeing to the
+point with the other agent's independent counts from the raw lists.**
 
-| | id | speed | DPM vs DD | vs air | system damage |
-|---|---|---|---|---|---|
-| **Saber** (佩刀) | 12001 | **3,500** | 962 | 623 | primary **60%/+250%**, command 40%/+150%, propulsion 25%/+100% |
-| **Reason A101** (理智A101) | 12701 | 2,800 | **1,652** | **1,080** | primary 25%/+100% only |
+## Open: does a weapon's cycle include its lock-on?
 
-Very different ships behind identical hit points: the Saber is 25% faster and a serious
-**system-damage bomber** — 60% at +250% against an enemy's primary weapon is among the heaviest in the
-game — while the Reason A101 hits 72% harder in plain damage and barely touches systems. Speed or DPM
-off the blueprint screen settles it in a second.
+Chris's Saber figures, 2026-10-12, match `Tb_cfg_weapon_action` field for field — the missile at 75
+damage, 1×4, 20s duration, 9s cooldown, 10s lock-on, and the AA gun at 5 damage, 3×4, 16s, 10s, 10s.
+He also reports a different DPM from the model, and there is an obvious candidate: **the cycle used
+everywhere in these tools is `duration + cooldown + flight`, and omits the lock-on entirely.**
+
+| | model cycle | with lock-on | DPM today | DPM with |
+|---|---|---|---|---|
+| missile | 35s | 45s | 514 | 400 |
+| AA gun | 26s | 36s | 277 | 200 |
+| total | | | **791** | **600** |
+
+**225 of 344 mounts (65%) carry a non-zero lock-on**, so if it belongs in the cycle every DPM figure
+in this repo is overstated by 20–40%, and the hulls with long lock-ons are overstated worst — which
+would change rankings, not just magnitudes. The counter-argument is that a lock-on may be paid once
+when a weapon acquires its target rather than on every volley, in which case the current formula is
+right for a sustained fight and wrong only for the opening seconds.
+
+This is the single biggest open question in the model. **One number settles it: the DPM the game
+shows for either of the Saber's two weapons.** 514 or 400 for the missile, 277 or 200 for the AA.
 
 ### Where the pools already in hand should go
 

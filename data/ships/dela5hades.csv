@@ -69,6 +69,7 @@ II003,,15,2,,,4900,2500,,12500,CO,204,18,,id 20401; blueprint list 'CV110033' va
 Ray,,10,2,,,5350,2500,,12500,CO,203,44,,id 20301; blueprint list 'SilentAss' variant '-'; family resolved by alias
 AT021 Pulse,,15,1,,,4920,3000,,15000,FT,125,19,,id 12501; blueprint list 'AT021' variant 'A'; family resolved by alias
 AT021 Attack,,15,1,,,4920,3000,,15000,FT,125,19,,id 12503; blueprint list 'AT021' variant 'C'; family resolved by alias
+Saber,,10,1,,,4050,3500,,17500,FT,120,18,,id 12001; blueprint list 'Janbiya' variant '-'; family resolved by alias
 Vee A,,10,1,,,5370,3300,,16500,FT,115,18,,id 11501; blueprint list 'Vitas A021' variant '-'; family resolved by alias
 Wood Owl,,10,1,,,4920,2800,,14000,FT,109,18,,id 10901; blueprint list 'Strix' variant '-'; family resolved by alias
 Sand Dragon,,10,1,,,4200,2800,,14000,FT,107,17,,id 10701; blueprint list 'Sandrake' variant '-'; family resolved by alias
