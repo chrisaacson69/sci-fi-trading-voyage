@@ -296,3 +296,32 @@ here, but upgraded this is supposed to be like the Xeno."* Better than that:
 is *below* the Xeno and not worth chasing.
 
 DelA5Hades owns the XenoStinger Tactical at **zero TP** and no Zircon at all.
+
+## The Alkaid: no
+
+Chris got 10 of them with 20 TP from the event run. Against the 43 owned FF/DD hulls on DelA5Hades it
+ranks **21st and 22nd** (General and Special are the same hull to two significant figures):
+
+| hull | CP | DPM | HP | BV/CP |
+|---|---|---|---|---|
+| Quaoar Railgun *(fleet #1)* | 6 | 3,672 | 30,540 | **1,765** |
+| Mare Serenitatis A *(fleet cutoff)* | 5 | 1,883 | 15,569 | 1,083 |
+| **Alkaid-class Special** | 6 | **473** | 18,050 | **487** |
+| **Alkaid-class General** | 6 | 473 | 17,940 | 485 |
+
+**Less than half the value of the worst hull already in the fleet**, and it is dominated outright by a
+hull the account already fields: the **Ruby Railgun at 5 CP does 1,511 DPM — 3.2× — with *more* hit
+points (19,989)**. Cheaper, tougher and three times the damage.
+
+The cause is its armament: a single 240-damage gun, one shot, one install. 17,940 HP sounds like a
+body, but at 2,990 HP per CP it is not even good at that — the Winged Hussar A is 4,580 and the Ruby
+Railgun 3,998.
+
+And it will not back into the fleet at a larger cap either. Twenty owned hulls rank above it, almost
+all at build limit 10, which is roughly 1,200 CP of better options before the Alkaid is reached.
+
+**Caveat:** the tables hold no `-TE` Alkaid, only the two base variants, so this is an evaluation of
+the base hull. If the event's TE version has different stats, none of the above applies to it — worth
+checking its damage figure on the blueprint screen, since one 240-damage gun is the whole problem.
+
+The 20 TP that came with them is FF-class and should go where the FF points were already headed.
