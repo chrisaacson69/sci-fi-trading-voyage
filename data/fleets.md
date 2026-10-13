@@ -247,21 +247,38 @@ for:
 - **M470** — *the healer*, and a first build for a small fleet so ships do not have to be replaced.
   See below.
 
-## The metric does not model healing, and that matters for PvE
+## The metric does not model healing, and healing is a PvE mechanic
 
-Chris: *"we haven't taken into account healing, and for PvE battles where you are trying to outlast
-many waves of enemy, staying alive is a big deal. M470 tends to be a first build for the small fleet
-so I don't have to replace ships. When PvP matters, BV is king and healing is less useful."*
+Chris, 2026-10-12, correcting an earlier version of this section that had the mechanism wrong:
 
-`sqrt(DPM × HP) / CP` scores a single engagement. It cannot express *repair between waves*, which is
-the whole point of a support hull in PvE, so every healer in these tables — M470 Support, Guardian
-Support, Ceres Support, Tundra Support, CAS066 Support — scores near its family's floor and looks like
-a reset candidate when it is nothing of the sort.
+> *"Healers heal **during** battle, and don't explicitly heal between battles. A hull that is damaged
+> before battle starts cannot be healed above starting value during. Healing is actually better as a
+> PvE mechanism — with PvP damage rates are so high, healers don't get to heal long enough to be worth
+> it. During PvE, once you reach a certain level, you can take on almost infinite enemies."*
 
-So the BV rankings in this file are **PvP rankings**. For PvE wave content, read them as the damage
-half of the answer and keep a healer regardless of what the number says. Pricing repair properly needs
-the repair effects decoded (`EFFECT_SHIP_REPAIR_ARMOR_ADD` and the rest in `data/upgrades.md` §6, still
-unsized) and a multi-wave model that does not exist.
+So healing is **hit points restored mid-fight, capped at the HP the ship entered with**. It is not
+between-battle repair, and it cannot recover damage taken before the engagement. That makes its value
+a function of two things:
+
+- **how long the fight lasts** — healing is a rate, so it compounds over time while HP is a stock
+- **incoming damage per second relative to the heal rate**
+
+Which gives a sharp breakpoint rather than a gradual benefit: **once a fleet's heal rate meets the
+damage it is taking, it stops losing ships at all** — Chris's "almost infinite enemies". Below that
+line a healer buys some time; above it, it buys the engagement outright. PvP sits far below the line
+because damage rates are high and fights are short, so the slot is better spent on damage; PvE wave
+content sits near or above it, which is why the M470 is a first build for a small fleet.
+
+`sqrt(DPM × HP) / CP` scores a single engagement at a single instant and has no term for a rate, so it
+cannot express any of this. Every healer in these tables — M470 Support, Guardian Support, Ceres
+Support, Tundra Support, CAS066 Support — scores near its family's floor and reads as a reset candidate
+when it is nothing of the sort.
+
+**So the BV rankings in this file are PvP rankings.** For the PvE content these accounts actually run
+they are the damage half of the answer, and a healer belongs in the fleet regardless of what the number
+says. Making this quantitative needs the repair effects sized — `EFFECT_SHIP_REPAIR_ARMOR_ADD` and the
+rest are still unmeasured in `data/upgrades.md` §6 — after which the useful output is not a BV score
+but **the incoming DPM at which a given fleet's healing breaks even**.
 
 ## Zircon B is worth getting — it beats the XenoStinger
 
