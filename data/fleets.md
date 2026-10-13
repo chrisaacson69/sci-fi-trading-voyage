@@ -885,3 +885,33 @@ need**, and that is exactly what the cheap end of its ladder sells.
 So the tryout shows you the hull and stops one rung short of making it fieldable, which is a
 reasonable thing for a trial to do. **Try it, do not invest**: 20 more points would get it in, but on
 a temporary hull those are 20 points that leave with it.
+
+## Roster separation, checked
+
+The two rosters are built independently from each account's own blueprint list, and the CA lists
+differ exactly as Chris describes:
+
+| | DelA5Hades | Cnc04Cavalry |
+|---|---|---|
+| **066 family** | **A → 066 General, B → 066 Bombardment** | **A → 066 General only** |
+| Chimera | — | **A (50601)** |
+| Conamara | — | **Chaos Railgun (51201)** |
+| Light Cone | — | Composite A (50501) |
+| Predator | A only | **A, B and C** (Carrier, Tactical, AA) |
+| KCCP | A, B, C, D | A and D only |
+| Io / Ranger / Jaeger | both | both |
+
+**Cnc04 has no 066 Bombardment**, which is why its armour answer is the **General at 893 BV/CP** while
+DelA5Hades gets the **Bombardment at 1,153**. The fleets above use the right one in each case — the
+Bombardment appears only in DelA5Hades' CA fleet, and the cnc04 recommendation names the General.
+
+Chris's two details also **confirm the variant-letter mapping from the other direction**: cnc04's
+blueprint list carries "Conamara" with no letter, which `bp_roster.py` resolves to the family's base
+hull 51201 — and Chris says it is the Conamara **Rail**, which 51201 is. Same for the Chimera at A.
+That is the ship-id-order rule holding on two families it was not derived from.
+
+One caveat worth stating: **the letter mapping is an inference**, that A/B/C/D follow ship-id order.
+It is now confirmed on the Taurus, the Conamara, the Chimera and the NOMA/M470, but if any family's
+in-game letters are ordered differently then that family's row is wrong. The 066 is the one that would
+matter most here, since A and B are 893 and 1,153 — worth a glance at whether DelA5Hades' "CAS066 B"
+really is the Bombardment.
