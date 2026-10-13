@@ -1,6 +1,7 @@
 name,cost,limit,cp,cargo,dpm,hp,cruise_min,cruise_max,warp,type,class,tp,row,notes
 Solar Whale,,5,55,,,329430,250,,1250,CV,801,0,,id 80101; blueprint list 'Solar Whale' variant '-'; family resolved by alias
 FSV830,,2,40,,,180470,560,,2800,AUX,703,0,,id 70301; blueprint list 'FSV830' variant '-'; family resolved by alias
+Antontas Command Ship,,3,35,,,173600,250,,1250,BC,608,0,,id 60801; blueprint list 'Swordbearer' variant '-'; family resolved by alias
 Spear of Uranus,,6,35,,,180470,250,,1250,BC,605,0,,id 60501; blueprint list 'SpearOUranus' variant '-'; family resolved by alias
 Constantine the Great,,6,35,,,141550,400,,2000,BC,604,34,,id 60401; blueprint list 'CtG' variant '-'; family resolved by alias
 ST59,,6,28,,,136510,450,,2250,BC,603,16,,id 60301; blueprint list 'ST59' variant '-'; family resolved by alias
@@ -32,7 +33,9 @@ Ceres Carrier,,10,8,,,32310,850,,4250,DD,404,0,,id 40401; blueprint list 'Ceres'
 Ceres Support,,10,8,,,32310,850,,4250,DD,404,0,,id 40402; blueprint list 'Ceres' variant 'B'; family resolved by alias
 Ceres Tactical,,10,8,,,32310,850,,4250,DD,404,0,,id 40403; blueprint list 'Ceres' variant 'C'; family resolved by alias
 Quaoar Railgun,,10,6,,,30540,850,,4250,DD,411,0,,id 41101; blueprint list 'Quaoar' variant 'A'; family resolved by name
-NOMA 330武装,,10,3,,,12180,1040,,5200,FF,306,56,,id 30601; blueprint list 'NOMA' variant 'A'; family resolved by alias
+M470 Siege,,10,6,,,14000,800,,4000,FF,307,56,,id 30701; blueprint list 'NOMA' variant 'A'; family resolved by alias
+M470 Support,,10,6,,,14000,800,,4000,FF,307,56,,id 30702; blueprint list 'NOMA' variant 'B'; family resolved by alias
+M470 AA,,10,6,,,14000,800,,4000,FF,307,56,,id 30703; blueprint list 'NOMA' variant 'C'; family resolved by alias
 Mare Imbrium Basic,,10,5,,,14480,900,,4500,FF,313,48,,id 31301; blueprint list 'MareImb' variant 'A'; family resolved by alias
 Mare Imbrium Pulse,,10,8,,,14480,900,,4500,FF,313,48,,id 31302; blueprint list 'MareImb' variant 'B'; family resolved by alias
 Mare Serenitatis A,,10,5,,,14970,900,,4500,FF,312,47,,id 31201; blueprint list 'MareSeren' variant 'A'; family resolved by alias

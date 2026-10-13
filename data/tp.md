@@ -189,16 +189,33 @@ ships in **ship-id order** (A = `...01`, the base hull), and variants of a famil
 python tools/bp_roster.py dela5hades --out data/ships/dela5hades.csv
 ```
 
-**DelA5Hades** 75 of 79 owned blueprints resolved, 1,073 TP over 32 families.
-**Cnc04Cavalry** 71 of 73, **572 TP — exactly the other agent's figure**, which is an independent
+**DelA5Hades** 78 of 79 owned blueprints resolved, 1,073 TP over 32 families.
+**Cnc04Cavalry** 72 of 73, **572 TP — exactly the other agent's figure**, which is an independent
 check on the pool arithmetic from a completely different direction.
 
-Unresolved and *not* guessed: **Swordbearer** (no battlecruiser family carries that name — the real
-ones are Eternal Storm, ST59, Constantine, Spear of Uranus, Thunderbolt, Shield of Plutus, Antontas,
-Megrez, Indomitable), **NOMA B and C** (family 30601 has a single variant in these tables), and
-**Janbiya** (no fighter family matches; Saber 12001 is the only sword-named fighter, but that is
-flavour and the Silent Assassin episode is the reason not to write flavour into a file). Those four
-account for the 18 TP between 1,073 and 1,091.
+Chris settled two of the four on 2026-10-12, and both were my search being too literal:
+
+- **Swordbearer is the Antontas** (608). Family 608 holds one hull, 60801, whose Chinese name
+  安东塔斯指挥舰 the tables translate as "Antontas Command Ship" — the English client calls it the
+  **Antontas Swordbearer**. Same ship, and the blueprint list carries it as a capital at `0/2`.
+- **NOMA is the NOMA M470** (307), not the NOMA 330 — several ships carry the NOMA name. Its B is a
+  **healer** and C is **AA**, which is 30702 M470 Support and 30703 M470 AA exactly, in id order
+  behind 30701 M470 Siege.
+
+That leaves **Janbiya**, and it is now the only unresolved blueprint on either account — **its 18 TP
+is exactly the gap** between this file's 1,073 and the other agent's 1,091, so everything else
+reconciles to the point. Chris describes it as a 4,050 HP fighter with 3 craft in a wing, which gives
+two candidates, both 1 CP size-2 group-3 fighters at exactly 4,050 HP:
+
+| | id | speed | DPM vs DD | vs air | system damage |
+|---|---|---|---|---|---|
+| **Saber** (佩刀) | 12001 | **3,500** | 962 | 623 | primary **60%/+250%**, command 40%/+150%, propulsion 25%/+100% |
+| **Reason A101** (理智A101) | 12701 | 2,800 | **1,652** | **1,080** | primary 25%/+100% only |
+
+Very different ships behind identical hit points: the Saber is 25% faster and a serious
+**system-damage bomber** — 60% at +250% against an enemy's primary weapon is among the heaviest in the
+game — while the Reason A101 hits 72% harder in plain damage and barely touches systems. Speed or DPM
+off the blueprint screen settles it in a second.
 
 ### Where the pools already in hand should go
 
