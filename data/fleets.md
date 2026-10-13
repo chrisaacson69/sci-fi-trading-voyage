@@ -915,3 +915,51 @@ It is now confirmed on the Taurus, the Conamara, the Chimera and the NOMA/M470, 
 in-game letters are ordered differently then that family's row is wrong. The 066 is the one that would
 matter most here, since A and B are 893 and 1,153 — worth a glance at whether DelA5Hades' "CAS066 B"
 really is the Bombardment.
+
+## Correction: the Conamara Railgun is Cnc04's armour answer, not the 066 General
+
+Chris: *"surprised a 15 pt Chimera didn't make the list, nor the rail Conamara over a 4 TP CAS066."*
+Half right, and the half he is right about is a mistake of mine — I named the 066 General as cnc04's
+armour hull without ever curving the Conamara.
+
+DPM against a cruiser as its armour rises, at the TP each holds:
+
+| hull | CP | TP | arm 0 | 80 | 160 | **240** | loss |
+|---|---|---|---|---|---|---|---|
+| **Io A** | 18 | 14 | 25,099 | 21,136 | 20,844 | **20,844** | **−17%** |
+| **Conamara Chaos Railgun** | **16** | **0** | 8,616 | 7,362 | 6,842 | **6,322** | **−27%** |
+| 066 General | 18 | 4 | **9,634** | 6,095 | 4,391 | 2,687 | −72% |
+| Chimera A | 18 | 15 | 13,946 | 9,105 | 6,103 | 3,101 | −78% |
+| Light Cone Composite A | 20 | 13 | 19,198 | 11,239 | 6,730 | 3,481 | −82% |
+| Ranger Composite | 16 | 23 | 12,938 | 6,347 | 4,469 | 3,025 | −77% |
+
+**The 066 General leads only at armour 0.** They cross around armour 55; by 160 the Conamara is doing
+6,842 against the General's 4,391, and by 240 it is **2.4× better** — on 2 CP less and with no TP in
+it at all.
+
+The mechanism is shot size, as it was for the Ranger swap on the other account:
+
+| hull | weapons |
+|---|---|
+| **Conamara Chaos Railgun** | **1,200 × 2**, plus a 20 |
+| 066 General | 420, 300 × 2, 40 |
+| Chimera A | 350 × 2, 25, 280 |
+
+A 1,200-damage shot loses 20% to armour 240; a 300-damage shot is floored out entirely. **Nothing else
+about the hulls matters to this** — not CP, not the TP invested.
+
+**And the Chimera genuinely is not an armour hull**, 15 points or not: −78%, third worst of the six. It
+earns its place in the fleet at armour 0–80 and should come out against anything harder, which is what
+the original table said.
+
+### So cnc04's hard-target configuration is different
+
+Against high armour the fleet should be **Io A and Conamara Chaos Railgun** — the only two hulls on
+the account that keep their damage — with the Chimera, Light Cone and Ranger all coming out. The
+Conamara's build limit is 8 and only one is in the standard fleet, so there are seven more available
+for exactly this.
+
+**The lesson repeats:** every ranking above is computed at one armour value, and shot size decides
+whether a hull survives the sweep. The hulls worth checking first are always the ones firing few big
+shots (Conamara 1,200, 066 Bombardment 1,500) or energy (Io A) — they are the ones whose position
+improves as the target hardens.
