@@ -128,3 +128,49 @@ Clearest craft-TP opportunity either account has.
   If a cap exists these compositions break and the answer shifts toward fewer, bigger ships.
 - The craft are not in the strength index at all, so a fleet's real value with 6–8 fighters aboard is
   higher than the numbers here.
+
+## DelA5Hades: the capitals' modules, and 160 unspent points
+
+### The capitals own drone bays, not fighter bays
+
+Chris's module list, 2026-10-12, mapped against `Tb_cfg_ship_system` — M/A/B/C are the group letters
+`maxout.build` documents (M = group 101, A = 102, B = 201, C = 202, in system-id order):
+
+| hull | owns | what those are | **does not own** |
+|---|---|---|---|
+| **ST59** | M2, A3, B1, B3, C1, C2, C3 | three more weapons (M2 16036, A3 16038, B1 16035), a **drone bay** (B3), three C utility modules | **B2 — its 2-fighter carrier bay** |
+| **Constantine** | C3 | a **drone bay** (6040110) | C2 — its 1-fighter bay |
+| **FSV830** | A3, C2 | one module, a **drone bay** (C2) | C1 — its 2-fighter bay |
+
+So all three capitals carry **drones** and none carries fighters. That settles the earlier question from
+the other direction: the battlecruisers are not the craft platform on this account because **the
+modules that would make them one are not owned**, not merely because they are small. It also means
+`EFFECT_DRONE` matters here and nothing in these tools scores drones at all.
+
+The seven ST59 modules also match the blueprint list's `16/9` exactly — 2 base plus 7 earned — which
+is an independent check on the other agent's capital-module reading.
+
+### Where the 160 unspent points go
+
+TP sits in a **typed account pool** before it is assigned, which the per-family numbers in the
+blueprint list do not show. DelA5Hades holds: DD 38, FF 33, CV 30, Aux 17, FT 15, CA 13, CO 11, BC 3.
+
+| type | pts | best use | gain | note |
+|---|---|---|---|---|
+| **FT** | 15 | **Follower** (pool 0 of 81) | **+31.3** | biggest gain of any type, and the account's best fighter |
+| **DD** | 38 | **Quaoar Railgun** (pool 0 of 78) | **+29.1** | not currently in the fleet — see below |
+| **FF** | 33 | Mare Serenitatis A (47 of 83) | +8.3 | *in* the fleet |
+| **CO** | 11 | Wraith (17 of 107) | +17.3 | |
+| **CA** | 13 | **Io A** (30 of 100) | +5.7 | *in* the fleet |
+| CV | 30 | Solar Whale (0 of 98) | +13.0 | Chris is holding these for a CV3000 |
+| BC | 3 | anything | +0.6 to +2.5 | negligible |
+| **Aux** | 17 | FSV830 (0 of 65) | **+1.3** | Chris's instinct to save these is right — it is the worst return on the account |
+
+Two things to watch:
+
+- **Reliat Stealth shows the biggest FF gain (+17.9) but shares family 316 with Reliat Energy**, which
+  holds the pool and is in the fleet. Spending there is *moving* the pool, not adding to it, so the
+  real FF pick is Mare Serenitatis A.
+- **The Quaoar Railgun is the best DD buy and is not in the fleet.** It is the highest BV/CP hull on
+  Cnc04Cavalry (1706) and sits at 0 TP here; 38 points may well promote it into the composition, so
+  the fleet is worth re-running after that spend rather than before.
