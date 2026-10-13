@@ -179,6 +179,60 @@ Both had been collapsed to averages, and both are now read per rung — `maxout.
 `matrix.ladder_at()`. This matters most to the greedy allocators: the cheapest rungs on a hull are
 exactly what they should buy first, and an average hid them.
 
+## Levelling the low accounts (2026-10-12)
+
+`lagrange-combat/tools/bp_roster.py` turns a blueprint list into ship ids, which is what the TP tools
+need. The two rules come from the other agent's write-up above: a variant letter indexes the family's
+ships in **ship-id order** (A = `...01`, the base hull), and variants of a family **share one pool**.
+
+```
+python tools/bp_roster.py dela5hades --out data/ships/dela5hades.csv
+```
+
+**DelA5Hades** 75 of 79 owned blueprints resolved, 1,073 TP over 32 families.
+**Cnc04Cavalry** 71 of 73, **572 TP — exactly the other agent's figure**, which is an independent
+check on the pool arithmetic from a completely different direction.
+
+Unresolved and *not* guessed: **Swordbearer** (no battlecruiser family carries that name — the real
+ones are Eternal Storm, ST59, Constantine, Spear of Uranus, Thunderbolt, Shield of Plutus, Antontas,
+Megrez, Indomitable), **NOMA B and C** (family 30601 has a single variant in these tables), and
+**Janbiya** (no fighter family matches; Saber 12001 is the only sword-named fighter, but that is
+flavour and the Silent Assassin episode is the reason not to write flavour into a file). Those four
+account for the 18 TP between 1,073 and 1,091.
+
+### Where the pools already in hand should go
+
+Scored against the **small** pirate team, which is the right enemy for accounts at this level. The
+pool is per *family*, so the question is which variant to direct each one at.
+
+**DelA5Hades** — biggest gains from TP already held:
+
+| direct the pool at | TP in hand | of | gain now | maxed would be |
+|---|---|---|---|---|
+| **Reliat Stealth** | 47 | 86 | **+266.8** | 479.1 |
+| **Constantine the Great** | 34 | 136 | **+179.4** | 461.2 |
+| ST59 | 16 | 152 | +114.8 | 423.9 |
+| Wraith (Void Elfin) | 17 | 107 | +105.1 | 757.8 |
+| Ray (Silent Assassin) | 44 | 90 | +73.8 | 314.7 |
+| AT021 Attack | 19 | 64 | +71.8 | 428.5 |
+
+**Cnc04Cavalry**:
+
+| direct the pool at | TP in hand | of | gain now | maxed would be |
+|---|---|---|---|---|
+| **Constantine the Great** | 13 | 136 | **+134.4** | 461.2 |
+| **Hayredin's Loyal** | 33 | 108 | **+97.6** | 757.7 |
+| CV3000 | 14 | 103 | +74.5 | 279.2 |
+| M011 Missile | 27 | 91 | +67.2 | 416.9 |
+| ST59 | 7 | 152 | +63.1 | 423.9 |
+
+Two patterns worth noting. **Reliat Stealth at 384 BV/CP on 47 points** is the same effect as the Void
+Elfin on the mobile account — a cheap high-evasion hull is enormous against a team of torpedo frigates
+and collapses against the big one, so these are small-fleet answers and should be re-scored with
+`--vs large` before a 200 CP fleet uses them. And **the capitals are where the unspent capacity is**:
+Constantine and ST59 have 136 and 152 point ladders against 13–34 in hand, so they will absorb
+everything these accounts can feed them for a long time.
+
 ## Constraints this has to respect (told, not derived)
 
 1. **Blueprints arrive randomly**, so TP committed to the best design you have now is stranded when a

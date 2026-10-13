@@ -1,0 +1,72 @@
+name,cost,limit,cp,cargo,dpm,hp,cruise_min,cruise_max,warp,type,class,tp,row,notes
+CV3000,,5,40,,,278340,400,,2000,CV,802,14,,id 80201; blueprint list 'CV3000' variant '-'; family resolved by alias
+Solar Whale,,5,55,,,329430,250,,1250,CV,801,0,,id 80101; blueprint list 'Solar Whale' variant '-'; family resolved by alias
+FSV830,,2,40,,,180470,560,,2800,AUX,703,9,,id 70301; blueprint list 'FSV830' variant '-'; family resolved by alias
+Shield of Plutus,,6,35,,,185720,250,,1250,BC,607,0,,id 60701; blueprint list 'ShieldoPlutus' variant '-'; family resolved by alias
+Constantine the Great,,6,35,,,141550,400,,2000,BC,604,13,,id 60401; blueprint list 'CtG' variant '-'; family resolved by alias
+Thunderbolt,,3,32,,,146740,400,,2000,BC,606,0,,id 60601; blueprint list 'Thunderbolt' variant '-'; family resolved by alias
+ST59,,6,28,,,136510,450,,2250,BC,603,7,,id 60301; blueprint list 'ST59' variant '-'; family resolved by alias
+Io A,,8,18,,,62120,650,,3250,CA,503,14,,id 50301; blueprint list 'IO' variant 'A'; family resolved by alias
+066 General,,12,18,,,71600,500,,2500,CA,502,4,,id 50201; blueprint list 'CAS066' variant 'A'; family resolved by alias
+Jaeger Carrier,,8,20,,,76190,500,,2500,CA,511,0,,id 51101; blueprint list 'Jaeger' variant 'A'; family resolved by alias
+Light Cone Composite A,,8,20,,,69570,450,,2250,CA,505,13,,id 50501; blueprint list 'LightCone' variant 'A'; family resolved by alias
+Predator Carrier,,8,18,,,76190,500,,2500,CA,510,0,,id 51001; blueprint list 'Predator' variant 'A'; family resolved by alias
+Predator Tactical Carrier,,8,18,,,76190,500,,2500,CA,510,0,,id 51002; blueprint list 'Predator' variant 'B'; family resolved by alias
+Predator AA Carrier,,8,18,,,76190,500,,2500,CA,510,0,,id 51003; blueprint list 'Predator' variant 'C'; family resolved by alias
+Chimera A,,8,18,,,89390,450,,2250,CA,506,15,,id 50601; blueprint list 'Chimera' variant 'A'; family resolved by alias
+Ranger Composite,,8,16,,,73260,500,,2500,CA,513,23,,id 51301; blueprint list 'Ranger' variant 'A'; family resolved by alias
+Conamara Chaos Railgun,,8,16,,,71600,450,,2250,CA,512,0,,id 51201; blueprint list 'Conamara' variant '-'; family resolved by alias
+KCPV-A,,12,16,,,52040,650,,3250,CA,501,3,,id 50101; blueprint list 'KCCP' variant 'A'; family resolved by alias
+KCCPV2.0 Carrier,,12,16,,,52040,650,,3250,CA,501,3,,id 50104; blueprint list 'KCCP' variant 'D'; family resolved by alias
+Taurus Pulse,,10,11,,,36040,650,,3250,DD,405,47,,id 40501; blueprint list 'Taurus' variant 'A'; family resolved by alias
+Taurus Assault,,10,11,,,40030,650,,3250,DD,405,47,,id 40502; blueprint list 'Taurus' variant 'B'; family resolved by alias
+Taurus Defense,,10,8,,,40030,650,,3250,DD,405,47,,id 40503; blueprint list 'Taurus' variant 'C'; family resolved by alias
+Quaoar Railgun,,10,6,,,30540,850,,4250,DD,411,33,,id 41101; blueprint list 'Quaoar' variant 'A'; family resolved by name
+Winged Hussar A,,10,6,,,22710,700,,3500,DD,408,42,,id 40801; blueprint list 'WingHuss' variant 'A'; family resolved by alias
+Winged Hussar 区域防空,,10,6,,,22710,850,,4250,DD,408,42,,id 40803; blueprint list 'WingHuss' variant 'C'; family resolved by alias
+Guardian Support,,10,9,,,25650,650,,3250,DD,410,0,,id 41001; blueprint list 'Guardian' variant 'A'; family resolved by alias
+Guardian Amphibious,,10,14,,,25650,650,,3250,DD,410,0,,id 41002; blueprint list 'Guardian' variant 'B'; family resolved by alias
+Ceres Carrier,,10,8,,,32310,850,,4250,DD,404,0,,id 40401; blueprint list 'Ceres' variant 'A'; family resolved by alias
+Ceres Support,,10,8,,,32310,850,,4250,DD,404,0,,id 40402; blueprint list 'Ceres' variant 'B'; family resolved by alias
+Ceres Tactical,,10,8,,,32310,850,,4250,DD,404,0,,id 40403; blueprint list 'Ceres' variant 'C'; family resolved by alias
+AC721 Logistics,,15,8,,,34140,800,,4000,DD,401,35,,id 40101; blueprint list 'AC721' variant 'A'; family resolved by alias
+AC721 Missile,,15,8,,,34140,800,,4000,DD,401,35,,id 40102; blueprint list 'AC721' variant 'B'; family resolved by alias
+AC721 Amphibious,,15,12,,,30730,800,,4000,DD,401,35,,id 40104; blueprint list 'AC721' variant 'D'; family resolved by alias
+Eris Cannon,,10,7,,,30540,900,,4500,DD,402,0,,id 40201; blueprint list 'Eris1' variant 'A'; family resolved by alias
+Eris Heavy Cannon,,10,9,,,30540,850,,4250,DD,402,0,,id 40202; blueprint list 'Eris1' variant 'B'; family resolved by alias
+XenoStinger Tactical,,10,8,,,10530,800,,4000,FF,304,30,,id 30401; blueprint list 'Xeno' variant 'A'; family resolved by name
+XenoStinger AA,,10,6,,,10530,800,,4000,FF,304,30,,id 30402; blueprint list 'Xeno' variant 'B'; family resolved by name
+Mare Serenitatis A,,10,5,,,14970,900,,4500,FF,312,26,,id 31201; blueprint list 'MareSeren' variant 'A'; family resolved by alias
+Mare Serenitatis AA,,10,5,,,14970,900,,4500,FF,312,26,,id 31203; blueprint list 'MareSeren' variant 'C'; family resolved by alias
+Ruby Railgun,,10,5,,,16520,900,,4500,FF,305,1,,id 30501; blueprint list 'Ruby' variant 'A'; family resolved by name
+Reliat A,,10,4,,,10530,800,,4000,FF,316,27,,id 31601; blueprint list 'Reliat' variant 'A'; family resolved by name
+Carilion Recon,,10,4,,,8340,1040,,5200,FF,308,30,,id 30801; blueprint list 'Carilion' variant 'A'; family resolved by name
+Carilion Special,,10,5,,,9770,1040,,5200,FF,308,30,,id 30803; blueprint list 'Carilion' variant 'C'; family resolved by name
+FG300 Multipurpose,,15,3,,,10530,1000,,5000,FF,301,55,,id 30101; blueprint list 'FG300' variant 'A'; family resolved by alias
+FG300 Armored,,15,3,,,12540,900,,4500,FF,301,55,,id 30102; blueprint list 'FG300' variant 'B'; family resolved by alias
+FG300 Recon,,15,3,,,12540,1040,,5200,FF,301,55,,id 30103; blueprint list 'FG300' variant 'C'; family resolved by alias
+Follower,,10,1,,,6930,3000,,15000,FT,112,0,,id 11201; blueprint list 'Zircon' variant 'A'; family resolved by alias
+NOMA 330武装,,10,3,,,12180,1040,,5200,FF,306,0,,id 30601; blueprint list 'NOMA' variant 'A'; family resolved by alias
+Mare Nubium Siege,,10,4,,,9030,900,,4500,FF,303,0,,id 30301; blueprint list 'MareNubium' variant 'A'; family resolved by name
+Mare Tranquillitatis Missile,,10,4,,,12360,1000,,5000,FF,302,0,,id 30201; blueprint list 'MareTranq' variant 'A'; family resolved by name
+S Levi 9,,10,2,,,6000,2400,,12000,CO,214,12,,id 21401; blueprint list 'Levy9' variant '-'; family resolved by alias
+T800,,15,2,,,7500,2500,,12500,CO,213,7,,id 21301; blueprint list 'CVT800' variant '-'; family resolved by alias
+M011 Missile,,15,2,,,7500,2500,,12500,CO,211,27,,id 21101; blueprint list 'CVM011' variant 'A'; family resolved by alias
+M011 Heavy Cannon,,15,2,,,7500,2500,,12500,CO,211,27,,id 21102; blueprint list 'CVM011' variant 'B'; family resolved by alias
+M011 High-Speed,,15,2,,,7500,2500,,12500,CO,211,27,,id 21103; blueprint list 'CVM011' variant 'C'; family resolved by alias
+Wraith,,10,2,,,5200,2500,,12500,CO,210,5,,id 21001; blueprint list 'Void Elfin' variant '-'; family resolved by alias
+RB7,,10,2,,,5200,2500,,12500,CO,207,12,,id 20701; blueprint list 'RedBeast' variant '-'; family resolved by alias
+II003,,15,2,,,4900,2500,,12500,CO,204,13,,id 20401; blueprint list 'CV11003' variant '-'; family resolved by alias
+Tempel,,10,2,,,7100,2400,,12000,CO,216,0,,id 21601; blueprint list 'Tempel' variant 'A'; family resolved by alias
+Hale-Bopp,,10,2,,,7000,2400,,12000,CO,215,0,,id 21501; blueprint list 'HaleBopp' variant 'A'; family resolved by alias
+Nebula A,,10,2,,,6300,2500,,12500,CO,209,0,,id 20901; blueprint list 'NebChaser' variant 'A'; family resolved by alias
+Ray,,10,2,,,5350,2500,,12500,CO,203,0,,id 20301; blueprint list 'SilentAss' variant '-'; family resolved by alias
+Stingray,,10,1,,,5200,3200,,16000,FT,119,6,,id 11901; blueprint list 'Stingray' variant '-'; family resolved by alias
+Vee A,,10,1,,,5370,3300,,16500,FT,115,7,,id 11501; blueprint list 'Vitas A021' variant '-'; family resolved by alias
+Hayredin's Loyal,,8,1,,,6480,3000,,15000,FT,113,33,,id 11301; blueprint list 'Haydreddin L' variant '-'; family resolved by alias
+SC002,,15,1,,,2850,2800,,14000,FT,102,9,,id 10201; blueprint list 'SC002' variant '-'; family resolved by alias
+AT021 Pulse,,15,1,,,4920,3000,,15000,FT,125,0,,id 12501; blueprint list 'AT021' variant 'A'; family resolved by alias
+Spore,,10,1,,,3550,3100,,15500,FT,118,0,,id 11801; blueprint list 'Spore' variant '-'; family resolved by alias
+New Earth,,10,1,,,4680,3300,,16500,FT,117,0,,id 11701; blueprint list 'Newland' variant '-'; family resolved by alias
+Bullfrog,,10,1,,,4740,2800,,14000,FT,108,0,,id 10801; blueprint list 'Bullfrog' variant '-'; family resolved by alias
+Sand Dragon,,10,1,,,4200,2800,,14000,FT,107,0,,id 10701; blueprint list 'Sandrake' variant '-'; family resolved by alias
