@@ -241,11 +241,22 @@ is exactly 5 damage × 3 shots, one action of one launcher. The gun is `install_
 | 26s cycle (no lock-on) | 138 | **277** |
 | 36s cycle (with) | 100 | 200 |
 
-None of them is 398. To reach it from 60 damage a cycle the cycle would have to be **9.0 seconds** —
-and 9s is exactly the *missile's* cooldown, which may be a coincidence or may mean the AA fires on a
-shared cycle. Aircraft also have "AA special armour" per Chris, which the model does not represent at
-all. The AS weapon is the one that settles the cycle question; this is a separate puzzle about how
-anti-air is counted, and it does not affect ship-to-ship DPM.
+None of them is 398, and no combination of the damage, install count and the two cycles lands on it.
+
+Two things Chris added do check out, and both are about the hit side rather than the cycle:
+
+- **The tooltip's "60% to-hit, aircraft vs aircraft" is consistent with the tables.** The gun's own
+  priority row reads **75%** against fighter classes 100/102/103 and 80% against 105, and the verified
+  hit rule is `table × (1 + bonus) × (1 − evasion)`. 75 × (1 − 0.20) = 60, so the tooltip is the table
+  rate against a 20%-evasion aircraft — which supports the hit model rather than contradicting it.
+- **"Special armour" is special *ammo*** (Chris's correction). So the 15 is what the gun does to
+  aircraft with its ammo, not a defence the target carries, and nothing needs adding to the damage
+  model for it.
+
+The 398 itself stays open. It is **not** worth fitting a constant to — that is precisely the mistake
+Chris caught on the HP ladder, and anti-air is where this model has least ground truth. What would
+settle it is the rest of the tooltip: whether that 398 is per launcher or for both, and whether it is
+quoted for one Saber or for the three in a wing. None of it touches ship-to-ship DPM.
 
 ### Where the pools already in hand should go
 
