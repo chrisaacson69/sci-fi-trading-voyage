@@ -222,22 +222,60 @@ Whale's 8-fighter module.
 The two that *can* fly are the two best, and both sit at **zero TP** against 81- and 108-point ladders.
 The 15 FT points go to the Follower (+31.3).
 
-## Reset candidates
+## Reset candidates — corrected
 
-A reset moves **up to 50 TP out of one hull back into its typed pool** (Chris). Four families on
-DelA5Hades hold large pools that **no fleet hull and no craft plan uses**:
+A reset moves up to 50 TP out of **one class** back into its typed pool. **It is a class reset, not a
+variant reset** (Chris): there is no "Mare Imbrium Pulse" reset, only a "Mare Imbrium" one, so a
+candidate has to be a family the account does not want *at all*.
 
-| family | type | pool | recoverable |
-|---|---|---|---|
-| FG300 Recon | FF | 79 | **50** |
-| AC721 Missile | DD | 76 | **50** |
-| M470 Support | FF | 56 | **50** |
-| Mare Imbrium Pulse | FF | 48 | 48 |
-| | | | **198 TP** |
+Part of a pool is **fixed** and cannot be recovered. Chris's figures for DelA5Hades, 2026-10-12:
 
-That is **five times the spend that just improved the fleet by 19%**, and it is sitting in hulls the
-account does not field. Taurus Pulse (62) is a fifth candidate but appears in the fleet as a single
-ship, so check before resetting it.
+| family | type | pool | **fixed** | scavengeable | per reset |
+|---|---|---|---|---|---|
+| **FG300** | FF | 79 | 19 | **60** | 50 |
+| **AC721** | DD | 76 | 21 | **55** | 50 |
 
-**Do not reset Nebula Pulse (23) or RB7 (23)** — Nebula Pulse is the second of the three corvettes
-filling the Whale seats, and RB7 is the reserve.
+**~100 TP in one reset each**, against the 38 that just bought +19%. (The AC721's 21 fixed points are
+the same number as the 205-point AC721 on the oldest account — so the fixed share looks like a
+property of the family, not of how much has been poured in.)
+
+Two of my earlier candidates are **withdrawn**, both because the metric cannot see what the hull is
+for:
+
+- **Mare Imbrium** — a good hull by reputation, and it was only flagged because the composition
+  dropped it to a single ship after the Quaoar spend.
+- **M470** — *the healer*, and a first build for a small fleet so ships do not have to be replaced.
+  See below.
+
+## The metric does not model healing, and that matters for PvE
+
+Chris: *"we haven't taken into account healing, and for PvE battles where you are trying to outlast
+many waves of enemy, staying alive is a big deal. M470 tends to be a first build for the small fleet
+so I don't have to replace ships. When PvP matters, BV is king and healing is less useful."*
+
+`sqrt(DPM × HP) / CP` scores a single engagement. It cannot express *repair between waves*, which is
+the whole point of a support hull in PvE, so every healer in these tables — M470 Support, Guardian
+Support, Ceres Support, Tundra Support, CAS066 Support — scores near its family's floor and looks like
+a reset candidate when it is nothing of the sort.
+
+So the BV rankings in this file are **PvP rankings**. For PvE wave content, read them as the damage
+half of the answer and keep a healer regardless of what the number says. Pricing repair properly needs
+the repair effects decoded (`EFFECT_SHIP_REPAIR_ARMOR_ADD` and the rest in `data/upgrades.md` §6, still
+unsized) and a multi-wave model that does not exist.
+
+## Zircon B is worth getting — it beats the XenoStinger
+
+Chris: *"I was curious about the Zircon. The B variant is probably worthwhile and I don't have it yet
+here, but upgraded this is supposed to be like the Xeno."* Better than that:
+
+| hull | CP | HP | BV/CP stock | **maxed** | ladder |
+|---|---|---|---|---|---|
+| **Zircon B** (31902) | 8 | **13,400** | 27.8 | **43.4** | 118 TP |
+| XenoStinger Tactical (30401) | 8 | 10,530 | 25.1 | 37.5 | 90 TP |
+| Zircon A (31901) | 8 | 13,400 | 19.3 | 29.5 | 118 TP |
+
+**Zircon B ends 16% above the XenoStinger** at the same 8 CP, with 27% more hit points — but it is a
+118-point ladder against the Xeno's 90, so it is a long-term target rather than a quick win. Zircon A
+is *below* the Xeno and not worth chasing.
+
+DelA5Hades owns the XenoStinger Tactical at **zero TP** and no Zircon at all.
