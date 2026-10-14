@@ -1303,3 +1303,64 @@ That one ratio settles it, and it also bears on the open **evasion-cap** questio
 ratio matches at 25% evasion, the linear rule is holding, which makes the maxed Reliat Stealth's 115%
 against torpedoes more plausible — though a cap could still bite above some threshold this fight
 cannot reach.
+
+## Correction: effective HP was order-dependent, and every BV/CP above is ~7% high (2026-10-14)
+
+Everything in the two sections above was computed with a broken cache and the figures are **6.5-7.7%
+too high**. Found by scoring CountDeMonet (76)'s fleet two ways and getting a uniform 8.33%
+disagreement - the kind of constant factor that is never a modelling difference.
+
+`fleet_build.ehp` scales hit points by how much damage a hull avoids, which needs a reference: the
+damage the same hull would take **stripped of evasion, armour and energy defence**. That reference
+was cached under `id(enemy)` alone. But `dpm_out` reads the target's own ship id - interception, and
+which weapons apply by ship type - so the bare figure genuinely differs per hull: **43,328 for the
+Quaoar against 42,298 for the Eris**, both destroyers. Keyed on the enemy alone, whichever hull was
+evaluated first set the denominator for every hull after it, and effective HP depended on the order
+rows happen to sit in a CSV. The key is now `(id(enemy), hull id)`.
+
+### What survived and what did not
+
+The rankings mostly hold, which is why this went unnoticed: the error was nearly - but not exactly -
+uniform, so it inflated magnitudes without reordering much.
+
+- **Frigates, cruisers, carriers, auxiliaries: order unchanged, all 51/46/6/3 hulls.** The Reliat
+  Stealth is still the top frigate, the Io A still the top cruiser.
+- **Destroyers: unchanged through rank 12.** Eris Armor and Taurus Assault swap at 13/14.
+- **Battlecruisers: the top two swap.** The **Eternal Storm** now beats the Constantine the Great.
+- `data/hull_ceiling.csv` is regenerated - all 109 hull rows changed value.
+
+Corrected figures for the hulls quoted most often, maxed, vs the large pirate team:
+
+| hull | was | now |
+|---|---|---|
+| Reliat Stealth | 3071 | 2848 |
+| Quaoar Torpedo | 2451 | 2291 |
+| Eris Heavy Cannon | 1973 | 1821 |
+| Aldabra A | 1762 | 1646 |
+| Taurus Defense | 1618 | 1494 |
+| XenoStinger Tactical | 1080 | 1002 |
+
+### It changed a fleet, not just the numbers
+
+CountDeMonet (76)'s FF/DD fleet is no longer six XenoStingers deep. With effective HP computed per
+hull, an **AC721 Amph package and a single Mare Serenitatis A** both earn places and the XenoStinger
+count drops to four:
+
+```
+FF/DD fleet - 399 of 400 CP
+   10x Reliat Stealth                 40 CP   BV/CP 2848
+   10x Quaoar Torpedo                 60 CP   BV/CP 2291
+   10x Eris Heavy Cannon              90 CP   BV/CP 1821
+   10x Aldabra A                      80 CP   BV/CP 1646
+   10x Taurus Defense                 80 CP   BV/CP 1494
+    1x AC721 Amph + 2 S Levi 9        12 CP   BV/CP 1390
+    1x Mare Serenitatis A              5 CP   BV/CP 1336
+    4x XenoStinger Tactical           32 CP   BV/CP 1002
+```
+
+That matters beyond the fleet: both newcomers had been listed as **reset candidates** on the strength
+of not being fielded. The reset plan in `data/tp.md` is built on the corrected fleets.
+
+The lesson is the one already in the kernel - a second scorer disagreeing with the first is worth
+more than either agreeing with itself. The 8.33% was only visible because two independent paths were
+asked the same question.

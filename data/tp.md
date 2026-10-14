@@ -408,3 +408,83 @@ everything these accounts can feed them for a long time.
 - **Combat and trade value are still separate scores.** `--roi` prices routes in credits per hour; a
   cruise level and an armour level should ultimately compete in that same currency, not in BV/CP and
   warp % side by side.
+
+## The 20-reset grant (Chris, 2026-10-14)
+
+A balance patch changed enough that NetEase compensated every account with **20 tech-point resets**.
+One reset takes up to **50 points out of one FAMILY** and returns them to that family's typed pool;
+part of some pools is fixed and comes back as nothing. `tools/reset_plan.py` in the lagrange-combat
+repo does both halves - which families to strip, and where the points then go.
+
+Chris also described the other new source of points, which is NOT a reset and NOT permanent:
+
+> season **experience** gives up to **50 temporary TP**, usable only in that season. The first **30
+> are easy** and come from PvE. The last **20 can only be had from PvP, or from "upgrades"** - awards
+> given for battles, also season-only.
+
+So a season's peak is the permanent pool plus 50, and the top 20 of that is gated behind PvP. Plans
+that lean on the full 50 are plans for a season, not for the account.
+
+### The binding constraint is the TYPE of the points, not the 20 resets
+
+No account can use all 20, and not one of them runs out of resets - they run out of places to put
+what comes back. TP is typed, so points recovered from a frigate family can only ever buy frigates.
+
+| account | resets worth taking | TP recovered | best destination found |
+|---|---|---|---|
+| DelA5Hades | 14 of 20 | 324 | Nebula Pulse, 22.6 BV/CP per TP |
+| Cnc04Cavalry | 11 of 20 | 176 | Wraith, 22.8 per TP |
+| Countlesmoney | 16 of 20 | 323 | Nebula Pulse, 24.4 per TP |
+| Count DeMonet (33) | 8 of 20 | 307 | Nebula Pulse, 25.9 per TP |
+| CountDeMonet (76) | 9 of 20 | 328 | Vee B, 16.5 per TP |
+
+### Craft are worth two to ten times what line hulls are
+
+The strongest result, and it holds on all five accounts: recovered points are worth far more in the
+**corvette and fighter** pools than in any line hull. Corvettes return **9.7-25.9 BV/CP per TP** and
+fighters **9.0-17.1**, against **0.08-14.4** for frigates, destroyers and cruisers. The reason is the
+wing multiplier - a craft in a 4-bay has its damage counted (n+1)/2 = 2.5 times, so a point spent on
+the craft is spent 2.5 times over, while the same point in a cruiser is spent once.
+
+The cruiser pools are also simply closer to saturation. On CountDeMonet (76) the CA queue ends with
+the Conamara Chaos Plasma taking 17 points for **0.08 per TP** - a rounding error - and the fielded
+Jaeger Carrier at 1.90. Points that cheap are better left unrecovered until a new cruiser blueprint
+arrives, because the reset that frees them is itself the scarce thing.
+
+### The frigate pools on the big accounts are stranded, and a reset cannot unstrand them
+
+This is the same wall already recorded for the unspent pools. The big accounts hold large FF pools in
+families no fleet fields, and their fleets field so few frigate families that there is nowhere for the
+points to land:
+
+| account | stranded, by type | held in |
+|---|---|---|
+| DelA5Hades | FF 223 | M470 50, Ruby Railgun 48, Mare Imbrium 48, Mare Serenitatis 47, Carilion Recon 30 |
+| CountDeMonet (76) | FF 250, DD 50 | M470, Mare Nubium, Carilion Recon, FG300, Mare Imbrium, Ceres Carrier - 50 each |
+| Count DeMonet (33) | FF 200, DD 100 | FG300, M470, Carilion Recon, Mare Nubium, AC721, Winged Hussar - 50 each |
+| Countlesmoney | FF 184, BC 33, AUX 16 | Carilion Recon 50, Mare Imbrium 46, Ruby Railgun 44, Mare Serenitatis 44 |
+| Cnc04Cavalry | BC 20, AUX 9 | Constantine 13, ST59 7, FSV830 9 |
+
+Resetting any of these converts 50 usable points into 50 unusable ones, so the tool refuses them and
+says why. The only thing that moves them is a frigate the fleet wants to field - which is a blueprint
+problem, not a tech-point problem.
+
+### A reset is not needed to fix a merely unfielded hull
+
+Worth separating, because it looks like a reset case and is not. On CountDeMonet (76) the Winged
+Hussar A already holds its full ladder (123 points, family 408) and still does not make the FF/DD
+fleet - the planner passes it over on the gradient, not for want of points. Dropping 2 XenoStinger
+for 3 Hussar is **+0.49%** and fills the fleet to exactly 400 CP. Free, and no reset involved.
+
+### Two bugs this uncovered
+
+1. `reset_plan.py` decided which families were fielded by looking for each hull's **name** in
+   `fleet_plan`'s printed output. That output ends with a `craft unused:` line naming two dozen idle
+   craft, so idle craft counted as fielded and their families were never offered for reset; and a
+   carrier bay prints its bay label, never its roster name, so **AC721 was offered up for reset on
+   accounts whose fleet was flying it**. `fleet_plan` now emits a `FIELDED_SIDS` line and
+   `reset_plan` reads ids; it refuses to run if that line is missing rather than guess.
+2. Demand was taken per fielded **family** rather than per fielded **variant**. Family 511 holds 19
+   points on CountDeMonet (76) and flies the Jaeger Carrier, but the family's best ladder belongs to
+   the Jaeger **Cannon**, so the plan put 69 points into the Cannon - stripping the bay the cruiser
+   fleet is built around. Points now go only to the variant actually fielded.
