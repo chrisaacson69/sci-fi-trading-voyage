@@ -1019,3 +1019,70 @@ AC721 Amphibious package.
 
 Note the **Quaoar Torpedo** rather than the Railgun here: with real TP behind it the torpedo variant
 wins, which is the A/B from `data/families.md` resolving the other way once both are fully invested.
+
+## Base vs maxed, best variant per family — where the free TP can actually go
+
+`lagrange-combat/tools/hull_ranks.py`. Takes **the best variant of each family** (since a family's TP
+goes to one variant) and shows it as the account has it now against fully invested, with the points
+still needed and the gain per point — which is the ranking a spend should follow.
+
+```
+python tools/hull_ranks.py countdemonet-76 --types FF,DD
+```
+
+### The big account's FF and DD pools are stranded
+
+**CountDeMonet (76), FF and DD — almost every family is already maxed:**
+
+| hull | CP | base | now | maxed | TP | **need** |
+|---|---|---|---|---|---|---|
+| Quaoar Torpedo | 6 | 1,088 | **2,142** | 2,142 | 118 | **0** |
+| Aldabra A | 8 | 1,015 | 1,503 | 1,503 | 143 | **0** |
+| Taurus Defense | 8 | 1,029 | 1,364 | 1,364 | 131 | **0** |
+| Eris Heavy Cannon | 9 | 644 | 1,308 | 1,308 | 108 | **0** |
+| Winged Hussar A | 6 | 833 | 1,302 | 1,302 | 123 | **0** |
+| Reliat Energy | 4 | 986 | 1,324 | 1,324 | 127 | **0** |
+| Mare Serenitatis A | 5 | 798 | 1,267 | 1,267 | 126 | **0** |
+
+Across both classes only three families have any appetite left, and they are hulls the fleet does not
+field: Thassa B (84 TP), Inostrancevia (90), Zircon (46).
+
+**But its CA families are hungry:**
+
+| hull | base | now | maxed | need | **gain/TP** |
+|---|---|---|---|---|---|
+| Light Cone Composite A | 931 | 931 | **1,452** | 89 | **5.85** |
+| Callisto A | 1,254 | 1,303 | **1,858** | 96 | **5.78** |
+| Jaeger Cannon | 933 | 933 | 1,329 | 69 | 5.74 |
+| Chimera A | 1,103 | 1,811 | 1,825 | **3** | 4.62 |
+| Io A | 1,425 | 1,933 | **2,033** | 23 | 4.35 |
+
+**So the problem is not that the account is short of TP — it is that the TP it holds is the wrong
+type.** FF and DD points cannot be spent on a Light Cone or a Callisto, and the FF/DD hulls that could
+take them are finished. That is the real reason the 4,034 and 4,617 accounts produce identical fleets:
+the binding constraint is build limits *and* typed supply, not points.
+
+Two cheap exceptions worth taking immediately: **Chimera A needs 3 TP** for +14 BV/CP, and **Io A needs
+23** for +100.
+
+### Countlesmoney is where points still buy a great deal
+
+| class | hull | need | now → maxed | **gain/TP** |
+|---|---|---|---|---|
+| **DD** | **Quaoar Torpedo** | 98 | 1,088 → **2,142** | **10.75** |
+| DD | Eris Heavy Cannon | 84 | 644 → 1,308 | 7.90 |
+| CA | Io A | 64 | 1,598 → 2,033 | 6.81 |
+| CA | Light Cone Composite A | 89 | 931 → 1,452 | 5.85 |
+| DD | Aldabra A | 93 | 1,015 → 1,503 | 5.25 |
+| FF | Mare Imbrium Basic | 35 | 1,019 → 1,135 | 3.31 |
+
+**The Quaoar Torpedo at 10.75 BV/CP per point is the best single spend found on any account** — 98
+points doubling the hull, and it is already the best DD in the game for these fleets.
+
+### What base-vs-maxed says in general
+
+TP roughly **doubles** a good hull: Quaoar Torpedo 1,088 → 2,142, Eris Heavy Cannon 644 → 1,308,
+Callisto A 1,254 → 1,858, Light Cone Composite A 931 → 1,452. The ones that gain most are those whose
+*base* is unimpressive — the Eris Heavy Cannon is 644 untouched and 1,308 fed, so a base ranking would
+have dismissed it. **Ranking hulls on their base stats is actively misleading**, which is the case for
+keeping both columns side by side.
