@@ -1195,3 +1195,52 @@ Two things that fall out of seeing all six classes together:
   big enough to matter, which the Taurus also plays. That is why it reads 644 at base and 1,308 maxed:
   the evasion is doing the work the hit-point term cannot see, and the base number badly understates
   it. Same for the Taurus Assault at 1,070 → 1,416.
+
+## Effective HP: evasion now counts, and it reorders the table
+
+Chris: *"effective HP depends on the shooter, but yes, high evasion ships should stand out more than
+they do."* Both parts are now in `fleet_build.ehp()`, and the shooter-dependence is explicit — EHP is
+defined against **the same pirate team everything else is scored on**:
+
+> **EHP = HP × (damage the team does to a bare hull) ÷ (damage it does to this one)**
+
+A hull with no evasion, no armour and no energy resistance gets EHP = HP, so the scale is unchanged.
+Everything defensive comes through `per_shot`, the same rules the damage side already uses — evasion,
+evasion by weapon type, armour and energy resistance all at once.
+
+| hull | CP | evasion | raw HP | **effective** | × |
+|---|---|---|---|---|---|
+| Carilion Special | 5 | 55% | 9,770 | 22,010 | **2.25×** |
+| Carilion Recon | 4 | 35% | 8,340 | 13,007 | 1.56× |
+| **Eris Heavy Cannon** | 9 | 25% | 30,540 | 44,753 | **1.47×** |
+| Io A | 18 | 15% | 62,120 | 75,815 | 1.22× |
+| Taurus Assault | 11 | 0% | 40,030 | 45,159 | 1.13× (armour only) |
+| Ruby Railgun | 5 | 0% | 16,520 | 16,747 | 1.01× |
+
+### What moved
+
+**Destroyers** — the Eris Heavy Cannon rises from 10th to 6th and now has **the largest base→maxed
+multiplier in the class at 2.34×** (783 → 1,830), which is exactly the effect Chris predicted: its
+evasion was doing work the raw-HP term could not see. The **Mizar jumps 7th → 3rd** at 1,938.
+
+**Frigates** — the whole top changes. **Reliat Stealth goes from 10th to 1st at 2,848**, and Reliat
+Energy from 3rd to 3rd but 1,324 → 1,774.
+
+`data/hull_ceiling.csv` is regenerated on this basis.
+
+### The Reliat Stealth result is real in the model and unverified in the game
+
+Its **70% base evasion is genuine** — the highest of any playable hull, double the rest of its own
+family — and maxed it adds +15 against artillery, pulse and ion, **+35 vs missiles and +45 vs
+torpedoes**. Against the large team that leaves it taking about a seventh of what a bare hull takes,
+hence **7.0× effective HP**.
+
+**But a maxed Reliat Stealth reads 115% evasion against torpedoes and 105% against missiles**, and
+whether the game caps evasion at all is still **unmeasured** (`data/upgrades.md` §6). A `HIT_FLOOR` is
+in the code at 10% so the arithmetic cannot diverge, but it does not bite here — the incoming is low
+rather than zero, because the team's railguns still land at 15%.
+
+So: **treat the Reliat Stealth's first place as contingent.** If evasion caps anywhere below ~85% it
+falls back toward the Holy Spirit and Reliat Energy. The hulls whose ranking barely moves between the
+capped and uncapped views — Quaoar Torpedo, Holy Spirit, Io A, Mare Serenitatis — are the safe picks;
+the ones that move a lot are unproven rather than good.
