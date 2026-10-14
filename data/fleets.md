@@ -1086,3 +1086,70 @@ Callisto A 1,254 → 1,858, Light Cone Composite A 931 → 1,452. The ones that 
 *base* is unimpressive — the Eris Heavy Cannon is 644 untouched and 1,308 fed, so a base ranking would
 have dismissed it. **Ranking hulls on their base stats is actively misleading**, which is the case for
 keeping both columns side by side.
+
+## The ceiling table: every hull at full max, no account
+
+Chris: *"I wanted the ranking of them all maxed, not what I can afford… this is more an explanation of
+what is theoretically possible than what is possible right now."* `hull_ranks.py --all` ignores
+accounts entirely and ranks **every playable hull fully invested** — the ceiling of each design, which
+is the table to read when deciding which blueprint to chase or which family to start feeding **before**
+the draw arrives.
+
+It lists every variant rather than one per family, because once a family's first variant is finished
+further points can go to a second — which is Chris's *"throwing more TP into a maxed hull just to get
+another variant working"*, and the destroyers show exactly why that is worth doing.
+
+### Destroyers — 43 hulls
+
+| hull | fam | CP | base | **MAXED** | TP | × base | per TP |
+|---|---|---|---|---|---|---|---|
+| **Quaoar Torpedo** | 411 | 6 | 1,088 | **2,142** | 98 | 1.97× | 10.75 |
+| **Quaoar Railgun** | **411** | 6 | 1,019 | **2,091** | **78** | 2.05× | **13.74** |
+| Helios Heavy Cannon | 415 | 6 | 1,075 | 1,763 | 118 | 1.64× | 5.83 |
+| Aldabra A | 412 | 8 | 1,015 | 1,503 | 93 | 1.48× | 5.25 |
+| Aldabra B | 412 | 8 | 970 | 1,443 | 78 | 1.49× | 6.07 |
+| Taurus Assault | **487** | 8 | 1,070 | 1,416 | 85 | 1.32× | 4.07 |
+| Mizar | 420 | 12 | 776 | 1,397 | 114 | 1.80× | 5.45 |
+| Eris Heavy Cannon | 402 | 9 | 644 | 1,308 | 90 | 2.03× | 7.37 |
+
+**The top two are the same family.** Feeding the Quaoar Railgun after the Torpedo is finished costs 78
+points for a 2,091 hull — **the best gain per point in the class at 13.74**, better than the Torpedo's
+own ladder. On an account whose Torpedo is already maxed, that is the obvious next DD spend, and it is
+the case for the second-variant move in general.
+
+### Frigates — 51 hulls
+
+| hull | fam | CP | base | **MAXED** | TP | per TP |
+|---|---|---|---|---|---|---|
+| **Holy Spirit** | **311** | 6 | **1,388** | **2,124** | 88 | **8.36** |
+| Holy Spirit (2nd variant) | 311 | 6 | 1,187 | 1,637 | 83 | 5.41 |
+| Reliat Energy | 316 | 4 | 986 | 1,324 | 83 | 4.08 |
+| Mare Serenitatis A | 312 | 5 | 798 | 1,267 | 83 | 5.65 |
+| Ruby Railgun | 305 | 5 | 821 | 1,198 | 88 | 4.28 |
+| **Zircon** | 319 | 8 | 734 | **1,090** | 118 | 3.02 |
+
+**The Holy Spirit is the best frigate in the game by 60%** — 2,124 maxed, and 1,388 even at base, which
+is above every other frigate's *maxed* figure except the Reliat Energy. Both its variants are top two.
+**Nothing on any of the five accounts owns it**, so it is the clearest blueprint to chase.
+
+On the **Zircon**: at 1,090 it is ninth, and its 118-point ladder is among the longest in the class for
+the weakest return per point in the top ten (3.02). Feeding it ahead of the draw is defensible as a
+hedge, but on these numbers Mare Serenitatis A (5.65) or Mare Imbrium Basic (4.60) are better homes for
+frigate points.
+
+### Cruisers — 46 hulls
+
+| hull | fam | CP | base | **MAXED** | TP | per TP |
+|---|---|---|---|---|---|---|
+| **Io A** | 503 | 18 | 1,425 | **2,033** | 100 | 6.08 |
+| Callisto Heavy | 504 | 20 | 1,361 | 1,953 | 110 | 5.38 |
+| Conamara Chaos Plasma | 512 | 20 | 1,373 | 1,905 | 116 | 4.59 |
+| **Ranger Ion** | 513 | 18 | 1,253 | **1,866** | 102 | 6.01 |
+| Callisto A | 504 | 18 | 1,254 | 1,858 | 107 | 5.65 |
+| **Chimera A** | 506 | 18 | 1,103 | 1,825 | 100 | **7.22** |
+| **Callisto Drone** | 504 | 16 | 1,216 | 1,797 | 79 | **7.35** |
+
+The Callisto family holds **three of the top seven** (Heavy, A, Drone), so it is the best family to
+pour cruiser points into — and the **Callisto Drone at 7.35 per point on a 79-point ladder** is the
+cheapest route into the top ten. The **Ranger Ion** at 1,866 is the variant to chase on the Ranger
+family, not the Composite the accounts hold at 1,403.
