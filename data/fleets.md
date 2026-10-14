@@ -1244,3 +1244,62 @@ So: **treat the Reliat Stealth's first place as contingent.** If evasion caps an
 falls back toward the Holy Spirit and Reliat Energy. The hulls whose ranking barely moves between the
 capped and uncapped views — Quaoar Torpedo, Holy Spirit, Io A, Mare Serenitatis — are the safe picks;
 the ones that move a lot are unproven rather than good.
+
+## Proving effective HP
+
+### What the existing data already validates
+
+The **2026-10-07 BlackGoldStar wipe** tests the incoming-damage model that EHP is built on: 15× AC721
+Logistics + 7× Taurus Assault, **wiped in 17 minutes** by team 1010801, so the enemy dealt at least the
+fleet's whole hit-point pool.
+
+| | |
+|---|---|
+| team DPM against one AC721 Logistics | 42,356 |
+| team DPM against one Taurus Assault | 37,494 |
+| ship-count weighted, fire spread over the fleet | **~40,809 DPM** |
+| over 17 minutes | 693,750 damage |
+| the fleet's hit points, all of which died | 792,310 |
+| **predicted ÷ actual** | **0.88** |
+
+**A 12% underprediction, and everything unmodelled pushes the same way** — the four Stingray bombers do
+system damage, each system lost explodes for 5% of max HP, and overkill on the killing shot is not
+counted. So the incoming side of the model is sound at the fleet level.
+
+**But this does not test evasion at all**: both hulls in that fleet have 0% evasion. It validates the
+denominator of EHP, not the thing EHP was added for.
+
+### The clean test, and it is a fight that has already happened
+
+The **2026-10-08 ArbreCAP fight** — *5× Taurus Pulse + 3× Eris Cannon + 2× Eris HC + 7× Winged Hussar A
++ 8× AC721 Logistics, won but lost over half* — contains the controlled comparison:
+
+| | row | class | armour | **evasion** | HP |
+|---|---|---|---|---|---|
+| **Taurus Pulse** | **0** | destroyer | **20** | **0%** | 36,040 |
+| **Eris Cannon / Eris HC** | **0** | destroyer | **20** | **25%** | 30,540 |
+
+**Same row, same class, same armour.** Row position is the thing that confounded the other battle
+report, and here it is held constant, so **evasion is the only variable**.
+
+The model's prediction is specific and falsifiable:
+
+> team DPM against a Taurus Pulse is **39,439**; against an Eris **28,865**.
+> So **each Taurus should take 1.37× the damage each Eris takes.**
+
+(Pure evasion would give 1/(1−0.25) = 1.33; the extra 3% is the Eris's energy resistance and the
+hit-table interaction.)
+
+**What to capture:** a battle report from that fleet showing **damage taken per hull type**, then
+divide per-Taurus by per-Eris:
+
+| result | conclusion |
+|---|---|
+| **≈ 1.37** | effective HP is right, and evasion works as modelled |
+| ≈ 1.0 | evasion does not reduce incoming damage the way `per_shot` assumes — EHP should be reverted |
+| **> 1.37** | evasion is worth *more* than modelled, and the Reliat Stealth result may be conservative |
+
+That one ratio settles it, and it also bears on the open **evasion-cap** question: if the measured
+ratio matches at 25% evasion, the linear rule is holding, which makes the maxed Reliat Stealth's 115%
+against torpedoes more plausible — though a cap could still bite above some threshold this fight
+cannot reach.
