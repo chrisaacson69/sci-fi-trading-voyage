@@ -1153,3 +1153,45 @@ The Callisto family holds **three of the top seven** (Heavy, A, Drone), so it is
 pour cruiser points into — and the **Callisto Drone at 7.35 per point on a 79-point ladder** is the
 cheapest route into the top ten. The **Ranger Ion** at 1,866 is the variant to chase on the Ranger
 family, not the Composite the accounts hold at 1,403.
+
+## `data/hull_ceiling.csv` — every hull at maxed BV/CP, all 159
+
+Chris: *"I kinda still prefer max, max — not enough TP until it falls off… I suppose just a list of
+BV/CP at maxed strength."* The straight ceiling, no marginal column, every variant listed:
+
+```
+python tools/hull_ranks.py --all --types FF,DD,CA,BC,CV,AUX --csv data/hull_ceiling.csv
+```
+
+`cls,name,sid,fam,cp,lim,base,maxed,ladder` for 159 hulls — FF 51, DD 43, CA 46, BC 10, CV 6, AUX 3.
+
+| class | top three maxed |
+|---|---|
+| **FF** | Holy Spirit **2,124** · Holy Spirit (2nd) 1,637 · Reliat Energy 1,324 |
+| **DD** | Quaoar Torpedo **2,142** · Quaoar Railgun 2,091 · Helios Heavy Cannon 1,763 |
+| **CA** | Io A **2,033** · Callisto Heavy 1,953 · Conamara Chaos Plasma 1,905 |
+| **BC** | Constantine the Great **1,951** · Eternal Storm 1,906 · Antontas Command Ship 1,640 |
+| **CV** | Marshal Crux **1,609** · Thunderous Radiance 1,301 · Solar Whale 1,292 |
+| **AUX** | Ediacaran **1,488** · Ganymede 227 · FSV830 149 |
+
+Two things that fall out of seeing all six classes together:
+
+- **The best destroyer out-scores the best cruiser and the best battlecruiser.** Quaoar Torpedo 2,142
+  against Io A's 2,033 and Constantine's 1,951, at 6 CP against 18 and 35. Per point of CP the small
+  hulls win outright, which is why every fleet above is built on them and the capitals earn their
+  place in the free reinforcement slots rather than in the cap.
+- **The Ediacaran is the only auxiliary worth anything at all** — 1,488 against the Ganymede's 227 and
+  the FSV830's 149. Those two are mobile bases, exactly as Chris described, and the score says so.
+
+### Notes from Chris, 2026-10-13
+
+- **The Mizar is an award ship.** Its family's boxes can only be bought with winner's currency, so it
+  is not a blueprint anyone can chase. He has one on the top account, and the Mizar fighter too. At
+  1,397 maxed it is seventh of 43 destroyers — worth feeding where it is held, and not a target
+  otherwise.
+- **The Holy Spirit is not obtainable** for him, so the frigate answer in practice starts at Reliat
+  Energy (1,324) and Mare Serenitatis A (1,267).
+- **The Eris Heavy Cannon's 9 CP is the price of its role** — a high-evasion front-line hull with a gun
+  big enough to matter, which the Taurus also plays. That is why it reads 644 at base and 1,308 maxed:
+  the evasion is doing the work the hit-point term cannot see, and the base number badly understates
+  it. Same for the Taurus Assault at 1,070 → 1,416.
