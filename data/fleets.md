@@ -963,3 +963,59 @@ for exactly this.
 whether a hull survives the sweep. The hulls worth checking first are always the ones firing few big
 shots (Conamara 1,200, 066 Bombardment 1,500) or energy (Io A) — they are the ones whose position
 improves as the target hardens.
+
+# The three larger accounts (2026-10-13)
+
+Resolved with `bp_roster.py` and planned with `fleet_plan.py`. **All three resolve 100%** — 97 of 97,
+116 of 116, 119 of 119 — and their TP totals of **1,444 / 4,034 / 4,617** agree exactly with the other
+agent's counts taken from the raw lists, which is now five accounts cross-checked from two directions.
+
+Five alias fixes were needed: Ediacaran is family **705** not 702, Zircon is **319** (112 is the Zircon
+*Escort Boat*, a different thing), "MareImbrium" spelled out, "VoldElfin" as a spelling of Void Elfin,
+and **"Thalassa" = Thassa = the Fluorite-class** (414) — the EW destroyers identified on 2026-10-09.
+
+| account | TP | CA fleet | FF/DD fleet |
+|---|---|---|---|
+| Countlesmoney | 1,444 | 3.83e11 | 2.50e11 |
+| Count DeMonet (33) | 4,034 | **6.13e11** | **3.64e11** |
+| CountDeMonet (76) | 4,617 | **6.13e11** | **3.64e11** |
+
+## The Marshal Crux changes the reinforcement answer
+
+Both big accounts own it, and it is the best capital CV in the game for this job:
+
+| capital CV | CP | carries | ×5 |
+|---|---|---|---|
+| **Marshal Crux** | **40** | **6 fighters** | **30F** |
+| Solar Whale | 55 | 6 corvettes | 30C |
+| CV3000 | 40 | 5F + 3C | 25F + 15C |
+
+So the big accounts run **5× Marshal Crux + 5× Solar Whale = 30 fighters + 30 corvettes** for 475 free
+CP, against Countlesmoney's Whale + CV3000 at 25F + 45C. More fighter seats, and the Crux is 15 CP
+cheaper than the Whale.
+
+## The two big accounts have converged
+
+4,034 TP and 4,617 TP produce **the same fleet strengths to three significant figures** — 6.13e11 and
+3.64e11. Their compositions differ only at the margin (33 fields 8 Chimera A, 76 fields 7 plus a
+Conamara Chaos Plasma).
+
+That is **build limits, not points**. Both field 10× Quaoar Torpedo, 10× Aldabra A, 10× Taurus Defense,
+10× Reliat Energy, 10× Eris Heavy Cannon — five families at their cap — and 8× Io A, also at cap. The
+extra 583 TP on the 76 account buys nothing a 400 CP fleet can use, because there is no room for more
+hulls and the ones fielded are already past the knee of their ladders.
+
+**Countlesmoney at 1,444 TP is the one where TP still binds**: 62% of the big accounts' CA strength and
+69% of their FF/DD, with the same build limits available. The gap is entirely what is in the hulls.
+
+## What the big accounts field
+
+**CA, both:** 5× Jaeger with corvette wings (Nebula Pulse, S Levi 9, RB7), 8× Io A, 7–8× Chimera A.
+The Jaeger packages lead at **2,034–2,394 BV/CP**, above the Io A's 1,933–2,025.
+
+**FF/DD, both:** 10× **Quaoar Torpedo at 2,142** — the best hull on either account — 10× Aldabra A
+(1,503), 10× Taurus Defense, 10× Reliat Energy, 10× Eris Heavy Cannon, 6× Winged Hussar A, plus one
+AC721 Amphibious package.
+
+Note the **Quaoar Torpedo** rather than the Railgun here: with real TP behind it the torpedo variant
+wins, which is the A/B from `data/families.md` resolving the other way once both are fully invested.
