@@ -465,13 +465,32 @@ start at zero: it starts at 30-50 in its first season, provided it can be flown 
 | 066 General | 8.6 | 8.7 | 8.0 | 6.2 | 6.7 | 4.9 | **4.5** |
 | Conamara Chaos Plasma | 15.4 | 0.0 | 10.9 | 12.0 | 11.9 | 9.1 | **8.6** |
 
-**A reset recovers `min(50, pool)`, so 50 is a liquidity cliff on PERMANENT points.** A family holding
-49 is fully re-allocatable with one reset; a family holding 99 strands 49 forever. Experience TP is
-season-only and expires on its own, so only the permanent footprint has to respect the cap. On the
-69-point example, 35/34 keeps both families liquid where 69-in-one-hull strands 19.
+**A reset recovers up to 50 from one family, and a family can be reset AGAIN for another 50** (Chris,
+2026-10-14). So nothing is ever stranded permanently and 50 is not a cliff - it is the recovery unit,
+which makes it a **block size**. The useful form of the rule is Chris's: *up to 50 points can go into
+a hull without creating a reset problem*, because one reset takes all of it back.
 
-Open: whether a SECOND reset on the same family recovers another 50. Everything above assumes one
-reset per family, which is how `reset_plan.py` models it.
+That cuts against spreading, not for it. Freeing 69 permanent points costs:
+
+| shape | resets to free it all |
+|---|---|
+| 50 + 19, two families | 2 |
+| 35 + 34, two families | 2 |
+| 23 + 23 + 23, three families | **3** |
+| 69, one family | 2 |
+
+Each family needs its own reset and each reset recovers at most 50, so holding **less** than 50 in a
+family wastes reset capacity. Reset-efficiency therefore prefers fewer families at ~50 each - the
+exact opposite of the experience argument above.
+
+**The experience argument wins, because resets are not scarce.** Measured across the five accounts,
+only 8-16 of the 20 granted resets are worth taking at all, and every account runs out of places to
+put recovered points long before it runs out of resets. Spending one extra reset to keep a third hull
+earning 30-50 a season is trivially worth it. So reset-efficiency is a tiebreaker between otherwise
+equal splits, never a reason to concentrate.
+
+Experience TP is season-only and expires by itself, so none of this applies to it - only the
+permanent footprint is ever reset.
 
 ### The binding constraint is the TYPE of the points, not the 20 resets
 
