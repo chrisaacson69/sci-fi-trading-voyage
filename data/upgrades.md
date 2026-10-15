@@ -422,3 +422,36 @@ was a drone wing, and the carrier's damage was tripled.
 
 The FF/DD and CA allocations for Cnc04Cavalry are untouched - they are line hulls, and no FF, DD or
 CA hull changed.
+
+### Chimera A over Light Cone Composite A, at 53 TP each (2026-10-14)
+
+Chris asked for both at equal investment. The Light Cone is 20 CP and the Chimera A 18 - the 20 CP
+Chimera is the HC variant, which he does not hold.
+
+| | Light Cone Composite A | Chimera A |
+|---|---|---|
+| HP at 53 TP | 78,614 | 107,268 |
+| EHP | 113,672 | **168,452** |
+| mounts | 336x2, 192x2, 25x4, 25x4 | 385x3, 280x1, 27.5x4 |
+| full ladder | 89 TP | 100 TP |
+
+| target armour | 0 | 80 | 160 | 240 | 300 | keeps |
+|---|---|---|---|---|---|---|
+| Light Cone DPM | **25,467** | 16,025 | 10,034 | 5,575 | 2,517 | 10% |
+| Chimera DPM | 19,636 | 13,065 | 9,215 | 5,364 | **3,314** | **17%** |
+| Light Cone BV | 53,804 | 42,681 | 33,772 | 25,173 | 16,916 | |
+| Chimera BV | **57,513** | **46,914** | **39,399** | **30,061** | **23,628** | |
+
+**The Chimera leads on BV at every armour value and there is no crossover** - 7% ahead at zero, 40%
+ahead at 300. The Light Cone leads only on raw DPM and only below about armour 205, opening 30% ahead
+and finishing 24% behind.
+
+The reason is the same pattern the corvettes showed: **fewer, bigger shots resist armour**. Eight of
+the Light Cone's twelve barrels are 25-damage mounts that floor at armour 22, and its main guns are
+336 and 192 against the Chimera's 385 and 280. Third independent sighting of the rule, after the
+S Levi 9's 1,180-damage torpedoes holding 76% and the Wraith's 120s collapsing to 9%. It is now a
+reliable way to read a loadout before running anything.
+
+This confirms rather than changes the Cnc04Cavalry plan, where the Light Cone was already one of the
+four families being reset to fund the Io A, and the Chimera A is kept and fielded. Worth noting the
+Chimera's ladder is 100 TP and it holds 97 there - three points from maxed.
