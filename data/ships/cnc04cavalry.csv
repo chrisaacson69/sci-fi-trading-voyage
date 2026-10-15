@@ -45,7 +45,7 @@ Carilion Special,,10,5,,,9770,1040,,5200,FF,308,30,,id 30803; blueprint list 'Ca
 FG300 Multipurpose,,15,3,,,10530,1000,,5000,FF,301,55,,id 30101; blueprint list 'FG300' variant 'A'; family resolved by alias
 FG300 Armored,,15,3,,,12540,900,,4500,FF,301,55,,id 30102; blueprint list 'FG300' variant 'B'; family resolved by alias
 FG300 Recon,,15,3,,,12540,1040,,5200,FF,301,55,,id 30103; blueprint list 'FG300' variant 'C'; family resolved by alias
-Follower,,10,1,,,6930,3000,,15000,FT,112,0,,id 11201; blueprint list 'Zircon' variant 'A'; family resolved by alias
+Hive,,10,2,,,6650,2500,,12500,CO,208,0,,id 20801; blueprint list 'CellDefender' variant '-'; was mis-resolved to 11201 Follower - Chris 2026-10-14: the Follower is a special hull, not in research, and is not on this account, while Cell Defender IS the Hive. TP HERE IS UNCONFIRMED
 M470 Siege,,10,6,,,14000,800,,4000,FF,307,0,,id 30701; blueprint list 'NOMA' variant 'A'; family resolved by alias
 M470 Support,,10,6,,,14000,800,,4000,FF,307,0,,id 30702; blueprint list 'NOMA' variant 'B'; family resolved by alias
 Mare Nubium Siege,,10,4,,,9030,900,,4500,FF,303,0,,id 30301; blueprint list 'MareNubium' variant 'A'; family resolved by name
