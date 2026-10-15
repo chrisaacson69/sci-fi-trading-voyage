@@ -510,3 +510,68 @@ missiles.. and while this module is helpful, it is probably down the list."
 
 Also resolved, and not a fault: the Constantine's ladder reads 145 TP against the 29 on Chris's ship
 because **29 is what it currently holds**, not its ceiling.
+
+### FIXED: system_mods handled 19 of 285 upgrade effects (2026-10-14)
+
+The "blank adjustment" rows were never blank. Prefix `6040110` on the Constantine's ion gun carries
+**`EFFECT_ID` 12350 = `EFFECT_WEAPON_BASIC_ATTACK_ADD`** with a real ladder (`1,14;...;5,70`), and
+`6040112` on its missiles carries `1,25;...;5,125`. `system_mods` took the named-effect branch, found
+no case for 12350, and dropped it silently.
+
+Auditing it: **`system_mods` had branches for 19 of the 285 effect names that appear in upgrade rows.**
+The unhandled ones by frequency:
+
+| effect | rows | |
+|---|---|---|
+| `EFFECT_WEAPON_BASIC_ATTACK_ADD` | 149 | **flat** damage add - now handled |
+| `EFFECT_SHIP_HP_ADD` | 92 | flat HP add - now handled |
+| `EFFECT_WEAPON_DURATION_INC0` / `DEC0` | 80 | cycle length - still unhandled |
+| `EFFECT_FLIGHT_TIME_DEC` | 39 | cycle length - still unhandled |
+| `EFFECT_WEAPON_REPEAT_TIMES_ADD0` | 30 | volleys per cycle - now handled |
+| `EFFECT_TARGET_PRIORITY_TOP` | 85 | targeting, not a stat |
+| `EFFECT_SPEED_ADD` / `CURVATURE_SPEED_ADD` | 118 | movement, out of scope here |
+| `EFFECT_REPAIR_INC` | 43 | healing, known unmodelled |
+
+Three are now implemented - the flat damage add, the flat HP add and the repeat-times add. The cycle
+effects (119 rows) are left, and they raise DPM where they appear, so DPM remains a floor.
+
+### FIXED: ship-level hit points were never applied
+
+`maxout.level_hp` has held the measured per-class rates since they were taken - destroyer 40 per TP,
+cruiser 60, corvette 5, fighter 1, capitals 0 - and **nothing in the repo ever called it.** So every
+HP figure was short by the whole term: 4,440 on a 111-TP destroyer, 12% of the hull.
+`fleet_build.stats` now adds it.
+
+### Both fixes validated against Chris's Quaoar Railgun at 111 TP
+
+| | model | Chris | |
+|---|---|---|---|
+| display DPM | **16,112** | **16,106** | **0.04%** |
+| raw HP | 42,310 | 43,836 | short 1,526 |
+
+The DPM match is as close as the readings can resolve. The HP shortfall is exactly the **+5% chip
+adjustment** this file already documents at 1,527 on a 30,540 base, so the remaining gap is a single
+known, unimplemented term rather than an unexplained one. Composition: 30,540 base x 1.24 from two
++12% structure upgrades, plus 40 x 111 ship-level. Chris's own breakdown of the same hull was
+base x (1 + .12 + .12 + .05) + 40 x TP = 43,837.
+
+### Consequence: the Conamara Chaos Plasma beats the Chimera A at any armour
+
+With the fixes in, the cruiser comparison Chris asked for, at 70-80 TP:
+
+| hull | CP | TP | BV/CP @0 | @80 | @160 | @240 | @300 |
+|---|---|---|---|---|---|---|---|
+| Io A | 18 | 75 | **4,346** | **4,092** | **4,072** | **4,072** | **4,072** |
+| Chimera A | 18 | 75 | 3,577 | 2,932 | 2,501 | 1,979 | 1,634 |
+| Conamara Chaos Plasma | 20 | 75 | 3,481 | 3,435 | 3,435 | 3,435 | 3,435 |
+
+The Conamara is **armour-immune** - 27,480 DPM flat from armour 80 to 300 - so the Chimera's 2.8%
+lead against bare targets becomes a 74% deficit at armour 240. The Io A is largely energy too and
+beats both everywhere. This does not contradict the earlier Chimera-over-Light-Cone result: those are
+both ballistic hulls, and against a plasma hull the ordering inverts.
+
+**So no three-way hedge.** A hull acquired later arrives with 30 free experience points once flown,
+so pre-positioning permanent TP for the Conamara or the Chimera HC buys nothing that experience will
+not give. What matters is keeping the Chimera **at or under 50 permanent**, since the Conamara sits in
+family 512 and the Chimera in 506 - points cannot migrate, only a reset frees them, 50 at a time.
+Io A first and heavily, Chimera to 50 and stop.
