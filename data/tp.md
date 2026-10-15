@@ -422,8 +422,56 @@ Chris also described the other new source of points, which is NOT a reset and NO
 > are easy** and come from PvE. The last **20 can only be had from PvP, or from "upgrades"** - awards
 > given for battles, also season-only.
 
-So a season's peak is the permanent pool plus 50, and the top 20 of that is gated behind PvP. Plans
-that lean on the full 50 are plans for a season, not for the account.
+**Corrected 2026-10-14: experience TP is PER HULL, not an account pool, and it has to be EARNED by
+fielding and using that hull.** Each hull can reach 30-50 of its own, and none of it survives the
+season. That changes the arithmetic completely - a season's peak is not "the permanent pool plus 50",
+it is the permanent pool plus 30-50 **on every hull you actually fly**. Chris: "each hull gets their
+own experience... it's nice to start with some base TP."
+
+### Therefore: how many hulls you field beats how you allocate between them
+
+The free 30 buys the steepest part of every ladder, so what you do with the permanent points barely
+matters by comparison. Worked on Chris's cruiser pool - 69 free points across the Io A, Chimera A and
+066 General, with +30 experience landing on each:
+
+| allocation | free split | ends at | sum of BV/CP |
+|---|---|---|---|
+| two-way split | 35/34/0 | 65/64/30 | **5,943** |
+| Io to 50, then Chimera | 20/49/0 | 50/79/30 | 5,905 |
+| all free into the Io | 69/0/0 | 99/30/30 | 5,867 |
+| even thirds | 23/23/23 | 53/53/53 | 5,836 |
+
+**1.8% separates the best allocation from the worst.** Against that, fielding three hulls instead of
+one harvests 90-150 experience points a season rather than 30-50 - a 60-100 point swing. The
+allocation question is noise; the roster question is the whole game.
+
+So the rule is a **bootstrapping threshold**, not a hedge: spend permanent points to get a hull over
+the line where it is worth fielding, and from then on it earns its own 30-50 every season. Points
+concentrated in one hull leave the others below that line, and their experience is forgone
+permanently - it cannot be earned by a hull that never flies.
+
+It also makes a new blueprint far cheaper to absorb than it looks. Chris's worry was that opening a
+Chimera HC or a Conamara Plasma later would leave him unable to catch them up. A new hull does not
+start at zero: it starts at 30-50 in its first season, provided it can be flown well enough to earn.
+
+### Two hard numbers behind the doctrine
+
+**The ladders are concave**, so the top of a ladder is the worst TP you can buy. BV/CP per TP by band:
+
+| hull | 0-10 | 10-20 | 20-33 | 33-50 | 50-66 | 66-80 | 80-99 |
+|---|---|---|---|---|---|---|---|
+| Io A | 22.5 | 17.0 | 13.8 | 13.4 | 12.4 | 12.1 | **6.1** |
+| Chimera A | 12.7 | 13.5 | 11.0 | 13.1 | 9.2 | 9.1 | **6.3** |
+| 066 General | 8.6 | 8.7 | 8.0 | 6.2 | 6.7 | 4.9 | **4.5** |
+| Conamara Chaos Plasma | 15.4 | 0.0 | 10.9 | 12.0 | 11.9 | 9.1 | **8.6** |
+
+**A reset recovers `min(50, pool)`, so 50 is a liquidity cliff on PERMANENT points.** A family holding
+49 is fully re-allocatable with one reset; a family holding 99 strands 49 forever. Experience TP is
+season-only and expires on its own, so only the permanent footprint has to respect the cap. On the
+69-point example, 35/34 keeps both families liquid where 69-in-one-hull strands 19.
+
+Open: whether a SECOND reset on the same family recovers another 50. Everything above assumes one
+reset per family, which is how `reset_plan.py` models it.
 
 ### The binding constraint is the TYPE of the points, not the 20 resets
 
