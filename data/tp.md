@@ -483,11 +483,21 @@ Each family needs its own reset and each reset recovers at most 50, so holding *
 family wastes reset capacity. Reset-efficiency therefore prefers fewer families at ~50 each - the
 exact opposite of the experience argument above.
 
-**The experience argument wins, because resets are not scarce.** Measured across the five accounts,
-only 8-16 of the 20 granted resets are worth taking at all, and every account runs out of places to
-put recovered points long before it runs out of resets. Spending one extra reset to keep a third hull
-earning 30-50 a season is trivially worth it. So reset-efficiency is a tiebreaker between otherwise
-equal splits, never a reason to concentrate.
+**Which of the two wins depends on whether resets are free, and normally they are not.** Chris,
+2026-10-14: the 20-reset grant is a one-off that turns up "maybe once a year" with a balance update -
+**the normal price of a reset is expensive.** So there are two regimes:
+
+* **During a grant (now).** Resets are not the scarce thing: only 8-16 of the 20 are worth taking on
+  any of the five accounts, and each runs out of places to put recovered points long before it runs
+  out of resets. Spending an extra reset to keep a third hull earning 30-50 a season is trivially
+  worth it, so reset-efficiency is only a tiebreaker between otherwise equal splits.
+* **The rest of the year.** Reset-efficiency is a real cost and the 50-point block is the discipline
+  that avoids paying it: a family at or under 50 is undone by one reset, a family at 99 needs two.
+  Points committed past 50 in a hull are a bet that it will not need unwinding before the next grant.
+
+Conveniently the two constraints agree on the number. **~50 per hull is both the reset block and the
+end of the useful part of the ladder** - the Io A returns 13.4 BV/CP per TP in its 33-50 band and 6.1
+in its last 19 points. So capping a hull near 50 costs almost nothing in value and buys a cheap exit.
 
 Experience TP is season-only and expires by itself, so none of this applies to it - only the
 permanent footprint is ever reset.
