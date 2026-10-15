@@ -296,3 +296,129 @@ convention again from the "full firepower" accuracy problem in section 4. Chris 
 and the gap is exactly explained if the target-count row (prefix 401) costs **15 TP rather than 10**.
 `Tb_cfg_system_enhance` gives it `ENHANCE_COST (2, 2, 2, 2, 2)` = 10, so either that field is not the
 whole price for this row or the row is not the one being read. Worth one look at the upgrade screen.
+
+## Carrier and craft model faults, found against Chris's in-game readings (2026-10-14)
+
+Chris checked the model's carrier numbers against the game and three of the four disagreements were
+the model's fault. The readings that found them: stock Solar Whale 9,648 DPM; Constantine the Great
+34k+; Wraith 5,200 HP with 120/60 mounts; RB7 5,200 HP with a 220 ballistic; T800 carrying the 120
+pulse. Everything below is anchored to those.
+
+### FIXED - weapon systems are one-per-GROUP, exactly like hangars
+
+`carriers_csv` already knew that a carrier fields ONE system per `Tb_cfg_ship_system.GROUP` and that
+summing every hangar module counts alternatives that cannot coexist. The same rule governs WEAPON
+systems and `matrix.hull` was not applying it. It filtered mounts by module id against
+`STOCK_MODULES`, and a module that appears in both the stock system and its alternatives passes that
+test once per system. The Solar Whale's group 102 is the worked example:
+
+```
+8010103  grp 102  STOCK    [18011, 18012]     <- the stock M1/A1/B1 fit
+8010104  grp 102  add-on   [18014, 18012]
+8010105  grp 102  add-on   [18016, 18012]
+```
+
+Module 18012 is in all three, so the hull mounted it three times - the stock copy at slot 0304 plus
+the optional systems' copies at 0406 and 0508. On top of that the Whale carried module 11032, a
+4 x 900-damage **UAV ST-1 drone wing hosted on an optional system**, straight into the hull's gun DPM.
+
+Result: the model read **21,074 DPM where Chris measured 9,648** - 2.2x, and worse once the drone
+wing is understood as a third thing that is neither gun nor corvette bay.
+
+`matrix.hull` now drops any weapon mount whose `system_group` is in `OPTIONAL_SYS[sid]` on the stock
+path, and the same test gates drone bays. The Whale is left with slots 0303 (320 dmg x2) and 0304
+(220 dmg x2), which reproduces the measurement exactly:
+
+| | model | Chris |
+|---|---|---|
+| nominal | 10,032 | |
+| display convention, (dmg - 10) | **9,648** | **9,648** |
+| hit-adjusted | 7,513 | |
+
+**15 of 164 hulls had an inflated stock loadout, every one of them a capital.** Solar Whale and Spear
+of Uranus lost weapon mounts (2 each); Shield of Plutus, CV3000 and Dubhe lost 3 drone bays each;
+Eternal Storm, Antontas Command Ship and Ediacaran 2 each; ST59, Constantine, Megrez, FSV830,
+Ganymede, Marshal Crux and Eternal Heavens 1 each. No frigate, destroyer or cruiser moved, so the
+line-hull work and the ceiling table's FF/DD/CA sections are unaffected.
+
+### The in-game display is NOMINAL; the model is hit-adjusted
+
+Not a fault, but the conversion has to be applied before the two are compared, and forgetting it
+manufactured a fault that did not exist. The display applies the -10 armour convention and nothing
+else; `tp_assign._mount_dpm` multiplies by the hit-table probability.
+
+| hull | nominal | display | hit-adjusted | Chris reads |
+|---|---|---|---|---|
+| Solar Whale, stock | 10,032 | 9,648 | 7,513 | 9,648 |
+| Constantine the Great | 33,000 | 32,493 | 26,850 | 34k+ |
+
+The Whale's two guns hit 70% and 80% against a cruiser, which is the whole of the gap between 9,648
+and 7,513. The Constantine was **never wrong** - its 34k is nominal and the model's 28,232 was the
+same gun after hit rates. Its tech points go to non-damage upgrades, so its nominal DPM is flat at
+33,000 from 0 to 31 TP.
+
+Flight time is **zero** on both Whale guns, so the cycle rule (duration + cooldown + flight, lock-on
+excluded) reproduces the display unchanged and needs no revision.
+
+### OPEN - `AIRCRAFT_COEF` and `AIRCRAFT_RANGE` are never read
+
+Every `Tb_cfg_weapon` row carries both and the model ignores them. Across 601 weapon rows
+`AIRCRAFT_COEF` is 100 on 288, blank on 271, and scattered at 5, 15, 25, 30, 33, 40, 44 and 66 with a
+couple at 200 and 307; `AIRCRAFT_RANGE` is 99 on 223 rows, 11 on 161, blank on 125, 3 on 40, 0 on 34
+and 2 on 18.
+
+**Whether blank means "full damage" or "cannot engage aircraft" decides how much a wing is worth.**
+Chris: most of the meta is aircraft killing aircraft, with a heavy focus on killing carriers, and
+aircraft are hard for ships to hurt. If blank is "cannot engage", 45% of ship weapons cannot touch a
+wing and craft effective HP is several times what the model computes. Measured today, craft EHP comes
+out at only 0.7-1.5x raw HP, which is far too flat to match what Chris describes - so the model is
+missing this and the gap is most likely here. Two cheap in-game tests settle it: a wing taking fire
+from a ship whose weapons are blank-coef, and the same against a coef 5-15 weapon.
+
+### OPEN - craft hit tables carry 1xx target classes the lookup never reads
+
+`matrix.per_shot` finds the hit rate with `table.get(defender["type"] * 100)`, so it only ever reads
+the 300/400/500/600 ship entries. The Wraith's table also carries classes 100, 101, 102, 103 and 105
+alongside 200, 1000, 2100-2300, 3100, 4100 and 4300. Those are where aircraft-versus-aircraft lives,
+and none of them are reachable through a `type * 100` key. Any answer about wings fighting wings is
+currently outside the model.
+
+### Corrected for the record - energy weapons are NOT wrongly armour-immune
+
+An earlier note in this session claimed the armour model was broken for energy weapons, on the
+strength of the Wraith showing flat damage against armour. That was a label swap in a scratch script,
+not a model fault: the flat curve belonged to the **T800**, whose weapon genuinely is a 120-damage
+Energy/pulse mount. The ids are right in `data/ships/*.csv` and were right all along:
+
+| sid | craft | base HP | mounts |
+|---|---|---|---|
+| 20701 | RB7 | 5,200 | 220 Ballistic |
+| 21001 | Wraith | 5,200 | 120 Ballistic x2 + 65 |
+| 21301 | T800 | 7,500 | 120 Energy (pulse) |
+
+Corvette damage retention from armour 0 to 300, corrected:
+
+| corvette | DPM @0 | @300 | keeps | |
+|---|---|---|---|---|
+| T800 (120 pulse, energy) | 2,280 | 2,280 | **100%** | armour-proof |
+| S Levi 9 (1,180 torpedo x3) | 2,579 | 1,949 | **76%** | few big shots resist |
+| Wraith (120 x2 + 65) | 3,958 | 372 | 9% | floors at armour 108 |
+| M011 Missile | 3,285 | 328 | 10% | |
+| RB7 (220 ballistic) | 2,508 | 251 | 10% | floors at armour 198 |
+
+Chris called the Wraith and the M011 correctly and his "flattens to 10% just over 100" is the model's
+own prediction for a 120-damage ballistic mount. The RB7 collapses too. Its reputation for hitting
+cruisers is a HIT TABLE, not a damage bonus - 85% against FF/DD, 95% CA, 100% BC, **70% CV** - so it
+holds up against battlecruisers and gets worse against carriers, the wrong direction for a
+carrier-focused meta.
+
+### What this changes in the plans
+
+The reinforcement comparison reverses. With the Whale's anti-ship damage corrected from 21,074 to
+7,513 hit-adjusted, against the Constantine's 26,850, **5x Constantine the Great beats 5x Solar
+Whale** on Cnc04Cavalry, and the 11 free BC points stop being dead. The earlier claim that a Whale
+package was 86% hull and 14% wing was an artifact of the same bug: part of what was counted as hull
+was a drone wing, and the carrier's damage was tripled.
+
+The FF/DD and CA allocations for Cnc04Cavalry are untouched - they are line hulls, and no FF, DD or
+CA hull changed.
