@@ -455,3 +455,58 @@ reliable way to read a loadout before running anything.
 This confirms rather than changes the Cnc04Cavalry plan, where the Light Cone was already one of the
 four families being reset to fund the Io A, and the Chimera A is kept and fielded. Worth noting the
 Chimera's ladder is 100 TP and it holds 97 there - three points from maxed.
+
+### Mounting a module costs 10 TP (Chris, 2026-10-14)
+
+A mechanic the model does not have at all. Fitting a module into a new system slot costs **10 tech
+points**, and for that you get the module's own effect immediately; its upgrade ladder is extra on
+top. Chris on the Constantine the Great: "according to the blueprint, the module alone gives +10% dam
+to energy weapons and it costs 10 to mount a new module. (slots C and D are new). it also then gives
+a damage and cooldown upgrade for extra."
+
+**This invalidates every "best (every module unlocked)" ceiling figure in this repo**, which treats
+optional systems as free. Each one costs 10 TP to reach before any of its upgrades are bought.
+
+The correction that matters: the Solar Whale's spare bays were costed at zero. Group 103's `48015`
+(+3 corvettes) and group 201's `48013` (+5 fighters) are optional systems, so reaching the 9C+5F
+configuration costs **20 TP**, not nothing. The earlier claim that it was "+31% wing value for no
+tech points at all" was wrong - and on Cnc04Cavalry it is also unaffordable, since the account holds
+7 free CV points against the 20 needed.
+
+### The planner is blind to blank adjustment upgrades
+
+`matrix.apply_upgrades` ignores enhancement prefixes that carry `EFFECT_TYPE=3`,
+`ADJUST_ENHANCE_INDEX=1` and no `EFFECT_ID`, and `tp_assign.plan` never schedules them. These are the
+flat percentage upgrades - cost `(2,2,2,2,2)` for five levels of 2%, so **10 TP for +10% damage on one
+gun**. Two sit on the Constantine alone: prefix `6040110` on system `6040101` (its ion gun) and
+`6040112` on `6040103` (its missiles). Applying either through the model produces no change at all.
+
+So every ladder figure in this repo is missing them, every "full ladder" total is understated, and
+gain-per-TP rankings are mis-ordered wherever an adjustment row would have competed. The arithmetic
+has to be done by hand until this is fixed.
+
+### Worked example: the Constantine's +10% energy module is low priority
+
+The Constantine is **not** mostly energy, which is what makes the answer clear. Its 33,000 nominal:
+
+| gun | action | nominal | share |
+|---|---|---|---|
+| `16041`, 400 dmg ion | **Energy** | 9,000 | 27% |
+| `16941` x2, 850 dmg | **Ballistic** (missile) | 24,000 | **73%** |
+
+So +10% to energy weapons is +900 nominal, +2.7% of the ship. The same flat upgrade on the missile
+gun is +2,400, or +7.3%.
+
+| target armour | +10% energy | +10% ballistic |
+|---|---|---|
+| 0 | +900 | **+2,400** (2.7x) |
+| 240 | +900 | **+1,728** (1.9x) |
+| 540 | +900 | +875 (crossover) |
+
+The ion gun ignores armour, so its relative worth climbs as armour rises, but the crossover is near
+**armour 540** - far past the 300 ceiling of any sweep taken so far. The missiles are the better buy
+at every armour level that occurs in practice. Chris: "the big weapons on the CtG are actually the
+missiles.. and while this module is helpful, it is probably down the list."
+
+Also resolved, and not a fault: the Constantine's ladder reads 145 TP against the 29 on Chris's ship
+because **29 is what it currently holds**, not its ceiling.
