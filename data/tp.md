@@ -450,9 +450,12 @@ the line where it is worth fielding, and from then on it earns its own 30-50 eve
 concentrated in one hull leave the others below that line, and their experience is forgone
 permanently - it cannot be earned by a hull that never flies.
 
-It also makes a new blueprint far cheaper to absorb than it looks. Chris's worry was that opening a
-Chimera HC or a Conamara Plasma later would leave him unable to catch them up. A new hull does not
-start at zero: it starts at 30-50 in its first season, provided it can be flown well enough to earn.
+A new blueprint is somewhat cheaper to absorb than it looks, but **not free**: experience has to be
+EARNED by flying the hull, PvE encounters stop paying at 30 points, and the last 20 come only from PvP
+or battle awards (Chris, 2026-10-14). So a new hull does not start at 30 - it starts at zero and
+climbs, at the cost of play time, with the top 20 much harder than the first 30. Pre-positioning
+permanent points in a family therefore has real value, and arguments of the form "experience will
+cover it later" are claims about grinding, not about a grant.
 
 ### Two hard numbers behind the doctrine
 

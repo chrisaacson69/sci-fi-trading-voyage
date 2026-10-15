@@ -570,8 +570,23 @@ lead against bare targets becomes a 74% deficit at armour 240. The Io A is large
 beats both everywhere. This does not contradict the earlier Chimera-over-Light-Cone result: those are
 both ballistic hulls, and against a plasma hull the ordering inverts.
 
-**So no three-way hedge.** A hull acquired later arrives with 30 free experience points once flown,
-so pre-positioning permanent TP for the Conamara or the Chimera HC buys nothing that experience will
-not give. What matters is keeping the Chimera **at or under 50 permanent**, since the Conamara sits in
-family 512 and the Chimera in 506 - points cannot migrate, only a reset frees them, 50 at a time.
-Io A first and heavily, Chimera to 50 and stop.
+**Corrected: the three-way split IS the right hedge.** Two things were wrong in the first version of
+this note (Chris, 2026-10-14).
+
+Experience is **earned, not granted**. A new hull does not arrive with 30 points - it has to be flown,
+PvE encounters stop paying at 30, and the last 20 need PvP or battle awards. So "experience will cover
+a new hull" is a claim about grinding, not about a free grant, and pre-positioning permanent TP has
+real value.
+
+And the Conamara Chaos **Railgun** and **Plasma** are the SAME family - 51201 and 51202 are both 512 -
+and Chris already owns and flies the Railgun. So points placed in the Conamara family are not
+speculative: they work today in a fielded hull, and one reset moves the whole position to the Plasma
+if it lands, as long as the family stays at or under 50.
+
+That is what makes the hedge cheap. Chris measured the three-way split at about **2% below** the
+Io/Chimera split today, and that 2% reverses the moment the Plasma arrives, because the Conamara
+family's points carry over while the Chimera's cannot - family 506 has no path to 512.
+
+The Chimera should still be capped at **50 permanent**, and Chris's reason is the better one: "it is
+possible the Chimera gets dropped in an advanced account, so I don't want to take this past 50
+anyway." Io A first and heavily, Chimera to 50, and the Conamara family funded as the hedge.
