@@ -657,8 +657,35 @@ variants are, so an upgraded player model overtakes a TE one given enough points
 exist in the tables with different costs - 573xx at 18/18/14 CP and 582xx at 14/14 - and which is the
 TE line is not yet established.
 
-**Conclusion unchanged and now firmer: the XT 20 Support is the best healer per CP at every
-investment level, and the Alioth A has the highest absolute output once fed.**
+### Corrected again: the XT 20s are TE ships and cannot be fed
+
+Chris, 2026-10-14: **the XT 20s are TE ships with fixed upgrades.** So the 94 TP ladder computed for
+the XT 20 Support above is meaningless - there is no way to spend points on it - and the conclusion
+that it is "the best healer per CP at every investment level" was wrong twice over. A TE hull is
+compared at its frozen state against a hull that can be invested in.
+
+| hull | CP | TP | HP | repair/min | DPM | rep/CP | DPM/CP |
+|---|---|---|---|---|---|---|---|
+| XT 20 Support (TE, frozen) | 14 | - | 57,510 | 8,182 | 3,714 | **584** | 265 |
+| 066 Support | 18 | 0 | 66,400 | 8,182 | 3,728 | 455 | 207 |
+| 066 Support fed | 18 | 78 | **82,336** | 9,184 | **6,390** | 510 | **355** |
+| Alioth A fed | 20 | 74 | **101,618** | **11,667** | **7,842** | 583 | **392** |
+
+**The XT 20 wins only on repair-per-CP in isolation**, and that is the wrong yardstick: healing a hull
+that dies anyway is wasted, so repair has to be read alongside the HP it is protecting and the damage
+the platform contributes. A fed 066 Support carries 43% more hit points and 72% more damage. Chris:
+*"a 78 TP CAS is prolly gonna outperform an XT20 even at a per/CP level.. not to mention the CAS has
+guns and more HP."* It does.
+
+**A fed Alioth A beats both outright** - most HP, most repair, most damage, best DPM/CP. So among
+these three the Alioth is the investment target, the 066 the solid buildable healer, and the XT 20
+free filler that cannot be improved.
+
+**Note the tables do not mark TE status for these hulls.** `TEST_NAME` is plain for all of them -
+XT-20护航, XT-20载机, XT-20支援 - with no `-TE` suffix, which is the only TE marker the tooling knows.
+Two XT 20 lines exist, 573xx at 18/18/14 CP and 582xx at 14/14, and which is the trial line is not
+established. So TE status currently has to come from Chris, and any ranking that silently feeds a TE
+hull tech points is wrong in the way this section was.
 
 ### Known-bad number to distrust
 
