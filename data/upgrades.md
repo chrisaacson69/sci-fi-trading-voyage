@@ -633,12 +633,32 @@ would take it to 13,000/min. Whether that bonus is per-action, per-second or som
 | 066 Support | 8,182 | 8,182 | 8,182 |
 | XT 20 Support | 8,182 | 8,182 | 8,182 |
 
-So the Alioth starts 14% behind and finishes 43% ahead. **Read that asymmetry with suspicion**:
-`maxout` also gates upgrade scoring on `action in ("Ballistic", "Energy")`, so `plan` never VALUES a
-repair upgrade. The Alioth's gain is incidental - upgrades bought for other reasons that happen to
-share the drone's system group. The two flat lines are most likely the planner not looking rather
-than the hull not scaling, and a player choosing deliberately could raise all three. Valuing repair
-upgrades properly is the next step.
+The flat lines WERE the planner not looking, and it is fixed. `tp_assign.seconds_alive` now
+subtracts `repair_pm` from incoming damage - which is Chris's breakpoint directly, a hull healing as
+fast as it is hit cannot be killed - so `value_of` prices a repair upgrade and `plan` buys it. The net
+is floored at 5% of incoming rather than allowed to reach zero, because a hull that out-heals one
+pirate template is not immortal and an infinity would make every repair rung look priceless.
+
+With that in, all three scale and Chris's description is reproduced:
+
+| hull | CP | 0 TP | 50 TP | 80 TP | ladder | repair/CP at 80 |
+|---|---|---|---|---|---|---|
+| Alioth A | 20 | 7,000 | 9,211 | **11,667** | 74 | 583 |
+| **XT 20 Support** | **14** | 8,182 | 8,182 | 9,491 | 64 -> **94** | **678** |
+| 066 Support | 18 | 8,182 | 8,182 | 9,184 | 58 -> **78** | 510 |
+
+Chris: *"the base healers only differ in the amount of UAV they have. it is the upgrades that start to
+differentiate them... the ships differentiate as more and more TP are applied."* That is the table:
+identical 8,182 at zero points, diverging only once fed. The ladders lengthen too - the 066 from 58 to
+78 TP and the XT 20 from 64 to 94 - because repair upgrades are now purchasable at all.
+
+He also notes the XT 20 ships with specific upgrades already applied, which is what the `-TE` trial
+variants are, so an upgraded player model overtakes a TE one given enough points. Two XT 20 lines
+exist in the tables with different costs - 573xx at 18/18/14 CP and 582xx at 14/14 - and which is the
+TE line is not yet established.
+
+**Conclusion unchanged and now firmer: the XT 20 Support is the best healer per CP at every
+investment level, and the Alioth A has the highest absolute output once fed.**
 
 ### Known-bad number to distrust
 
