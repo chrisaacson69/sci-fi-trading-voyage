@@ -590,3 +590,69 @@ family's points carry over while the Chimera's cannot - family 506 has no path t
 The Chimera should still be capped at **50 permanent**, and Chris's reason is the better one: "it is
 possible the Chimera gets dropped in an advanced account, so I don't want to take this past 50
 anyway." Io A first and heavily, Chimera to 50, and the Conamara family funded as the hedge.
+
+## Repair, modelled at last (Chris, 2026-10-14)
+
+Chris: *"repair is a UAV that has stats like a weapon, except that it is +HP instead of -HP. The
+upgrades on the ship are similar to any other weapon upgrade, so you can increase damage or reduce
+cooldown or duration."* That is exactly how the tables hold it, and it is why repair was invisible.
+
+A repair drone's module has **`ACTION = 4`** in `Tb_cfg_weapon_action`, and its `ACTION_PARAM` is the
+heal amount. `matrix.ACTION_NAMES` mapped only 1 (Energy) and 2 (Ballistic), so `per_shot` returned
+zero on its first line and the whole system vanished. There are **17 repair modules** in the game.
+`ACTION_NAMES` now maps 4 to "Repair", and `matrix.repair_pm(hull)` reads them with the same cycle
+arithmetic as a gun - duration + cooldown + flight, lock-on excluded. Every DAMAGE path in the repo
+already gated on `action in ("Ballistic", "Energy")`, so repair mounts are skipped there untouched.
+
+`WEAPON_TYPE = 7` is the repair type, and the Alioth's RT-2 carries
+`EFFECT_WEAPON_SELECT_TARGET_REPAIR_SELF_OR_CARRIER` - the drone aims its "weapon" at its own ship.
+
+### The three support cruisers on the new account
+
+| hull | CP | repair drones | module | heal | reps | cycle | repair/min | per CP |
+|---|---|---|---|---|---|---|---|---|
+| **XT 20 Support** | **14** | 3x ST-10 | `11034` | 500 | 4 | 44,000 | 8,182 | **584** |
+| 066 Support | 18 | 3x AT-2 维修 | `11034` | 500 | 4 | 44,000 | 8,182 | 455 |
+| Alioth A | 20 | 2x RT-2 | `27414` | 350 | 1 | 6,000 | 7,000 | 350 |
+
+**The XT 20 Support and the 066 Support carry the identical repair module**, three each, so their
+healing is the same and the XT 20 delivers it for 4 fewer CP plus two armed ST-9s. It is strictly the
+better healer, which settles whether the XT 20s are worth chasing: they are.
+
+The Alioth's RT-2 is a different design - a third of the heal on a 6-second cycle instead of 44 - so
+it is higher per drone (3,500 against 2,727) and only loses by carrying two. It is also the only one
+of the three with **`EFFECT_SHIP_REPAIR_ARMOR_ADD = 300`**, which, if it lands on each repair action,
+would take it to 13,000/min. Whether that bonus is per-action, per-second or something else is
+**unmeasured**, and it is the one number that decides Alioth against 066.
+
+### Repair scales with tech points, but the planner cannot see it
+
+| hull | 0 TP | 50 TP | 80 TP |
+|---|---|---|---|
+| Alioth A | 7,000 | 8,750 | **11,667** |
+| 066 Support | 8,182 | 8,182 | 8,182 |
+| XT 20 Support | 8,182 | 8,182 | 8,182 |
+
+So the Alioth starts 14% behind and finishes 43% ahead. **Read that asymmetry with suspicion**:
+`maxout` also gates upgrade scoring on `action in ("Ballistic", "Energy")`, so `plan` never VALUES a
+repair upgrade. The Alioth's gain is incidental - upgrades bought for other reasons that happen to
+share the drone's system group. The two flat lines are most likely the planner not looking rather
+than the hull not scaling, and a player choosing deliberately could raise all three. Valuing repair
+upgrades properly is the next step.
+
+### Known-bad number to distrust
+
+`Alioth-class Type C` computes to **16,000 repair/min**, which would make it the best healer found.
+Its module `27401` has a **blank `CD_TIME`**, so the code substitutes `CD_DEFAULT_MS = 3000` - an
+assumption covering the 20 weapon rows with no cooldown. If the true cooldown is 30 seconds the real
+figure is 1,600. Do not use it until the cooldown is measured.
+
+The game's repair ceiling is far above any of these in any case: `13058` heals 1,120 x 4 on a 52s
+cycle, and `27407` 800 on 30s. Whatever carries those out-heals all three of these hulls.
+
+### Sizing it against Chris's breakpoint
+
+Chris's rule is that a hull healing at least as fast as it is being hit cannot be killed, so
+`repair_pm` is directly comparable to incoming DPM. At ~8,000/min these cruisers each absorb roughly
+one upgraded corvette's worth of fire, so a 400 CP fleet needs several before healing changes an
+outcome. That sizing question is now answerable, which it was not this morning.
