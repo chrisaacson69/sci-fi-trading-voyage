@@ -703,3 +703,64 @@ Chris's rule is that a hull healing at least as fast as it is being hit cannot b
 `repair_pm` is directly comparable to incoming DPM. At ~8,000/min these cruisers each absorb roughly
 one upgraded corvette's worth of fire, so a 400 CP fleet needs several before healing changes an
 outcome. That sizing question is now answerable, which it was not this morning.
+
+## Weapon strategies: the 9xxx prefixes (Chris, 2026-10-17)
+
+Chris asked whether the Reliat A's **"high-speed dense munitions"** had been priced. It had not, and
+nor had any other strategy - `tp_assign.options` discarded every `9xxx` enhancement prefix outright.
+
+A `9xxx` prefix is a **skill**, not a permanent buff: each has a row in `Tb_cfg_system_skill` with a
+`TRIGGER_TYPE`, a `TRIGGER_PARAM` and an `EFFECT_ROUND`. "High-speed dense munitions" is prefix
+**`9216`, 15 TP, a single rung**, granting `WEAPON_REPEAT_TIMES_ADD0 = 2` (+2 volleys on a 4-volley
+launcher) and `HIT_RATE_INC = 30`, with `TRIGGER_TYPE=13 TRIGGER_PARAM=3 EFFECT_ROUND=1
+SKILL_PROB=100`. While it runs it is worth **+63% DPM** against +9% for the best permanent option on
+the same system - so discarding these hid the largest single upgrade on some hulls.
+
+**Uptime is inferred, not measured.** Across the 22 `TRIGGER_TYPE=13` skills, `EFFECT_ROUND` is 1 (one
+is 2) and `TRIGGER_PARAM` is 2, 3 or 4, which reads as "fires every `TRIGGER_PARAM` rounds, lasts
+`EFFECT_ROUND`" - so `uptime = EFFECT_ROUND / TRIGGER_PARAM`, one third for `9216`. The semantics of
+trigger type 13 are unconfirmed; a strategy that really fires on a player action or a kill would have
+quite different uptime. **Any ranking that turns on a strategy is provisional until the cadence is
+measured in game.**
+
+### Two things this got wrong before it got right
+
+**Scaling a strategy's parameters by uptime is invalid.** It is only correct where DPM is linear in
+the parameter. The Quaoar Railgun proved it: strategy `9101` cuts cooldown 80%, and a "uptime-scaled"
+26.7% stacked onto its permanent cut produced a 533ms cycle and **2,326 -> 6,955 BV/CP**. Having 80%
+off for a third of a fight is not 27% off always. `tp_assign._mount_dpm` now blends the **rates** -
+`(1-u) * rate_off + u * rate_on` - which is exact for every effect type.
+
+**But rate-blending alone was not enough, because the stacking rule is unknown.** With the strategy's
+cooldown applied at full strength in the on-state, `9101`'s -80% stacks additively onto the Quaoar's
+permanent reduction to give **-99%, a 160ms cycle and 285,525 DPM**. Additive stacking is confirmed
+for ordinary upgrades (Chris: two 15% cuts = 30%) but nothing establishes it for a strategy, and the
+result is plainly degenerate. So **a strategy is credited only with the effects DPM is LINEAR in** -
+flat and percentage damage, extra volleys, hit rate - and its cooldown and duration effects are
+ignored. A strategy whose only modelled effect is a cooldown cut therefore contributes nothing and is
+never bought. That is the honest answer until the stacking rule is measured, and it means **DPM
+remains a floor** for hulls carrying such a strategy.
+
+### What moves, with strategies wired in
+
+| hull | with strategies | without | strategies bought |
+|---|---|---|---|
+| **Reliat A** | **800** | 673 | **+19%** - `9216` + `9119` |
+| Taurus Defense | 1,539 | 1,530 | +1% - `9119` |
+| Quaoar Railgun | 2,326 | 2,326 | none: `9101` is cooldown-only |
+| Eris Heavy Cannon | 1,906 | 1,906 | none |
+| Quaoar Torpedo | 2,406 | 2,406 | none |
+| Reliat Stealth | 3,048 | 3,048 | none |
+
+So the practical effect is small today and concentrated on hulls with volley or hit-rate strategies.
+That is a consequence of the conservative choice above, not evidence that strategies are minor.
+
+### The layer that is still missing
+
+All 22 trigger-13 skills are now offered to the planner, but several grant effects the model has no
+handler for, so they still price at zero: `9232` armour penetration +100 (`WEAPON_ARMOR_PENETRATION_INC`),
+`9180` and `9137` burst damage, `9131`/`9132` extra attack targets (`EXTRA_ATTACK_TARGET`), `9260`
+target priority. **Armour penetration is the one to worry about**: armour has been the dominant
+variable in every comparison this week, so a strategy granting +100 penetration could reorder the
+cruiser and corvette rankings outright. Until `WEAPON_ARMOR_PENETRATION_INC` is implemented, any
+armour-curve conclusion for a hull carrying `9232` is understated.
