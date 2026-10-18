@@ -910,19 +910,26 @@ cycles were cut short when targets died - the means above are depressed by trunc
 so the activation RATE is the sounder number. And the final cycle per ship is dropped for the same
 reason.
 
-### What the cadence is NOT
+### Read as "every third cycle", and do not over-fit it
 
-It is not a clock. Per-ship gaps between activations are 23, 25, 26, 26, 28, 28, 30, 30, 30, 38, 38,
-38, 65, 65, 69, 82, 82, 82, 85, 85, 85, 86 seconds - clustered, not periodic. **And nothing fires in
-the first four cycles of the battle at all**; the activations begin around 143 s, close to when the
-second wave arrived. The ten ships split into two cohorts (seven firing together at 143 s, three at
-151-153 s) which then keep separate schedules, so it is per-ship or per-squad rather than fleet-wide.
+Chris's reading, and the right one: **it fires on the 3rd cycle**, which is exactly
+`TRIGGER_PARAM = 3` with `EFFECT_ROUND = 1`. The 31% rate is corroboration, not a precise constant.
 
-Incoming fire does not explain it: only one distinct attacker was hitting the Reliats during the first
-120 seconds, and none afterwards, so "when attacked by N" is ruled out. **The trigger CONDITION
-remains unidentified.** For valuation it does not matter - the long-run rate is what prices the
-strategy, and that is measured - but it does mean the uptime could differ in a different kind of
-fight, and a model that assumes 1/3 everywhere is assuming this battle was typical.
+The wall-clock gaps are ragged - 23, 25, 26, 26, 28, 28, 30, 30, 30, 38, 38, 38, 65, 65, 69, 82, 82,
+82, 85, 85, 85, 86 seconds - but that is what a cycle COUNTER looks like when the cycles themselves
+are irregular. A ship that switches targets or has nothing in range does not complete a cycle, so
+wall-clock spacing drifts even though the count does not. Chris: *"it is possible they are missing
+cycles or the timing is off because they switched targets... I wouldn't try to get too accurate here
+as the test conditions were not clean."*
+
+Two artefacts of the measurement rather than the mechanic: the apparent absence of activations in the
+first four cycles, and the two cycles that read as **10 volleys**, are both most likely the 20-second
+gap threshold used to segment cycles merging or splitting them around target changes. A clean read
+would need a single-wave fight against one target type, which this was not - a second pirate joined
+mid-battle and the fleet had to be sized to win rather than to measure.
+
+So: **uptime 1/3 for a round-based strategy, from the table and consistent with observation.** Not a
+figure to refine further without a staged fight.
 
 ### Bug found: ilcap.py ignored nanosecond timestamps
 
