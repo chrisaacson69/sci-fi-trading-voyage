@@ -93,16 +93,42 @@ A maxed Reliat Stealth buys `EFFECT_AVOID_INC_BY_WEAPON_TYPE` on top of its 70% 
 | 5 missile | 102% | 0% |
 | 6 torpedo | 110% | 0% |
 
-It buys +32 against missiles, +40 against torpedoes, +15 against artillery, ion and pulse - **and
-nothing at all against railguns.** So a railgun lands twice as often as anything else and is the hard
-counter. Per-attacker, against every hull in the game, the spread is **29% at best, 13% median, 0% at
-worst** - so `roles.csv`'s single EHP figure of 8.99x raw hit points is an artefact of averaging over
-one pirate team. Against a railgun it is nearer 3.4x; against a pure-missile hull it is unkillable.
+It buys +32 against missiles, +40 against torpedoes, +15 against artillery, ion and pulse - and
+nothing against railguns or type 8. Per-attacker the retention spread is **29% at best, 13% median,
+0% at worst**, so `roles.csv`'s single EHP figure of 8.99x raw hit points is an artefact of averaging
+over one pirate team: nearer 3.4x against a railgun, unkillable against pure missile.
 
-Best counters are cheap: the **Quaoar Railgun** at 6 CP lands 29% and puts 1,047 DPM on it, and the
-Alkaid-class pair are pure railgun at 6 CP. The hulls that cannot touch it at all are pure missile -
-Arctos B and C, Alioth-class Type B, Mare Nubium Siege, Guardian Amphibious - which makes **an
-all-missile fleet a composition trap** rather than a hull problem.
+**But retention alone is NOT the counter**, and an earlier version of this page wrongly said it was.
+Chris: *"a weapon with a low tohit is the best against a ship with insane evasion? ... the best
+counter [is] high hitrate and high shots per minute."* Exactly right - what matters is retention
+TIMES output. Ranked by damage per command point actually landed:
+
+| attacker | CP | DPM/CP landed | DPM | retention | weapon types |
+|---|---|---|---|---|---|
+| Conamara Chaos Plasma | 20 | **541** | 10,811 | 29% | 5, **8** |
+| **Quaoar Railgun** | 6 | **490** | 2,939 | 29% | **2** |
+| XenoStinger Tactical | 8 | 322 | 2,579 | 29% | 1, **8** |
+| Holy Spirit | 6 | 312 | 1,870 | 21% | 3, **8** |
+| Io A | 18 | 280 | 5,033 | **14%** | 1, 3, 5 |
+| Alkaid-class Special | 6 | **58** | 350 | **29%** | 2 |
+
+The Alkaid-class is the refutation: joint-best retention at 29%, and **58 DPM/CP** because the gun is
+feeble. And the Io A makes the top five on raw output *despite* 14% retention, so brute force
+partially substitutes for bypassing evasion.
+
+### Why railgun and type 8 are the gaps: those avoidances are RARE
+
+Avoidance against railguns exists - it is simply scarce. Counting `AVOID_INC_BY_WEAPON_TYPE` prefixes
+by the type they protect against: **missile 19, ion 16, torpedo 16, pulse 13, artillery 10, railgun 3,
+type 8 three**. So a hull tunes its evasion against the COMMON threats - blank/artillery mounts are
+169 of 325 in the game and missiles another 65 - and is left open to the rare ones. Railgun is 18
+mounts game-wide and **type 8 is four** (XenoStinger Tactical 350 dmg, XenoStinger AA 25, Holy Spirit
+250), which is why those hulls punch so far above their cost here.
+
+The practical counter is therefore a cheap high-rate railgun (**Quaoar Railgun**, 6 CP, 490 DPM/CP) or
+one of the four type-8 mounts, not "any railgun". The hulls that cannot touch it at all are pure
+missile - Arctos B and C, Alioth-class Type B, Mare Nubium Siege, Guardian Amphibious - which makes
+**an all-missile fleet a composition trap** rather than a hull problem.
 
 ### The duel grid had to be regenerated, and needed a maxed mode
 
