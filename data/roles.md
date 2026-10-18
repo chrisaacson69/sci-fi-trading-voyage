@@ -74,3 +74,60 @@ healers hold the front" is arithmetic.
 
 Craft are not covered here - `roles.py` walks `playable_weapons`, which excludes fighters and
 corvettes. Their armour curves are in `data/upgrades.md`.
+
+## Counters: ship-to-ship beats the average (2026-10-18)
+
+Chris: *"if we are going ship to ship, we can model ship to ship instead of using averages... if a
+ship has high evasion, is there something out there that counters it?"*
+
+Yes, and the averaged effective-HP figure actively hides it.
+
+### Evasion is per ATTACKER WEAPON TYPE, and one type is always unprotected
+
+A maxed Reliat Stealth buys `EFFECT_AVOID_INC_BY_WEAPON_TYPE` on top of its 70% base:
+
+| attacker weapon type | total evasion | shots that land |
+|---|---|---|
+| **2 railgun** | **70%** | **30%** |
+| 1 artillery / 3 ion / 4 pulse | 85% | 15% |
+| 5 missile | 102% | 0% |
+| 6 torpedo | 110% | 0% |
+
+It buys +32 against missiles, +40 against torpedoes, +15 against artillery, ion and pulse - **and
+nothing at all against railguns.** So a railgun lands twice as often as anything else and is the hard
+counter. Per-attacker, against every hull in the game, the spread is **29% at best, 13% median, 0% at
+worst** - so `roles.csv`'s single EHP figure of 8.99x raw hit points is an artefact of averaging over
+one pirate team. Against a railgun it is nearer 3.4x; against a pure-missile hull it is unkillable.
+
+Best counters are cheap: the **Quaoar Railgun** at 6 CP lands 29% and puts 1,047 DPM on it, and the
+Alkaid-class pair are pure railgun at 6 CP. The hulls that cannot touch it at all are pure missile -
+Arctos B and C, Alioth-class Type B, Mare Nubium Siege, Guardian Amphibious - which makes **an
+all-missile fleet a composition trap** rather than a hull problem.
+
+### The duel grid had to be regenerated, and needed a maxed mode
+
+Chris's other concern: *"my only concern was if the matrix and grid got updated as we added
+mechanics."* `matrix.csv` was dated **30 September** and predated every fix of the last week - flat
+damage adds, ship-level hit points, module hit points, repair, strategies, the fight-length cap. It is
+regenerated.
+
+More important: the grid was **stock-vs-stock**, and weapon-type evasion only exists as an UPGRADE. A
+stock Reliat Stealth evades a flat 70% of everything and `ev_by_wtype` is empty, so no counter-play
+was visible at all. `tools/matrix.py --max` now fields every hull fully upgraded and writes
+`matrix_maxed.csv`. The mechanism then shows up as the thing that does NOT move:
+
+| opponent weapon type | stock grid | maxed grid |
+|---|---|---|
+| 6 torpedo | 58% | **12%** |
+| 1 artillery | 59% | 34% |
+| 3 ion | 88% | 65% |
+| 5 missile | 73% | 40% |
+| **2 railgun** | **59%** | **59%** |
+
+Every type's win rate against the Reliat Stealth falls when it maxes its evasion, except railguns,
+which are unchanged because there is no railgun avoidance to buy. Ion's 65% is higher in absolute
+terms only because ion-armed hulls are individually strong; the diagnostic is the delta.
+
+**Read `matrix_maxed.csv` for fielded ships and `matrix.csv` for stock**, and regenerate both after any
+mechanic change - they are snapshots, not live views, and the 30 September file was wrong for three
+weeks without anyone noticing.
