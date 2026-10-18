@@ -764,3 +764,55 @@ target priority. **Armour penetration is the one to worry about**: armour has be
 variable in every comparison this week, so a strategy granting +100 penetration could reorder the
 cruiser and corvette rankings outright. Until `WEAPON_ARMOR_PENETRATION_INC` is implemented, any
 armour-curve conclusion for a hull carrying `9232` is understated.
+
+## A stock module can grant hull HP, and it was never counted (Chris, 2026-10-17)
+
+Chris checked the Taurus against the game and found both the Assault and the Defense showing **48,036
+HP where the tables say 40,030** - with no upgrades applied, and his own tool agreeing with the game.
+He traced it himself: "both of them have 2 armor modules. the base armor system with
+structure/resistance upgrades shows base 40030 HP, and the Reinforced Armor system (anti crit/system
+structure upgrades) lists 8006 additional HP."
+
+That is exactly +20%, and it is in the data: systems `4050203` and `4050303` field module **`36032`,
+carrying `EFFECT_SHIP_HP_INC = 2000`**. `matrix.hull` read `playable_weapons.json`'s `hp` and never
+added module HP at all, so it was short by the whole term.
+
+**The Taurus Pulse is the control.** It has no such system and reads its base 36,040, which is what
+Chris sees - so the discrepancy appears on exactly the two variants that carry the module.
+
+`EFFECT_SHIP_HP_INC` is in **hundredths of a percent**, which Chris's own Quaoar reading confirms
+independently: he described that ladder as "2+2+2+3+3" against params 200, 400, 600, 900, 1200. So
+2000 is +20%, not +2000.
+
+`hull()` now applies `stock_stat(sid, "10")`. **Only three hulls in the game carry a stock HP module**,
+and two of them now match Chris's readings to the digit:
+
+| hull | table HP | module | corrected | Chris sees |
+|---|---|---|---|---|
+| Taurus Assault (40502) | 40,030 | +20% | **48,036** | **48,036** |
+| Taurus Defense (40503) | 40,030 | +20% | **48,036** | **48,036** |
+| Aldabra B (41202) | 37,090 | +10% | 40,799 | - |
+
+The Quaoar Railgun carries none, so the 42,310 HP validation of the ship-level-HP fix is unaffected.
+
+### What it changes for the build decision
+
+| hull | CP | @0 | @30 TP | @40 TP |
+|---|---|---|---|---|
+| **Taurus Defense** (C) | 8 | 1,212 | **1,519** | **1,598** |
+| Taurus 攻坚 (48701) | 8 | 1,122 | 1,386 | 1,455 |
+| **Eris Heavy Cannon** | 9 | 780 | 1,245 | 1,434 |
+| Taurus Assault (B) | 11 | 980 | 1,235 | 1,315 |
+| Taurus Pulse (A) | 11 | 825 | 1,057 | 1,119 |
+
+On the limited account the only Taurus held is the **Pulse**, the one variant with no HP module, so
+**the Eris Heavy Cannon wins there by 18% at 30 TP and 28% at 40** and the HP fix does not disturb
+that. Where the Defense IS held, it leads until about **60-72 TP** (the fix pushed that crossover out
+from ~45) after which the Eris overtakes and keeps climbing to 1,906 against the Defense's 1,687.
+
+### Also settled: families 405 and 487 are different ships, not variants
+
+`48701` is **斗牛攻坚** (storming/siege) while `40502` is **斗牛-突击** (assault). Two distinct hulls
+this repo had mistranslated to the same English name, "Taurus Assault", which is why the two families
+looked like duplicates. They are separate families with separate TP pools: 487 is 8 CP with an 85 TP
+ladder reaching 1,715, against the 405 Assault's 11 CP and 1,315 at 40 TP.
