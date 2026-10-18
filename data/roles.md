@@ -157,3 +157,57 @@ terms only because ion-armed hulls are individually strong; the diagnostic is th
 **Read `matrix_maxed.csv` for fielded ships and `matrix.csv` for stock**, and regenerate both after any
 mechanic change - they are snapshots, not live views, and the 30 September file was wrong for three
 weeks without anyone noticing.
+
+### Weapon type 8 is UAV, and almost nothing evades it
+
+Chris, 2026-10-18, confirming the mechanic in game: *"ships have extra evasion against certain weapon
+types, and this is backed ingame.. and type 8 are UAV, which are special weapons indeed."*
+
+The data corroborates it. Two of the **four** type-8 mounts in the entire game are literally
+UAV-slotted - the XenoStinger Tactical (350 dmg) and XenoStinger AA (25 dmg), both `slot=UAV 刺水母`
+with a `uav=` craft id. The other two are hull mounts: the Holy Spirit (250) and the **Conamara Chaos
+Plasma (1,200)**.
+
+**Only two prefixes in the whole game grant avoidance against type 8** (`8010` and `8015` x2), against
+19 for missile, 16 for ion, 16 for torpedo, 13 for pulse and 10 for artillery. So UAV damage is the
+least evadeable damage in the game, and it shows up as the universal soft spot of every evasion build:
+
+| hull | softest against | lands |
+|---|---|---|
+| Reliat Stealth | **type-8 / railgun** | 30% |
+| Carilion Special | **type-8** | 45% |
+| Carilion Recon | **type-8** (flat 43% evasion, no type table) | 57% |
+
+This is also why the Conamara Chaos Plasma tops the counter ranking at 541 DPM/CP against a maxed
+Reliat Stealth: its main gun is a 1,200-damage type-8 mount, so it is firing the one type the target
+could not buy protection against.
+
+**And it explains the meta Chris described** - *"most of the meta is about using aircraft to kill
+other aircraft and a high focus on killing carriers"*. Ship evasion barely works against UAV damage,
+so carried craft are the reliable way through an evasion build, and killing the carrier is the only
+way to stop them. The two halves fit: evasion counters guns, UAVs counter evasion, anti-air and
+carrier-killing counter UAVs.
+
+### The two evasion tanks are near-mirrors, and cover each other
+
+| | Reliat Stealth | Carilion Special |
+|---|---|---|
+| base evasion | 70% | 55% |
+| softest | railgun & type-8, 30% | type-8 45%, then missile/torpedo 25% |
+| hardest | **missile 0%, torpedo 0%** | **ion 0%**, then artillery/pulse 15% |
+
+Missiles are useless against the Reliat and workable against the Carilion; ion is useless against the
+Carilion and fine against the Reliat. **A fleet running both forces an attacker to bring two weapon
+types** - which is a composition argument for mixing them rather than massing the better one.
+
+The Carilion **Recon** has no type table at all, just flat 43%, so it is generically slippery rather
+than tuned. That matches its EHP/CP of 5,534 against the Special's 13,102.
+
+### Encoding audit
+
+Chris was right to be sceptical that a "slow weapon" like a railgun should be hard to dodge, so the
+`TPPP` decode was re-checked: all **36** `EFFECT_AVOID_INC_BY_WEAPON_TYPE` params are four digits with
+a lead digit of 1-8 and a remainder that is always a plausible percentage (5, 7, 8, 10, 15, 20, 25,
+30), with no outliers. A mis-decode would produce nonsense percentages, so the reading stands. Whether
+`WEAPON_TYPE 2` really is "railgun" rests on an earlier session's name mapping rather than a
+localisation table, and remains the weaker link.
