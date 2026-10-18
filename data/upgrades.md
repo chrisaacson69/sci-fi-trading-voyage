@@ -816,3 +816,62 @@ from ~45) after which the Eris overtakes and keeps climbing to 1,906 against the
 this repo had mistranslated to the same English name, "Taurus Assault", which is why the two families
 looked like duplicates. They are separate families with separate TP pools: 487 is 8 CP with an 85 TP
 ladder reaching 1,715, against the 405 Assault's 11 CP and 1,315 at 40 TP.
+
+## Strategy uptime is in the tables after all, and the event stream proves it (2026-10-17)
+
+Preparing to capture a Reliat battle for the `9216` trigger cadence, the existing captures turned out
+to answer most of the question already.
+
+### Skill activations are logged in the battle event stream, by skill id
+
+`NOTIFY_WORLD_BATTLE_DATA` (cmd 2010) carries per-event rows of `[type, actor, code, 0, target]`, and
+**some of those codes are skill ids**: `battle4.jsonl` contains 68 events with code `9227` and 18 with
+`9901`, both real `Tb_cfg_system_skill` rows. So a strategy's firing is directly observable with
+microsecond timestamps - no need to infer it from volley counts, and no need for a single-hull fleet,
+since the events carry the actor.
+
+### And the cadence matches the table to the millisecond
+
+Skill `9227` has `PREPARE_TIME = 45000` and `EFFECT_TIME = 35000`. Its inter-arrival gaps per actor in
+battle4, for five separate ships, are **exactly `0.0, 35.0, 0.0, 45.0, 0.0, 35.0, 0.0, 45.0`** -
+paired events marking each transition, then 35 seconds active and 45 seconds preparing. So for a
+timed skill:
+
+    uptime = EFFECT_TIME / (PREPARE_TIME + EFFECT_TIME)
+
+which for `9227` is 43.75%. **155 of 709 skills carry both fields** (152 of them `TRIGGER_TYPE=1`),
+and **45 of those are buyable `9xxx` prefixes** on playable hulls. Median uptime among the timed
+skills is **95%**, so most are nearly permanent rather than occasional.
+
+`matrix.strategy_uptime` now uses that formula where the fields exist and falls back to the
+round-based inference only where they do not.
+
+### What this changed
+
+24 of 160 hulls moved, and the two that matter most moved DOWN, because the measured uptimes are
+lower than the 1/3 default they had been getting:
+
+| hull | with the 1/3 guess | measured | |
+|---|---|---|---|
+| Conamara Chaos Plasma | 3,215 | **2,961** | -254 |
+| Io A | 3,485 | **3,403** | -82 |
+
+So part of yesterday's "+20% to the Conamara" was the guess rather than the data. The
+Conamara-over-Chimera case survives at **+25%** (2,961 against 2,363) rather than +36%.
+
+### What still needs the capture
+
+`9216` - the Reliat A's "high-speed dense munitions" - is `TRIGGER_TYPE=13` with **no timing fields at
+all**: just `TRIGGER_PARAM=3`, `EFFECT_ROUND=1`, `SKILL_PROB=100`. Round-based, not clock-based. **No
+existing capture contains any of the 22 type-13 skills firing**, so its cadence is still the inferred
+one-third and the Reliat recommendation still rests on it. Break-even remains ~22% uptime.
+
+The capture to take is a live battle with Reliats carrying `9216`; the fleet can be mixed, since the
+events are attributed per actor. Count `9216` events and read the gaps the way `9227`'s were read.
+
+### Also found, also unmodelled
+
+Several buyable strategies grant **`EFFECT_SHIP_ADD_TEMP_SKILL`**, which chains to a further skill id
+(`9541` -> 954200 and 954300, `9170` -> 917100/917200, and so on). That is a second layer the model
+does not follow at all: a strategy that grants a skill that grants an effect currently prices as
+nothing. Worth mapping before trusting any ranking that turns on one of those 45 prefixes.
