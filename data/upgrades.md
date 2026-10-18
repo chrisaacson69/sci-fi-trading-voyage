@@ -940,3 +940,65 @@ between skill firings. The parser now reads option 9 per interface and normalise
 `ts_us` means what it says whichever tool wrote the file. Every earlier capture was pktmon, which is
 why this never showed up before - and why the first cadence numbers out of this capture were nonsense
 by a factor of 1,000.
+
+## Battle rows: the model scored every hull as if it were front-line (2026-10-17)
+
+Chris, explaining why his Reliat build has no defensive upgrades at all: *"I skipped the evasion
+because the reliats are mid-row, and are mostly shielded by all of the frontline ships."*
+
+`battle7`'s own damage table settles it:
+
+| ship | n | damage dealt | damage **taken** | taken/ship | ROW_INDEX |
+|---|---|---|---|---|---|
+| Quaoar Railgun | 10 | 48,457 | 8,526 | 853 | 1 |
+| **Reliat A** | 10 | **47,012** | **0** | **0** | 1 |
+| Eris Heavy Cannon | 8 | 40,181 | 12,344 | **1,543** | **0** |
+| Carilion Recon | 10 | 6,007 | 11,132 | 1,113 | **0** |
+| FG300 Multipurpose | 1 | 697 | 0 | 0 | 1 |
+
+**The Reliats took zero damage all fight while dealing the second-most in the fleet.** Evasion on them
+would have been entirely wasted. And `Tb_cfg_ship.ROW_INDEX` has carried this all along - 36 playable
+hulls in row 0, **77 in row 1, 51 in row 2** - so 128 of 164 hulls are not front-line and every BV/CP
+figure in this repo scored them as if they absorbed full incoming fire.
+
+The table also prices the Carilion exactly: **6,007 dealt for 11,132 taken**, the only hull in the
+fleet that absorbs more than it contributes. Chris: *"Carilions are probably temporary, but I needed
+them for the frontline when I could not build destroyers."*
+
+### Scaling exposure does not fix it; capping survival does
+
+The obvious fix - multiply incoming damage by a row factor - **changes nothing**, because it enters
+`sqrt(DPM x seconds_alive)` multiplicatively. Exposure x1, x5 and x100 all produce an identical buy
+order on the Reliat A. What makes survivability stop paying is a **cap**: once a hull outlives the
+fight, more hit points buy nothing. `seconds_alive` is now capped at `FIGHT_SECONDS = 320` (battle7's
+length) and takes a `ROW_EXPOSURE` multiplier.
+
+With the cap in place the behaviour matches Chris's reasoning. At exposure 0.05 - what the Reliats
+actually experienced - the model buys **17 damage rungs and no defensive ones**, starting
+`9216, 305, 305, 305, 305`. That is his real 51 TP build (`9216`, `305` x5, `306` x3, `103` x5,
+`104` x5). At 0.10 and above it still buys evasion first, so the threshold is sharp.
+
+### But no default discount is applied, and here is why
+
+Within row 1 the measured spread was **0 (Reliat), 0 (FG300), 853 (Quaoar)**. Exposure is a function
+of targeting and fleet composition, not of row alone - a thin front line exposes the mid row, a deep
+one hides it completely. A constant would quietly rewrite every ranking on one battle's composition,
+so `ROW_EXPOSURE` defaults to 1.0 for all rows and is a knob to set when a hull is known to be
+shielded.
+
+### What the cap alone changed: capitals were overstated
+
+19 of 160 hulls moved, every one of them a capital, because they are tanky enough to survive a whole
+fight and were being credited for survivability they cannot use:
+
+| | before | after |
+|---|---|---|
+| Ediacaran (AUX) | 2,078 | 1,257 |
+| Eternal Storm (BC) | 3,160 | 2,382 |
+| Marshal Crux (CV) | 2,400 | 1,668 |
+| Constantine the Great (BC) | 2,929 | 2,286 |
+| Thunderous Radiance (CV) | 2,070 | 1,376 |
+
+Orderings: FF, DD, CA and AUX unchanged; **BC swaps at rank 3** (Spear of Uranus now ahead of the
+Antontas) and **CV at rank 3** (Solar Whale now ahead of Eternal Heavens). No frigate, destroyer or
+cruiser moved, so the line-hull work stands.
