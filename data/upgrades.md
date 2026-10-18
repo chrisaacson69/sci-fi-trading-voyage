@@ -875,3 +875,61 @@ Several buyable strategies grant **`EFFECT_SHIP_ADD_TEMP_SKILL`**, which chains 
 (`9541` -> 954200 and 954300, `9170` -> 917100/917200, and so on). That is a second layer the model
 does not follow at all: a strategy that grants a skill that grants an effect currently prices as
 nothing. Worth mapping before trusting any ranking that turns on one of those 45 prefixes.
+
+## MEASURED: the Reliat's "high-speed dense munitions" trigger (battle7, 2026-10-17)
+
+Chris captured a live battle with ten Reliat A carrying `9216`, in Wireshark, across two waves (a
+second pirate joined mid-fight). `battle7.pcapng`, 508 MB, 322.9 seconds. **64 `9216` events.** Both
+halves of the model's treatment are now observed rather than assumed.
+
+### The effect: +2 volleys, exactly as modelled
+
+The event stream's type-2 rows carry the shot count in field 6 and `[hits, misses]` in field 8, which
+sum exactly. Each Reliat fires two weapons - code `101` at 8 shots per volley (duration 15000) and
+code `202` at 6 shots. **The shot count never changes all battle** (52 volleys of `202` at 6, 30 of
+`101` at 8).
+
+What changes is the number of VOLLEYS per firing cycle. Every Reliat fires exactly **4** volleys of
+the `101` weapon in its first cycle, with no activation. Cycles containing a `9216` activation run to
+**6**. That is `EFFECT_WEAPON_REPEAT_TIMES_ADD0 = 2` - more repeats, not bigger volleys - which is how
+`matrix.system_mods` applies it.
+
+### The cadence: 31%, against the inferred 33%
+
+| | complete cycles | mean volleys |
+|---|---|---|
+| no activation | 48 | 3.23 (29 of them exactly 4) |
+| activation | 22 | 4.09 (7 at five, one at six, two at ten) |
+| **activation rate** | **22 / 70 = 31%** | |
+
+`EFFECT_ROUND / TRIGGER_PARAM` = 1/3 = 33%. **The inference was right.** So the Reliat A figures stand:
++5.8% at 52 TP, +8.4% at 60, break-even around 22% uptime.
+
+Two cautions on the statistic. Estimating uptime from EXTRA VOLLEYS instead gives 25%, because many
+cycles were cut short when targets died - the means above are depressed by truncation on both sides,
+so the activation RATE is the sounder number. And the final cycle per ship is dropped for the same
+reason.
+
+### What the cadence is NOT
+
+It is not a clock. Per-ship gaps between activations are 23, 25, 26, 26, 28, 28, 30, 30, 30, 38, 38,
+38, 65, 65, 69, 82, 82, 82, 85, 85, 85, 86 seconds - clustered, not periodic. **And nothing fires in
+the first four cycles of the battle at all**; the activations begin around 143 s, close to when the
+second wave arrived. The ten ships split into two cohorts (seven firing together at 143 s, three at
+151-153 s) which then keep separate schedules, so it is per-ship or per-squad rather than fleet-wide.
+
+Incoming fire does not explain it: only one distinct attacker was hitting the Reliats during the first
+120 seconds, and none afterwards, so "when attacked by N" is ruled out. **The trigger CONDITION
+remains unidentified.** For valuation it does not matter - the long-run rate is what prices the
+strategy, and that is measured - but it does mean the uptime could differ in a different kind of
+fight, and a model that assumes 1/3 everywhere is assuming this battle was typical.
+
+### Bug found: ilcap.py ignored nanosecond timestamps
+
+`_read_pcapng` returned raw EPB timestamps without reading the interface's **`if_tsresol`** option.
+pktmon's `etl2pcap` writes the pcapng default of microseconds and omits the option; **Wireshark and
+dumpcap write nanoseconds**. So battle7 first read as a 322,861-second fight with 38,000-second gaps
+between skill firings. The parser now reads option 9 per interface and normalises to microseconds, so
+`ts_us` means what it says whichever tool wrote the file. Every earlier capture was pktmon, which is
+why this never showed up before - and why the first cadence numbers out of this capture were nonsense
+by a factor of 1,000.
