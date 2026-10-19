@@ -1002,3 +1002,24 @@ fight and were being credited for survivability they cannot use:
 Orderings: FF, DD, CA and AUX unchanged; **BC swaps at rank 3** (Spear of Uranus now ahead of the
 Antontas) and **CV at rank 3** (Solar Whale now ahead of Eternal Heavens). No frigate, destroyer or
 cruiser moved, so the line-hull work stands.
+
+---
+
+## Measured against real battles (2026-10-19)
+
+The model has now been scored against two captured battle reports rather than against itself. See
+**[data/battle_reports.md](battle_reports.md)** for the wire format, the enemy resolution and the
+full comparison. The short version:
+
+* Damage attribution must come from the **battle report** (cmd 2402), not the live event stream —
+  stream weapon codes are per-slot and reused by both fleets. The earlier "this fleet is armour
+  floored" reading, including the claim that the Reliat Energy floored at 108, came from that
+  mistake and is withdrawn.
+* **UAV and repair-drone mounts fly as their own ship instances.** The XenoStinger's `install=4`
+  type-8 mount is 4 craft per ship, logged separately; counting it as hull DPM reads 20x over.
+  The mount's `uav` field names the craft, and the report logs the craft under the parent's module id.
+* Per-hull error, consistent across both battles and duration-free: **Quaoar Railgun 1.8x too high**,
+  **Taurus Pulse ~0.6x too low**, Reliat Energy and M470 Support accurate. Cooldown stacking and the
+  prefix-`115` accuracy penalty are both ruled out as the Quaoar's cause.
+* `repair_pm` checked empirically for the first time: model capacity 30,612/min against 20,378 and
+  17,382 measured, with the fleet ending at 89-100% HP — a floor under capacity, so consistent.
