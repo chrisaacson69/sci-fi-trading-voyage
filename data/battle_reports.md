@@ -317,3 +317,70 @@ stream against **12.4** from the report's damage divided by damage-per-hit. The 
 suspiciously close to exactly half the nominal 25/min, which would mean the 2-shot volley costs two
 cooldowns rather than one. **Do not tune anything on the Quaoar until that is settled** - it is the
 difference between a data bug and a game mechanic.
+
+---
+
+## Follow-up 4: every shot traced - the 1v1 validation
+
+`tools/shot_trace.py`. Conditioning on the target removes selection, so what is left is per-shot
+mechanics, which the model predicts directly. Chris's framing was right: ballistic weapons cannot
+separate mechanics from target choice (562 into armour 120 is 442, into armour 50 it is 512, and
+which it got is RNG), while energy weapons ignore armour - which is why the Reliat matched first.
+
+### Hit rates are validated
+
+Across 38 (attacker, slot, target) cells the model's predicted hit rate lands at **0.82-1.16** of
+observed, mostly inside 5%. The Quaoar is **63.7% predicted against 63.8-67.9% observed** - its poor
+accuracy is correctly modelled and is not the error.
+
+### Damage per hit inverts to the TRUE enemy armour - and the table is wrong
+
+Observed damage per hit is exactly base-minus-armour, so it can be inverted. Two independent weapons
+agree:
+
+| target | Quaoar (base 562) | implied | Mare Imbrium (base ~598) | model table |
+|---|---|---|---|---|
+| Indomitable Missile | 442 | **120** | 478 -> 120 | 120 ok |
+| 066 Bombardment | 512 | **50** | 548 -> 50 | 50 ok |
+| Omni Ion / StarSweep | 452 | **110** | 488 -> 110 | **50 WRONG** |
+| KCCPV2.0 Carrier | - | - | 518 -> **80** | **50 WRONG** |
+
+**Bug 4: NPC stats are read off the base hull, ignoring the variant suffix.** NPC ship ids are a
+5-digit sid plus 4 variant digits (`571010401`), and the model resolves only the sid. Two of four
+enemy armour values are wrong as a result, which inflates predicted ballistic damage. This also
+confirms Chris's naming flag - sid 57101 is not the Omni Ion Cannon the table names.
+
+### The other two outliers are fully explained as parameter bugs
+
+* **Mare Imbrium** deals 478-548 per hit, implying base **~598** against the model's 378 - a 1.58x
+  gap matching its 0.77/0.56 over-performance.
+* **Taurus**: base 525 vs 420 (1.25x) times cooldown 2,700 vs 3,500 (1.30x) = **1.62x**, against
+  0.61 measured.
+
+### The Quaoar's 2x is firing cadence, confirmed twice
+
+Its hit rate is exact and its damage per hit is exact, so nothing per-shot is wrong. Two independent
+estimates of cadence agree:
+
+| method | independent of | cadence vs nominal |
+|---|---|---|
+| report damage / damage-per-hit / hit rate | stream completeness | **53%** |
+| stream volley count / elapsed | damage decoding | **51%** |
+
+This retires the earlier 19.7-vs-12.4 shots/min disagreement: the 19.7 was wrong, built on a bad
+per-ship clock denominator. **The Quaoar fires at ~52% of its 4,800 ms nominal cadence.**
+
+Lock-on at `ENGAGE_MS 3000 + aim_ms 10000` = 13 s per acquisition covers 24-36% of the ~48% idle
+(each Quaoar engaged 2-3 distinct targets). The remainder implies it re-acquires **more often than
+once per distinct target**, i.e. it switches back and forth - target-selection RNG appearing a second
+time, as retargeting cost rather than as armour. Charging `aim_ms` every cycle would give 32%
+cadence, so it is not per-cycle either.
+
+### Fix order
+
+1. **Bug 1** cross-system cooldown (`SYSTEM_TYPE 6` auxiliary systems apply ship-wide) - well
+   determined, explains the Taurus.
+2. **Bug 4** NPC variant stats - well determined, cross-validated by two weapons.
+3. **Bug 2** `TARGET_MODULE_TYPE` damage tiering - needs the module-tier table located.
+4. **Bug 3** charge lock-on in `dpm_out`, not only in `timeline()` - needs the retargeting rate,
+   and whether firing at aircraft resets it.
