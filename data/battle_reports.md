@@ -384,3 +384,77 @@ cadence, so it is not per-cycle either.
 3. **Bug 2** `TARGET_MODULE_TYPE` damage tiering - needs the module-tier table located.
 4. **Bug 3** charge lock-on in `dpm_out`, not only in `timeline()` - needs the retargeting rate,
    and whether firing at aircraft resets it.
+
+---
+
+## Follow-up 5: bug 1 fixed and measured, and a per-hull bonus audit
+
+### Retraction: field 10 of a stream row is the target's REMAINING HP, not a clock
+
+Verified: it decreases monotonically per target (the non-monotonic cases are our own healed ships).
+Anything built from it as a millisecond clock is void, which retires two tables published above - the
+measured "median cycle" figures (Taurus 1,243 ms, Quaoar 4,526 ms) and the "implied firing uptime"
+column (49% / 118% / 135% / 128%). **The Quaoar's ~52% cadence survives**, because both estimates of
+it used report damage and packet `ts_us`, never field 10.
+
+The upside: max field 10 per enemy instance gives true NPC max HP, and every NPC hull exceeds its
+base hull by 30-41% (Indomitable 181,556 against 136,510; KCCPV2.0 73,488 against 52,040; 066
+89,226 against 63,340; StarSweep 73,822 against 56,320). So NPC entries really are upgraded variants.
+The 4-digit suffix does **not** decode safely, though - `571010401` is equally valid as a
+`Tb_cfg_system_enhance` id (system `5710104` + index `01`), and no hull in `Tb_cfg_ship` carries the
+measured HP. Bug 2's fix should therefore use the **measured** armour and HP, which are ground truth,
+rather than a guessed suffix rule.
+
+### Bug 1 fixed, and it moved the number it was predicted to move
+
+Two defects, not one. `apply_upgrades` looped per system and, for each, **assigned** `base_damage`
+from `table_damage` and **multiplied** `cd_ms`. Both are wrong once a system can reach a mount
+outside its own group:
+
+* assigning meant the last system to touch a mount discarded every earlier system's damage bonus;
+* multiplying compounded cooldown across systems (5,000 x 0.70 x 0.85 = 2,975) where the measured
+  rule is additive within one pool.
+
+Rewritten to accumulate every applicable system's mods per mount and apply them once. A system whose
+group hosts no weapon mount is treated as auxiliary and applies ship-wide - scoped deliberately to
+EMPTY groups, since an auxiliary system that does host a weapon gives no evidence either way.
+
+| | before | after | in-game |
+|---|---|---|---|
+| Taurus main cooldown | 3,500 | **2,750** | 2,700 |
+| Taurus main damage | 420 | **455** | 525 |
+| Quaoar rail | 4,800 / 540 | 4,800 / 540 | 4,800 / 562 |
+
+Scored against the battle reports, the Taurus moves **0.61 -> 0.86** and **0.68 -> 0.90** with every
+other hull unchanged. The residual is bug 3 (damage 455 against 525).
+
+Also fixed: `tp_assign.plan` divided by a zero-cost upgrade rung. A free rung is simply worth taking,
+so it now ranks as unbounded value per point. It only surfaced once auxiliary systems began yielding
+value, because before then no free rung ever cleared `v > cur` to reach that line.
+
+### `effect_audit.py --hull` - what one hull is leaving on the table
+
+The fleet-wide survey answers "which effects does the engine model". It cannot answer "what is THIS
+hull missing", which is where synergies live. The new per-hull mode walks every system, every
+enhancement prefix and every effect, and flags two things nothing else did:
+
+* **which system carries a bonus, and whether that system hosts a weapon** - a bonus on a weaponless
+  system applies ship-wide. This is how the Taurus's `4050104` was found.
+* **prefixes with no numeric effect row.** The Taurus has **6**, the Quaoar **3**. These are not
+  harmless: `105`, `106`, `4050111`, `4050112` all carry `TARGET_MODULE_TYPE=204` and are the weapon
+  damage ladders. The engine cannot read them, so it substitutes a flat +20% - bug 3, now enumerable
+  per hull instead of inferred from one tooltip.
+
+It also surfaced `EFFECT_WEAPON_DURATION_DEC0` param 50 on the Taurus's strategy prefix 9201 - a 50%
+duration cut, unclassified and unmodelled, and duration is inside the cycle.
+
+### Bug 5 (new): upgrades need per-MOUNT scoping, not per-group
+
+Both the Taurus's mounts are group 01 (`14051`, `14052`), and both the Quaoar's are too (`14111`,
+`14112`). Group scoping therefore cannot tell them apart - which is why the model gives the Quaoar's
+turret the rail's 70% cooldown where the game gives it 30%. The upgrade string's first number in each
+triple is an enhancement INDEX, and that is the likely discriminator.
+
+Correction to follow-up 4: the Quaoar **does** have a `4110104` (type 6, group 4). It carries no
+enhancement prefixes, which is the real reason its rail is unaffected - the earlier claim that the
+system was absent was wrong, though the conclusion was right.
