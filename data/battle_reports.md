@@ -253,3 +253,67 @@ but not who each shot was aimed at over time, so per-hull ratios from one battle
 model error. **The Quaoar's own parameters are nearly exact** (540 vs 562, cycle exact), so its 2x
 gap is realisation - hit rate 65.9%, the worst in the fleet - and not something to tune out of the
 parameters.
+
+---
+
+## Follow-up 3: the per-ship target split
+
+The enemy instance -> hull mapping is now grounded, not guessed: NPC instances are allocated in
+`SHIP_INFO` order from the team's lead instance, and that reproduces **all ten** of Chris's in-game
+per-weapon-type cells exactly (Rail 37,128 / 33,085 and Turret 390 / 1,596 in battle 1; Rail
+43,316 / 27,768 / 8,374 and Turret 1,080 / 1,875 / 120 in battle 2). The only residual is 75 damage
+into enemy craft, which the in-game columns omit.
+
+### No ship specialises on a target
+
+In battle 1, 7 of 10 Quaoar engaged 2 distinct enemies and 3 engaged 1; in battle 2, 9 of 10 engaged
+3. Every hull spreads. So "did 5 Quaoar take the Indomitable and 5 the StarSweepers" has a clean
+answer: **no, they share targets**.
+
+### Armour faced varies by hull, and that is a weapon-priority effect
+
+| hull | armour faced (b1 / b2) | share into the Indomitable (armour 120) |
+|---|---|---|
+| Quaoar Railgun | **86.4 / 87.6** | **52% / 54%** |
+| Mare Imbrium | 64.3 / 78.3 | 20% / 40% |
+| Taurus Pulse | 70.9 / 70.3 | 30% / 31% |
+| Reliat Energy | **66.2 / 59.6** | **23% / 15%** |
+
+The model averages uniformly over the enemy composition: (120 + 4x50)/5 = **64**. That is almost
+exactly what the Reliat faces, which is **why the Reliat is the accurate hull**. The Quaoar faces 87
+because its railgun puts half its fire into the battleship while the Reliat's torpedoes chew the
+escorts - weapon-type target priority, which the model does not weight by.
+
+It is a small effect though: (562-87)/(562-64) = **0.954**, so focus-fire explains ~5% of the
+Quaoar's 2x, not the bulk.
+
+### Bug 3: lock-on is charged in the duel path but not in the DPM path
+
+`matrix.py:596` builds `t0 = ENGAGE_MS + aim_ms` - but only inside `timeline()`, which only the duel
+simulation uses. `dpm_out()`, which every fleet, TP and ranking tool goes through, never charges it.
+This is exactly the "does the matrix stay current as mechanics are added" problem, in reverse: the
+duel grid has a mechanic the DPM path lacks.
+
+For the Quaoar that is 3,000 + 10,000 = **13 s of a 109 s battle, about 12%**, and more if lock-on
+re-pays on target switches. Implied firing uptime tracks `aim_ms` across the fleet:
+
+| weapon | `aim_ms` | implied uptime |
+|---|---|---|
+| Quaoar rail | **10,000** | **49%** |
+| Taurus main | 4,000 | 118% |
+| Mare Imbrium main | 5,000 | 135% |
+| Reliat main | 0 | 128% |
+
+The >100% figures are the signature of bug 1 (modelled cooldowns too long), not real
+over-performance.
+
+### Unresolved: the Quaoar's residual
+
+Full accounting leaves **1.78x** unexplained: nominal 14,050 -> 9,259 at 65.9% hit -> 7,834 at 0.846
+armour retention -> 6,894 charging lock-on once, against **3,865 measured**.
+
+Worse, two measurements of its firing rate disagree: **19.7 shots/min** from the deduplicated event
+stream against **12.4** from the report's damage divided by damage-per-hit. The report figure is
+suspiciously close to exactly half the nominal 25/min, which would mean the 2-shot volley costs two
+cooldowns rather than one. **Do not tune anything on the Quaoar until that is settled** - it is the
+difference between a data bug and a game mechanic.
