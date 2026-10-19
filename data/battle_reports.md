@@ -117,3 +117,68 @@ python tools/battle_report.py battle8.jsonl --secs 130 --kind2 out --slots
 
 Captures stay local — the raw `.etl`/`.pcapng` carry the session token in clear at offset 8 of every
 client message, since port 8001 has no TLS. Only derived analysis like this page is shareable.
+
+---
+
+## Follow-up 2026-10-19: the stream is in half-units, and `shots_per_action` double-counts
+
+Chris supplied the in-game per-hull damage with the battle times at the top, which pinned every
+remaining free variable. Battle lengths are **1:49 and 1:56** — the two were fought back to back and
+the game treats them as one 3:45 engagement, which is why the embedded kill-timestamp span ran them
+together and gave 201 s for the second.
+
+**The in-game totals match kind 0 exactly**, so three things are now settled rather than assumed:
+
+| hull | in-game (summed per type) | decoded kind 0 |
+|---|---|---|
+| Taurus | 48,882 + 114,995 = 163,877 | 163,877 |
+| Xeno | 67,057 + 47,740 = 114,797 | 764 own + 114,033 craft |
+| Quaoar | 37,518 + 34,681 = 72,199 | 72,199 |
+| Reliat | 19,634 + 65,201 = 84,835 | 84,835 |
+
+* **kind 2 does not count** toward in-game damage.
+* **craft damage is credited to the parent hull** — the Xeno line only reconciles that way.
+* battle 1 was exactly **109 s**, matching the kill-timestamp span.
+
+### The event stream reports damage at 2x
+
+Summing the stream's damage field per hull and comparing against the report's kind 0 gives **exactly
+2.00 for all seven hulls** (1.98 for the Quaoar, partial capture). Shot counts are *not* doubled, so
+this is a half-unit encoding in the damage field, not duplicated events. **Halve stream damage
+before using it.** The report is the authority: it matches the in-game numbers to the digit.
+
+### Recalibrated per-weapon truth
+
+Ownership in the stream was never actually ambiguous — field 1 is the attacker **instance id**, which
+resolves it completely. The earlier "codes are reused by both fleets" caveat applies only to the
+code, and keying on it alone was the mistake.
+
+| weapon | real dmg/hit | model base | real cycle | model cycle |
+|---|---|---|---|---|
+| Quaoar rail | 229 | 540 | 4,526 ms | 4,800 ms |
+| Taurus main | 235 | 420 | **1,243 ms** | 3,500 ms |
+| Mare Imbrium main | 250 | 378 | 2,079 ms | 4,200 ms |
+| Reliat main | 76 | 120 | 1,424 ms | 17,600 ms / 5 repeats |
+
+### The two outliers have different causes
+
+* **Quaoar (model 2x high): `shots_per_action` double-counts damage.** In-game shows the rail at
+  **562 damage, 4,800 ms, 2 shots**, and 562/2 = 281 less ~50 armour = 231 against **229 measured** —
+  so the table damage is **per volley**, and the model applies it per shot and then multiplies by the
+  shot count. The cycle was never wrong: 4,800 in-game, 4,526 measured, 4,800 modelled.
+* **Taurus (model 0.6x low): the cycle is 2.8x too long.** Damage is close; the model has 3,500 ms
+  against 1,243 ms measured.
+* **Quaoar's tiny railgun (model 5x high): armour flooring plus a short cycle.** Real 4.25 damage per
+  hit against a modelled 72, and the in-game cycle is 6 s duration + 4.2 s cooldown = **10.2 s**
+  against the modelled 7,800 ms.
+
+Cooldown stacking is **not** implicated in any of these, and neither is the prefix-115 accuracy
+penalty. Both earlier hypotheses are dead.
+
+### Still open
+
+* Whether the per-volley reading of damage generalises beyond the two-shot railgun. The Mare Imbrium's
+  secondary also has `shots_per_action = 2` and reads 0.97, which is noise at 10 damage.
+* Why the model's cycle is long for the Taurus and Mare Imbrium but right for the Quaoar.
+* sid 57101 is named **Omni Ion Cannon** here but **StarSweep** in-game — a name-mapping discrepancy.
+* Chris notes a small real loss from lock-on timing when targets switch; minor at 5 ships.
