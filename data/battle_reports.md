@@ -194,3 +194,62 @@ prefix-115 accuracy penalty remain ruled out for both.
 * Why modelled cycles are long for three hulls but short for the Quaoar.
 * sid 57101 is named **Omni Ion Cannon** here but **StarSweep** in-game - a name-mapping discrepancy.
 * Chris notes a real loss from lock-on timing when targets switch; minor at 5 ships.
+
+---
+
+## Follow-up 2: two named assumption bugs, found by auditing against in-game tooltips
+
+Chris, on method: *"instead of trying to error correct the model, we need to go after the assumptions
+and make sure it matches."* Right call, and auditing the model's weapon parameters against the
+in-game tooltips found two concrete bugs rather than a fudge factor.
+
+The battle report's per-weapon-type split confirms the slot decode exactly: Quaoar Rail
+37,128 + 33,085 = **70,213** and Turret 390 + 1,596 = **1,986**, matching slots `14111` and `14112`
+to the digit.
+
+| weapon | | damage | cooldown |
+|---|---|---|---|
+| Taurus main | stock -> model | 350 -> 420 (+20%) | 5,000 -> 3,500 (30%) |
+| | stock -> **in-game** | 350 -> **525 (+50%)** | 5,000 -> **2,700 (46%)** |
+| Quaoar rail | model | 450 -> 540 (+20%) | 16,000 -> 4,800 (70%) |
+| | **in-game** | 450 -> **562 (+24.9%)** | 16,000 -> **4,800** (exact) |
+| Quaoar turret | model | 60 -> 72 | 6,000 -> 1,800 |
+| | **in-game** | 60 -> **75** | 6,000 -> **4,200** |
+
+### Bug 1: cross-system cooldown upgrades are not applied
+
+The model scopes upgrades to the weapon's own system. But the Taurus carries **`4050104`,
+`SYSTEM_TYPE 6`** (an auxiliary system, not `MAIN_SYSTEM`), whose prefix **`4105` is
+`EFFECT_CD_TIME_DEC 15`** and applies ship-wide. The weapon's own system `4050101` has `303`+`304` =
+30%, which is exactly what the model uses; adding the auxiliary 15% gives 45%, so
+5,000 x 0.55 = **2,750 against the 2,700 shown in-game**.
+
+This single miss accounts for the Taurus's entire shortfall:
+`(525/2700) / (420/3500) = 1.62`, and `1/1.62 = 0.617` against the **0.61** measured.
+
+The Quaoar has no `4110104`, which is why its rail cooldown matches in-game exactly - and that is the
+confirmation that additive stacking is correct, since 40+15+15 = 70% reproduces 4,800 ms.
+
+### Bug 2: weapon damage upgrades are a flat +20% guess
+
+Prefixes `105`/`106` (Taurus) and `109`/`110` (Quaoar) are the weapon damage upgrades. In
+`Tb_cfg_system_effect` they carry **no numeric `EFFECT_PARAM`** - instead they set
+**`TARGET_MODULE_TYPE`** (204 and 202), i.e. they upgrade the weapon module's tier rather than
+applying a percentage. The model does not implement that mechanism and substitutes a flat **+20% for
+every hull**, which is why both hulls read exactly +20.0% while the game gives the Taurus **+50%**
+and the Quaoar **+24.9%**.
+
+### Lock-on is read but never charged
+
+`aim_ms` is `INIT_PERPARE_TIME`, and the model holds **4,000 ms for the Taurus**, matching the 4 s
+lock-on shown in-game. It is excluded from the DPM cycle, which is correct **if** it is paid once at
+engagement. Whether firing at aircraft resets it is open and would be a real DPM loss.
+
+### Target selection is RNG and single-battle ratios have wide error bars
+
+Chris: the Quaoar's turret did **390** damage to the Indomitable in battle 1 but **1,080** in battle
+2, over near-equal battle times - a 2.8x swing from target selection alone. The report lists weapons
+but not who each shot was aimed at over time, so per-hull ratios from one battle cannot be read as
+model error. **The Quaoar's own parameters are nearly exact** (540 vs 562, cycle exact), so its 2x
+gap is realisation - hit rate 65.9%, the worst in the fleet - and not something to tune out of the
+parameters.
