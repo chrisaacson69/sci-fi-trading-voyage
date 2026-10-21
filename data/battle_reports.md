@@ -458,3 +458,78 @@ triple is an enhancement INDEX, and that is the likely discriminator.
 Correction to follow-up 4: the Quaoar **does** have a `4110104` (type 6, group 4). It carries no
 enhancement prefixes, which is the real reason its rail is unaffected - the earlier claim that the
 system was absent was wrong, though the conclusion was right.
+
+---
+
+## Follow-up 6: the Mare Imbrium closed, and damage percentages are ADDITIVE
+
+Chris supplied the fully-upgraded in-game readout: **519 damage, 1x1 shots, 5,400 ms cooldown, 5 s
+lock-on**, built from Additional Charge (+40% damage, +20% cooldown, an extra shot), both damage
+upgrades (+20%), both cooldown upgrades (-30%), Projectile Adjustment (+5%), and Firepower Assault
+(first 120 s: +25% damage, -35% cooldown).
+
+Stock from the tables: **315 damage, 6,000 ms cooldown, aim 5,000 ms** - the lock-on matches exactly.
+
+### Percentages are additive on the stock value, confirmed twice
+
+    315 x (1 + 0.40 + 0.20 + 0.05)        = 519.75   vs 519 displayed
+    6,000 x (1 - 0.30 + 0.20)             = 5,400    vs 5,400 displayed
+
+Multiplicative would give 555.7, which the display rules out. Adding Firepower Assault's +25% into
+the **same additive pool** gives 315 x 1.90 = **598.5**, and that reproduces every measured
+damage-per-hit exactly:
+
+| target | armour | 598.5 - armour | measured |
+|---|---|---|---|
+| Indomitable Missile | 120 | 478.5 | **478** |
+| Omni Ion / StarSweep | 110 | 488.5 | **488** |
+| KCCPV2.0 Carrier | 80 | 518.5 | **518** |
+| 066 Bombardment | 50 | 548.5 | **548** |
+
+Both battles ran 109 s and 116 s, inside the 120 s window, so the strategy was up the whole fight.
+This also re-confirms the inverted enemy armours from a second, independent direction.
+
+### Fixed: a strategy with PREPARE_TIME 0 never recharges
+
+Skill `9135` is `EFFECT_TIME 120000, PREPARE_TIME 0` - Chris's "first 120s". `strategy_uptime` tested
+`if et and pt`, so a zero PREPARE_TIME read as *absent* and fell through to the 1/3 default. Such a
+buff is not a duty cycle: it runs once from the opening, so its uptime is `min(1, EFFECT_TIME /
+fight)`. Now 1.0 at the measured 109 s and 0.375 at the 320 s reference. `battle_report.py` sets
+`M.FIGHT_MS` from each battle's real length so validation is apples-to-apples.
+
+This fix is correct but did **not** move the hull, because the strategy's damage half is also
+unreadable (below). Reported as such rather than claimed as a win.
+
+### Why the engine still reads 378 / 4,200 instead of 519 / 5,400
+
+| Chris's upgrade | prefix | what the engine sees |
+|---|---|---|
+| Additional Charge (+40% dmg, +20% cd, +1 shot) | `113` | **only** `CD_TIME_INC 20` |
+| both damage upgrades (+20%) | `109`, `110` | `TARGET_MODULE_TYPE=202`, no numeric effect |
+| both cooldown upgrades (-30%) | `301`, `302` | `CD_TIME_DEC 15` x2 - applied correctly |
+| Projectile Adjustment (+5%) | `3130111` | `WEAPON_BASIC_ATTACK_ADD` **param 0** |
+| Firepower Assault (+25% dmg) | `191350` | no numeric effect |
+
+`CD_TIME_INC` **is** implemented. The reason the model shows -30% rather than -10% is subtler and
+worse: **the TP planner refuses to buy Additional Charge at all**, because the only effect it can see
+is a cooldown PENALTY. A greedy planner correctly rejects a pure downside. So the model is not
+mis-computing Chris's build - it is choosing a different, worse build because one upgrade's upside is
+invisible.
+
+Three invisible magnitudes, one root cause: **the percentage is stored outside `EFFECT_PARAM`**, as
+`TARGET_MODULE_TYPE` or as a param of 0. Closing that one gap fixes the Mare Imbrium, the Taurus's
+residual, and the planner's refusal together.
+
+Arithmetic check: model 378/4,200 = 5,400 nominal DPM; real in-battle 598.5/5,400 = 6,650, a factor
+**1.23** against the measured shortfall of 1/0.77 = 1.30.
+
+### Open: did Firepower Assault's cooldown apply?
+
+Its damage demonstrably did. If its -35% cooldown also applied, the required firing cadence is
+**57%**; if only the damage applied, **94%**. The 94% reading fits far better - the Mare Imbrium's
+lock-on is 5 s against the Quaoar's 10 s, and the Quaoar measured ~52% cadence, so a hull with half
+the lock-on sitting at 57% would be odd.
+
+**The discriminating experiment is a battle longer than 120 s.** The strategy would lapse partway, so
+average damage per hit would fall between 519 and 598.5 by a measurable amount. Both captures are
+under the window, so they cannot separate the two readings.
