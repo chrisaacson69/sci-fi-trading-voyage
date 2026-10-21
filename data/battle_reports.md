@@ -800,3 +800,64 @@ time, against +2% damage or -3% cooldown per level:
 **The rule: lock-on only pays where `aim_ms` exceeds the cycle.** That is one weapon on this account -
 the Quaoar railgun, where retargeting burns 27% of the battle. Everywhere else the re-lock hides
 inside the cooldown and the 2% damage is the better buy, exactly as Chris plays it.
+
+---
+
+## Follow-up 11: the ballistic floor is on TABLE damage - settled from the Quaoar's own turret
+
+Chris's maxed in-game readout for the Quaoar Railgun:
+
+| mount | damage | shots | cycle | lock-on | nominal DPM |
+|---|---|---|---|---|---|
+| rail | 562 | 2x1 | 4,800 | 10 s | 13,812 |
+| turret | 75 | 1x3 | 6 s duration + 4,200 cd = **10,200** | 8 s | 2,294 |
+
+Both reproduce under the display convention (subtract 10 armour, no hit probability):
+
+    rail   (562 - 10) x 2 x 60000/4800  = 13,800   vs 13,812
+    turret (75 - 10) x 3 x 2 x 60000/10200 = 2,294   exact
+
+So the turret is 3 shots x 2 installs on a **10,200 ms** cycle, against the **7,800** the model holds -
+confirming the per-mount scoping bug (the engine hands the turret the rail's 70% cooldown where the
+game gives it 30%).
+
+### The floor question
+
+Chris placed the rail's 10% floor at armour **506**, i.e. 562 - 56.2, which implies the floor is 10%
+of the **upgraded** damage. The engine instead uses 10% of **table** damage, on the strength of an
+earlier measurement (the Eris Cannon at 113 total hit for 10, never 11).
+
+The Quaoar's own turret settles it, because battle8 caught it both above and below the floor:
+
+| target | armour | predicted | measured |
+|---|---|---|---|
+| 066 Bombardment | 50 | 75 - 50 = **25.0** | **25.0** |
+| Omni / StarSweep | 110 | floored | **6.0** |
+| Indomitable | 120 | floored | **6.0** |
+
+`0.10 x 60` (table) = **6.0**, matching. `0.10 x 75` (upgraded) = 7.5, not matching. The 25.0 also
+re-confirms the upgraded damage is 75, so both ends of the curve are pinned on the same mount.
+
+**The floor is on table damage. The rail therefore floors at armour 517, not 506** - and since the
+highest armour fielded anywhere in these captures is 240, **the rail's main gun never reaches its
+floor in practice.** Whatever crossover put the torpedo ahead sat beyond the playable range.
+
+### Rail vs torp, restated
+
+At the floor the rail wins outright - 45 x 25.0 shots/min = 1,125 DPM against the torp's
+35 x 14.0 = 490 - because the rail has both the higher table damage (450 vs 350) and the higher rate.
+So "the torp wins once both are floored" does not hold; and it never comes up anyway.
+
+The real division is **target priority**, which is decisive and is in `Tb_cfg_weapon_priority`:
+
+| mount | priority 1 | hit% vs FF/DD |
+|---|---|---|
+| torp main (type 6) | cruiser, BC, carrier, other | 55 |
+| torp secondary (type 5) | aircraft, corvettes | 80 |
+| rail main (type 2) | cruiser, BC, carrier | 70 |
+| **rail turret** (type 2) | **frigate, destroyer** | 70 |
+
+Chris's anti-symbiosis is exactly this: against an all-FF/DD enemy **neither torp mount has a tier-1
+match**, so its main drops to tier 2 at a 55% hit rate, while the rail's turret holds tier-1 priority
+on small ships at 70%. The torpedo's reach past the front row is real but only pays when there is a
+screened capital to reach, which is rare in an FF/DD format.
