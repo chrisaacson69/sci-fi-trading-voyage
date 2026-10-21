@@ -664,3 +664,73 @@ is therefore good enough to read a weapon's cycle straight off.
 This is the right caveat on the armour curves from 2026-10-19, which projected ~860 DPM/CP for a
 Zircon A at 53 TP: that is a **ceiling at full investment**, and the hull actually fielded is the base
 Zircon at essentially no tech. Nearly all of its real output is the escort boats, not the hull.
+
+---
+
+## Follow-up 9: the Zircon A's tech tree, and why the planner cannot read it
+
+Chris described the tree from in-game: 2 points into "lockon frequency" opens the two cooldown
+upgrades, or 18 points into the "mobile firepower" strategy opens **both** the cooldown and the damage
+upgrades; the main hull cannon is a separate module that will not see points at this level; and the
+main weapon is **anti-aircraft at base**, which cleared the enemy air before it could turn on the
+ships. Every part of that is in the tables, and it exposes more than it fixes.
+
+### The tree, grounded
+
+**System `3190201`** - the escort boats (module `11252`, uav `11002`):
+
+| Chris's name | prefix | effect | cost | engine |
+|---|---|---|---|---|
+| lockon frequency | `3101` | `INIT_PREPARE_TIME_DEC 70` | 2 | applied to `aim_ms`, **worth 0** |
+| the 2x cooldown upgrades | `3109`, `3102` | `CD_TIME_DEC 20` + `FLIGHT_TIME_DEC 20` | 2 | cooldown yes, **flight no** |
+| the damage upgrades | `3111`, `3107` | **no numeric effect** | 2 | **invisible** |
+| (accuracy) | `3116`, `3103` | `HIT_RATE_INC 20` | 2 | modelled |
+| mobile firepower | `9253` | `AVOID_PROB_INC 25` + `CD_TIME_DEC 25`, 60 s window | **18** | strategy cd not applied |
+
+**System `3190202`** - the main cannon (module `11254`, 500 dmg ballistic), a separate branch:
+`109` damage (no numeric effect), `205` hit-rate-by-type (modelled), `301`/`306` `CD_TIME_DEC 15`
+(modelled), `8307` crit via **effect 12031 `EFFECT_SYSTEM_BURST_DAMAGE`** - which is **not** the 12030
+the engine models, so unmodelled.
+
+### What the model cannot see on this one hull
+
+The lock-on fix, every damage upgrade on both branches, the crit, half of each cooldown upgrade
+(`FLIGHT_TIME_DEC` has **zero** references in matrix.py although `flight_before_ms`/`flight_after_ms`
+are inside the cycle), and the strategy's cooldown. That is most of the tree.
+
+**The lock-on case is the sharpest.** `INIT_PREPARE_TIME_DEC` is correctly applied to `aim_ms` - and
+`aim_ms` never reaches `dpm_out`, so a 70% cut to lock-on for **2 points** prices at exactly zero. It
+is the same root cause as the Quaoar mystery: lock-on is the dominant cadence loss (10 s of lock-on
+costs the Quaoar ~48% of its output), and the model charges it only in the duel path. So the engine
+cannot see the problem **or** the cheapest fix for it.
+
+### Prerequisite gates are not in the data
+
+`Tb_cfg_system_enhance` has `UNLOCK_TYPE`, `UNLOCK_COST_RARITY`, `ENHANCE_LIMIT_TAG` and
+`ADJUST_ENHANCE_INDEX`, but none of them encode "prefix X requires prefix Y" - on the Zircon A they
+appear only on free rows and adjust entries. So the planner treats every prefix as independently
+purchasable, which is wrong in two directions at once:
+
+* **optimistic** - it buys cheap upgrades that are actually gated behind something unbought;
+* **pessimistic** - an 18-point unlock with no immediate marginal return is invisible to a greedy
+  value-per-point search, so the planner will never find the branch that opens both upgrade lines.
+
+### The AA role, and why the Zircon read as 310 damage
+
+The replay settles it. The **first kill of the battle is at t+25.5 s: the Zircon's escort boat killing
+an enemy aircraft**, before any ship dies. The Taurus clears three more at t+40.6, 52.0 and 70.7, so
+all enemy air is gone inside 71 s, and the Quaoar only starts on ships at t+82.6. That value never
+appears in a DPM/CP ranking - enemy craft are 5,200 HP, so removing them costs almost no damage.
+
+The 310 damage is also narrower than it looked. Splitting the two mounts at stock cycle over 162 s
+with 2 ships:
+
+| mount | stock cycle | potential | measured |
+|---|---|---|---|
+| escort boats `11252` -> craft `11001` | 8,000 + 3,000 dur, aim 5,000 | ~5,600 | **9,329** |
+| main cannon `11254` | 20,000, aim 0 | ~7,960 | **310** |
+
+So the boats **beat** their stock potential, and the anomaly is entirely the main cannon, which
+delivered about 4% of its - roughly a single hit in 162 seconds. Chris's note that the cannon is a
+separate module with no points explains why it is weak, not why it barely fired; range or target
+gating is the open question.
