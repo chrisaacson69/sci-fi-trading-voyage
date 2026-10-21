@@ -278,3 +278,30 @@ option. Treat `203`/`204` as covering a weakness, not as defining a role.
 They are anti-symbiotic rather than complementary: both mains prioritise capitals, so fielding both
 concentrates fire on the same targets, while the small-ship coverage falls to the rail's turret and
 is undercut by the rail's own lock-on. Pick one per fleet against the enemy you expect.
+
+### The class picture: who pays for retargeting
+
+A relock costs `max(0, aim_ms - cycle_ms)` - measured at 5.8 s on the Quaoar rail and +63 ms on its
+turret, whose lock is shorter than its cycle. Applied across the 6 CP destroyers, that single rule
+sorts the class, and it matches how Chris actually plays them:
+
+| hull | lock / cycle | relock cost | priority 1 | role |
+|---|---|---|---|---|
+| Winged Hussar A | 4,000 / 17,500 | **free** | FF, DD | small-ship killer |
+| Winged Hussar B (row 2) | 4,000 / 9,600 | free | FF, DD | as A, with torpedo reach |
+| Winged Hussar area-AA (row 0) | 4,000 / 15,200 | free | - | front-row area AA |
+| Quaoar Torpedo | 5,000 / 34,400 | free | CA, BC, CV | anti-cruiser |
+| **Quaoar Railgun** | **10,000 / 4,800** | **5.8 s per switch** | CA, BC, CV | big-ship killer |
+
+**The Quaoar Railgun is the only hull in the class that pays for retargeting**, which is why it reads
+well on paper and underdelivers in play: small ships die fast, so the format its `203`/`204` hit
+upgrades point at is the one that bills it hardest. The Hussars, whose locks are a quarter of their
+cycles, lose nothing in that same fight - so they are the small-ship platform and the Quaoars are
+not, regardless of what the Quaoar's upgrade list suggests.
+
+Max-CA build comparison (Chris's verified stats, crit assumed 45%): the torpedo leads against
+cruiser/BC/carrier up to **armour 158** and the rail takes over at **159**; against destroyers the
+rail is ahead from **armour 75**. Two caveats on that bracket - it depends on the gated `205`
+(+15% vs CA+), without which the torpedo only leads below armour ~50, and it depends entirely on crit
+chance stacking. At the conservative reading (15% rather than 45%) **the rail wins at every armour
+value against every class**, so the torpedo's CA build is provisional until a capture settles it.
