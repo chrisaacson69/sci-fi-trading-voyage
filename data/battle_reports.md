@@ -533,3 +533,74 @@ the lock-on sitting at 57% would be odd.
 **The discriminating experiment is a battle longer than 120 s.** The strategy would lapse partway, so
 average damage per hit would fall between 519 and 598.5 by a measurable amount. Both captures are
 under the window, so they cannot separate the two readings.
+
+---
+
+## Follow-up 7: cmd 135 is the client's own battle log - durations and kills, free
+
+Measuring the cooldown turned out to be possible after all, and it overturned the lean in follow-up 6.
+
+### Weapon cycles, measured from PACKET timestamps
+
+`ts_us` on each `NOTIFY_WORLD_BATTLE_DATA` message gives a 1,000 ms median clock - coarse, but ample
+to separate 5,400 ms from 3,300. (The earlier attempt failed because it used field 10, which is
+remaining HP.) Per attacker instance, gaps between that instance's deduplicated volleys:
+
+| weapon | min gap | modal gaps | nominal | reading |
+|---|---|---|---|---|
+| Mare Imbrium main | 2,982 | **3 s x107, 4 s x109**, ~0 at 5-6 s | 5,400 | cycle ~3,500 |
+| Quaoar rail | 4,008 | **5 s x174**, tail at 11-15 s | 4,800 | on cycle, then idle |
+
+**So Firepower Assault's -35% cooldown DID apply, and it is MULTIPLICATIVE:**
+
+    permanent, additive:        6,000 x (1 - 0.30 + 0.20) = 5,400
+    strategy, multiplicative:            5,400 x 0.65     = 3,510   <- measured ~3,500
+
+Additive into one pool would give 3,300 and a 70/30 split of 3s/4s gaps; the observed 50/50 fits
+3,510. **This closes a question the repo has carried open** - whether a strategy's cut stacks like a
+permanent one. It does not.
+
+The caution about degenerate stacking was right to exist but aimed at the wrong thing: the Quaoar's
+`9101` is `EFFECT_TIME 8000 / PREPARE_TIME 90000`, an **8.2% uptime**, which is exactly why it never
+appears in the Quaoar's 5 s gaps. Strategy cooldown can now be priced, gated on real uptime.
+
+The Quaoar's modal 5 s gap against a 4,800 nominal also confirms it fires **on cycle when it fires** -
+its ~52% cadence is idle time, not a longer cycle.
+
+### Mare Imbrium, re-ranked with the measured stats
+
+DPM/CP at 5 CP:
+
+| armour | 0 | 50 | 100 | 180 | 240 |
+|---|---|---|---|---|---|
+| model today (378 / 4,200) | 868 | 667 | 567 | 407 | 287 |
+| in-game display (519 / 5,400) | 919 | 741 | 663 | 539 | 445 |
+| **in battle, strategy up (598.5 / 3,510)** | **1,543** | **1,323** | **1,203** | **1,012** | **868** |
+
+The model understates it **1.8x at armour 0 and 3.0x at armour 240**, and the shape is as important
+as the level: 598.5 is large relative to armour, so it loses only 44% from armour 0 to 240 where the
+Reliat A loses 91% by armour 100. It is a **two-phase hull** - 1,543 DPM/CP for 120 s, then 919.
+
+Chris's framing of the strategy is the right one: it is worth a **fixed damage budget** per battle,
+not a multiplier. 624 DPM/CP x 5 CP x 10 ships x 2 min = 62.4K damage at armour 0, and that figure
+does not grow with fight length, so it matters more the shorter the fight. At the 5 Mare Imbrium
+actually fielded, and at the measured ~61% cadence, the realised figure is nearer 19K.
+
+### cmd 135: battle start, end and every kill, with timestamps
+
+This is the workflow unlock. `cmd 135` is the client's own battle log:
+
+* `event 8` / `event 10` - a battle opens against a named `cfg_npc_team`
+* `event 9` - it closes; `36` enemy destroyed, `37` exp, `18` reward
+* **`event 12` - a KILL**, `param` = `[killer_sid, victim_sid, count]`
+
+On battle8 it yields **109 s and 116 s**, Chris's 1:49 and 1:56 exactly, totalling his 3:45. Two
+battles can be open at once, so starts and ends must be walked in sequence rather than matched
+nearest-first. `battle_report.py` now derives `--secs` from this automatically; passing it by hand is
+only an override.
+
+The kills also date every **forced retarget** - an enemy death costs its attackers their lock. Battle
+1 had five, at t+60, 62, 81, 98 and 109 s. Each Quaoar engaged 2-3 distinct targets, so 2-3 forced
+re-acquisitions at 13 s each is 26-39 s of a 109 s fight, against the ~48% idle measured. That is the
+right magnitude and matches Chris's prediction that retargeting happens more than it looks because
+ships move and die.
