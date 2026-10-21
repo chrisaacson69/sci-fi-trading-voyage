@@ -604,3 +604,63 @@ The kills also date every **forced retarget** - an enemy death costs its attacke
 re-acquisitions at 13 s each is 26-39 s of a 109 s fight, against the ~48% idle measured. That is the
 right magnitude and matches Chris's prediction that retargeting happens more than it looks because
 ships move and die.
+
+---
+
+## Follow-up 8: the battle REPLAY is a separate fetch, and it is far richer
+
+Captured 2026-10-20 as `report18.pcapng` (21.9 MB; only 153 KB of it on port 8001 - the bulk is
+unrelated traffic). Two reports with replays.
+
+### It is its own request, fetched on demand
+
+Downloading the battle report is **not** enough. Opening a replay issues two new commands:
+
+| cmd | request | response |
+|---|---|---|
+| **5852** | `[battle_id]` | replay index: `[1, duration_ms, 1, [...], [events]]` |
+| **5853** | `[battle_id, 0]` | **the full replay**, ~262 KB |
+
+Both are plain `zlib3` bodies on port 8001, so `ilcap.py` already decodes them. Because they are
+fetched **on demand rather than streamed live, a battle no longer has to be captured while it
+happens** - start the capture, open the replay, done. That removes the hardest part of the workflow.
+
+### What cmd 5853 contains
+
+`[0, 0, duration_ms, teams, events, samples, kills]`
+
+* **`b[2]`** - duration in ms, authoritative (162,200 and 166,100 in this capture).
+* **`b[3]`** - per-team, per-ship INITIAL state: each ship's modules as
+  `[module_id, slot_code, current_target, ..., cooldown_ms, ...]` plus its strategy list, e.g.
+  `[[9216, 0, 3160101]]`. So cooldowns and the fitted strategies are readable directly.
+* **`b[4]`** - **3,592 events at 100 ms resolution.** This is the sub-second shot timing the packet
+  clock could only quantise to 1,000 ms.
+* **`b[5]`** - **cumulative damage per hull, sampled every 5 s** (33-34 samples). A damage-RATE curve
+  per hull for the whole battle.
+* **`b[6]`** - the kill log, same `[killer_sid, victim_sid, n]` shape as cmd 135 event 12.
+
+**Cross-validated:** `b[5]`'s final cumulative damage equals the report's kind-0 totals exactly -
+Quaoar 122,406 vs 122,406, Winged Hussar 83,060 vs 83,060, Reliat A 28,253 vs 28,253, Eris 0.99.
+
+### Both battles run past 120 s, but carry no Mare Imbrium
+
+162 s and 166 s, so the Firepower Assault phase change is testable in principle - but the roster is
+Taurus Pulse x10, **Reliat A x9**, **Zircon x2**, Eris Heavy Cannon x10, Winged Hussar A x10, Quaoar
+Railgun x10, plus 4 escort craft. No Mare Imbrium, so that specific test still needs a capture with
+one fielded.
+
+### The Reliat A's 36 s cycle is visible in the rate curve
+
+Its per-5s damage goes 0, 24k, 24k, 30k, 1k, 1k, 1k, 1k, 10k, 26k, 24k, 12k, 1k... - bursts roughly
+every 36 s with near-zero between, which is exactly its 16-shot / 36 s torpedo cycle. The rate curve
+is therefore good enough to read a weapon's cycle straight off.
+
+### Actionable: the 2 Zircons contributed almost nothing
+
+**310 damage across a 162 s battle**, confirmed independently by replay and report. Its escort boats
+(`11001`, 4 of them) added 9,329. So the whole Zircon system delivered 9,639 for 2 ships over 162 s -
+**about 223 DPM/CP**, against 1,489 damage/CP for the Taurus Pulse.
+
+This is the right caveat on the armour curves from 2026-10-19, which projected ~860 DPM/CP for a
+Zircon A at 53 TP: that is a **ceiling at full investment**, and the hull actually fielded is the base
+Zircon at essentially no tech. Nearly all of its real output is the escort boats, not the hull.
