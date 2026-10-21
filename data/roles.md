@@ -211,3 +211,70 @@ a lead digit of 1-8 and a remainder that is always a plausible percentage (5, 7,
 30), with no outliers. A mis-decode would produce nonsense percentages, so the reading stands. Whether
 `WEAPON_TYPE 2` really is "railgun" rests on an earlier session's name mapping rather than a
 localisation table, and remains the weaker link.
+
+---
+
+## The two Quaoars: a worked role split (2026-10-20)
+
+Derived with Chris from the battle reports, the replays and the in-game trees. Full measurement trail
+in [battle_reports.md](battle_reports.md). Both are 6 CP destroyers, row 1, and they are **not**
+interchangeable.
+
+### Quaoar Torpedo (41102) - anti-cruiser specialist
+
+| | |
+|---|---|
+| main cluster torp | 437 dmg, 8 shots, 34.4 s cycle, **5 s lock-on**, built-in crit 15%/170% |
+| AA launcher | 87 dmg, 4 shots x2, 14.4 s cycle, 8 s lock-on - ignorable on this hull |
+| priority 1 | **cruiser, battlecruiser, carrier** (main); aircraft (secondary) |
+| hit% vs FF/DD | **55** |
+
+Its anti-CA case is three things, of which the engine prices only the first correctly:
+
+* **`205`** `HIT_RATE_INC_BY_TYPE` +15% vs cruiser/BC/BS/carrier - **gated behind `9206`**, so the
+  package is a lumpy ~25 TP commitment rather than an incremental buy.
+* **`9206`** the anti-CA strategy: `TRIGGER_TYPE 10 / TRIGGER_PARAM 5`, i.e. **fires whenever the
+  target is a cruiser**, `EFFECT_ROUND -1`, `SKILL_PROB 100`. Effects are `DURATION_INC 30` and a row
+  carrying **param 60 with no effect id** - invisible. Its real uptime is the share of fire going into
+  cruisers, ~100% against a CA fleet and 0% against FF/DD, where the engine uses a flat 1/3.
+* **crit**: `161` 30%/+50% enables, `163` adds +40%, 20 TP for +27% **on a mount with no crit**.
+  Stacking onto the main's built-in 15%/170% is **unverified** - the four candidate readings span
+  EV x1.255 to x2.17, and the engine takes the most generous.
+
+`213` Ammo Stealth (`INTERCEPT_DEC 30`) is dead weight unless the enemy intercepts, and is a GAP in
+the engine - so it prices at zero, which is right against non-intercepting enemies and wrong against
+carriers.
+
+**Verdict: an anti-CA ship that also handles low-armour capitals.** Against an all-FF/DD enemy
+*neither* mount has a tier-1 priority match and the main drops to a 55% hit rate, so it is the wrong
+tool for that format.
+
+### Quaoar Railgun (41101) - and why its anti-small kit is a trap
+
+| | |
+|---|---|
+| rail | 562 dmg, 2 shots, 4,800 ms cycle, **10 s lock-on, and NO lock-on reduction exists on the hull** |
+| turret | 75 dmg, 3 shots x2, 10,200 ms cycle, 8 s lock-on |
+| priority 1 | cruiser/BC/carrier (rail); **frigate, destroyer** (turret) |
+| hit% vs FF/DD | **70**, plus `203`/`204` for +15% more |
+
+On paper that reads anti-small: tier-1 turret priority on FF/DD, 70% base hit, and two +15% hit
+upgrades aimed at exactly those classes. **Chris's call is that this is anti-synergy, and the
+measurements back him.** A relock costs `max(0, aim - cycle)` - measured at **5.8 s** on this mount
+(10,000 lock against a 4,800 cycle) - and relocks are driven by targets dying and moving. Small ships
+die fastest, so the format that its upgrades point at is the format that punishes its lock-on hardest:
+**7.6 switches x 5.8 s = 27% of a battle lost**, which is the whole of its measured 2x shortfall
+against the model.
+
+With no lock-on reduction available anywhere on the hull, that cost is **structural, not tunable**.
+
+**Verdict: wants a stable target set - few, durable targets - which means big ships.** It also never
+reaches its damage floor (armour 517, against a fielded maximum of 240), so it holds at high armour
+where the torpedo does not. `9101` (`WEAPON_TARGET_NUM0 +1`, multi-target) is its genuine scaling
+option. Treat `203`/`204` as covering a weakness, not as defining a role.
+
+### The pair, together
+
+They are anti-symbiotic rather than complementary: both mains prioritise capitals, so fielding both
+concentrates fire on the same targets, while the small-ship coverage falls to the rail's turret and
+is undercut by the rail's own lock-on. Pick one per fleet against the enemy you expect.
