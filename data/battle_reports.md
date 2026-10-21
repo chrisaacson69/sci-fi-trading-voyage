@@ -734,3 +734,69 @@ So the boats **beat** their stock potential, and the anomaly is entirely the mai
 delivered about 4% of its - roughly a single hit in 162 seconds. Chris's note that the cannon is a
 separate module with no points explains why it is weak, not why it barely fired; range or target
 gating is the open question.
+
+---
+
+## Follow-up 10: the Quaoar closed - retargeting costs 5.8 s, measured
+
+### Correction: the lock-on ladder is 14%/level, not 70% for 2 points
+
+Chris: *"I show only 14% lockon reduction for each upgrade so 5 of them is a total of 70%."* Correct,
+and follow-up 9's "70% for 2 points" was wrong by 6x - the full 70% costs 2+2+2+3+3 = **12 points**.
+`3101` carries `EFFECT_PARAM 70` with no per-level ladder, and the rule is that **the param is the
+level-5 total**: `system_mods` already scales it `level / max_level`, so level 1 gives exactly 14%.
+The rule cross-checks on two other rows - `301`/`306` are `CD_TIME_DEC 15` -> 3%/level, matching
+Chris's "-3% cooldown", and the blank damage rows are the 2%/level measured earlier on his Hussar.
+
+The prerequisite rule is also now specified rather than hunted for: **at least one level in a
+prerequisite opens everything behind it**, and a strategy is a single level, which is why the Zircon
+A's mobile firepower needs all 18 points at once. That is implementable in the planner directly.
+
+### Relocks, counted
+
+From the replay's type-36 shot log (`[time_ms, 36, attacker, slot, target, shots, hits, ...]` at
+100 ms resolution): **7.6 target switches per ship over 162 s**, with ~10 type-1 acquisitions.
+Chris's "maybe 10 relocks" was well calibrated.
+
+### What a relock actually costs, measured
+
+Comparing shot-to-shot gaps that follow a target switch against those that do not:
+
+| slot | gap, no switch | gap after switch | extra |
+|---|---|---|---|
+| 101 | 6,007 ms | 11,784 ms | **+5,777** |
+| 102 | 5,256 ms | 5,319 ms | **+63** |
+| 202 | 7,341 ms | 13,243 ms | **+5,903** |
+
+Slot 102 pays **nothing**, which is the absorbed case - its lock (6,000) is shorter than its cycle
+(7,800), so the re-lock runs under the cooldown. Slot 101's predicted cost of `aim - cycle` =
+10,000 - 4,800 = 5,200 ms lands against **5,777 measured**. So the overlap rule holds: a relock costs
+roughly `max(0, aim_ms - cycle_ms)`, not the whole lock.
+
+### This closes the Quaoar's 2x
+
+7.6 switches x 5.8 s = 44 s lost to retargeting, plus 13 s for the opening `ENGAGE_MS + aim_ms`, over
+a 109 s battle = **52% idle**, against the **~48% measured**. The Quaoar's entire cadence gap is
+forced retargeting - which is what Chris predicted ("retargeting happens more often than it might
+appear.. ships move around or die"), now with a number on it.
+
+Every component of that hull is therefore accounted for: hit rate exact, damage per hit exact,
+cooldown exact, and the 2x is idle time from relocking.
+
+### Is a lock-on level worth buying? Only on one weapon in seven
+
+Chris takes it last, and he is right almost everywhere. One 14% level recovers 14% of the blocked
+time, against +2% damage or -3% cooldown per level:
+
+| weapon | aim | cycle | ratio | blocked over the fight | lock L1 | verdict |
+|---|---|---|---|---|---|---|
+| **Quaoar rail** | 10,000 | 4,800 | **2.08** | **52 s** | **4.5%** | **beats +2% damage** |
+| Quaoar turret | 6,000 | 7,800 | 0.77 | 0 | 0% | take it last |
+| Taurus main | 4,000 | 2,750 | 1.45 | 12.5 s | 1.1% | take it last |
+| Mare Imbrium main | 5,000 | 4,200 | 1.19 | 8 s | 0.7% | take it last |
+| Reliat A torpedo | 0 | 36,000 | - | 0 | 0% | take it last |
+| Zircon escort boats | 5,000 | 7,800 | 0.64 | 0 | 0% | take it last |
+
+**The rule: lock-on only pays where `aim_ms` exceeds the cycle.** That is one weapon on this account -
+the Quaoar railgun, where retargeting burns 27% of the battle. Everywhere else the re-lock hides
+inside the cooldown and the 2% damage is the better buy, exactly as Chris plays it.
