@@ -1265,3 +1265,36 @@ specifically, at ~4% of its stock potential while the escort boats beat theirs.
 To correct an ambiguity: **139 facility rows carry a `res_cost` while NOT building.** The cost of an
 upgrade is known in advance; only `begin_time`/`end_time`, and therefore the duration, require the
 build to be running.
+
+### Blueprint TP fields, and a snapshot caveat
+
+`Tb_ship_blueprint_game_play` has 73 rows but only **38 distinct `ship_id`** - most blueprints appear
+twice under different `bp_id_u`, so any per-hull total must deduplicate first. An earlier reading of
+this table double-counted.
+
+| field | meaning |
+|---|---|
+| `version`, 4th element | **TP available** on that hull |
+| `system_and_point_used` | **TP spent**, as `system,points` pairs |
+| `effects_enhanced` | the upgrade string, in `parse_upgrades` format |
+
+On the `startupbase.pcapng` snapshot (userid 2814, "anewname" - the same account as report18): all four
+destroyers read `version` ending in **`,10`**, matching Chris's "all my DD should have 10 base TP",
+with 8-9 spent; Reliat A and Zircon read 17 available and 17 spent.
+
+**It does not match his live state.** He reports two DDs upgraded to **31 TP** via experience and
+**40 TP allocated** in total; the snapshot shows no hull above 17 and 71 spent across eight hulls. The
+capture is a point-in-time snapshot rather than a cache, so the likeliest explanation is simply that
+it predates those upgrades - unconfirmed until a fresh capture.
+
+Do **not** recompute TP spend by summing `ENHANCE_COST` ladders over `effects_enhanced`: that gives
+215 for the same eight hulls, because it counts free prefixes beyond the handful in
+`DEFAULT_PREFIXES`. `system_and_point_used` is the field to trust.
+
+### Stock and income are in the payload too
+
+`Tb_user_res` (1 row, 40 columns) carries `metal_cur` **3,206,374**, `metal_max` 31,800,000,
+`metal_add` 66,799, plus crystal and deuterium, speedups and torpedoes. So `base_plan.py --stock` can
+be filled automatically. `metal_add` is **not** the mining rate - Chris mines 529,748/hr against this
+66,799 - so it is presumably base production only, with the mining fleets accounted elsewhere.
+`Tb_user_prosperity` reads 355,736 with a `1,302260;2,48000;3,5476;` breakdown.
