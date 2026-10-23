@@ -354,3 +354,31 @@ should be read as applying to the A variant only.
 **Correction to the 2026-10-20 note** on the Zircon's 310 damage: it blamed "essentially no tech". The
 blueprint capture shows 17 TP on it, joint-highest on that account. The real cause is targeting - both
 mounts prioritise aircraft - not investment.
+
+### Measured: the escort boats do die, and the losses carry over (report19)
+
+`report19.pcapng` caught the fight Chris was describing. Ownership is read from the **team field** of
+the replay's type-3 death events (`[time, 3, instance, sid, team]`) - instance ranges are not safe,
+since `b[3]` holds both teams and craft ids overlap the ship ranges.
+
+| battle | enemy | boats at start | lost | survival |
+|---|---|---|---|---|
+| report19 #1, 147 s | Indomitable + 4x Omni Ion Cannon | 12 | **7** | 1,231 of 1,765 boat-seconds = **70%** |
+| report19 #2, 160 s | Indomitable + 066 + KCCPV2.0 | **5** | 0 | 42% of nominal from the outset |
+| report18, 162 s | Indomitable + 4x Omni Ion Cannon | 4 | 0 | 100% |
+
+Deaths in #1 run t+31.8, 32.5, 44.3, 68.5, 86.5, 104.5, 127.5 s - the first inside 32 seconds. Battle
+#2 opened with **5 of 12**, so **losses carry across back-to-back battles and are not replaced**.
+
+**The correction, quantified.** `matrix.py` credits the escort-boat mount as if it fires for the whole
+fight, so against an air-capable enemy it over-reads by **1.43x** in a fight like #1 and **2.4x** in
+#2. Chris's "some of these enemy CA are heavy anti-air, and I lose allot of the firepower" is a
+measured 30% loss within one battle and a 58% deficit entering the next.
+
+Note report18 fought the *same* NPC team composition and lost nothing - with 2 Zircons and 4 boats
+rather than 6 and 12. So exposure scales with how many boats are on the field, and a single
+observation of "they survived" does not generalise.
+
+The kill log (`b[6]`) is **not** reliable for craft: its craft rows read `[11001, <instance>, 0]`,
+where the second field is an instance rather than a sid, and the same timestamps appear as both kills
+and deaths. Use the type-3 events and their team field instead.
