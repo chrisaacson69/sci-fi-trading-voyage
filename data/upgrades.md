@@ -1175,3 +1175,32 @@ The duration ladder is not mined into the planner by design - Chris enters what 
 since the costs cannot be attributed to rows without executing NeoX bytecode and he would rather do
 the arithmetic than mine the data. `--ceilings` adds the solvency-ceiling table, `--window 8h` runs
 the away-window simulation.
+
+### Don't mine the data - capture it, once per account
+
+Chris's real constraint is not the arithmetic: *"collecting a bunch of datapoints is not [easy]. I
+used to run this in a spreadsheet, but it was hard to track so many upgrades across too many
+accounts."* Hand-entering costs defeats the purpose, and the client tables cannot be attributed to
+rows without executing NeoX bytecode.
+
+**The server sends it in bulk.** `protocol_map.json` carries facility commands, and three of them are
+GET_INFO requests - the client asking for upgrade data rather than computing it:
+
+| cmd | name | expected payload |
+|---|---|---|
+| **4961** | `FACILITY_BATCH_UPGRADE_GET_INFO` | **cost and time for everything currently upgradeable** |
+| **4963** | `FACILITY_INTELLIGENT_UPGRADE_GET_INFO` | the auto-upgrade feature's own planning data |
+| 253 | `GET_FACILITY_UP_HINT_INFO` | per-facility detail |
+| 204 / 209 / 210 / 223 | `FACILITY_UPGRADE` / `CONSTRUCT` / `AUTO_UPGRADE` / `SPEED_UP` | the actions |
+
+Recipe, same as the battle reports: start the capture, open the base and then the batch-upgrade or
+intelligent-upgrade panel, stop, then `python tools/ilcap.py cap.pcapng --port 8001 -o cap.jsonl` and
+look for cmd 4961. `ilcap.py` labels these automatically from the protocol map.
+
+This beats mining the tables on every count that matters here: the values arrive **already attributed**
+to a facility and level, they reflect **that account's actual state** rather than a generic table, and
+one short capture per account replaces the whole spreadsheet. Expect the same base64 + 4-byte length +
+zlib envelope as `team_battle_data`.
+
+Not yet captured - the three captures on disk were taken in the battle-report screen and contain no
+facility commands, so the payload shape is unverified.
