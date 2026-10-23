@@ -1087,17 +1087,26 @@ upgrade against before starting it, at 529.2k/hr:
 
 | build length | ceiling, both slots busy | ceiling, sole build |
 |---|---|---|
-| 45 min | 198,450 | 396,900 |
-| 2h 30m | 661,500 | 1,323,000 |
-| **5 h** (the longest build time in the tables) | **1,323,000** | **2,646,000** |
+| 1 h | 264,600 | 529,200 |
+| 12 h | 3,175,200 | 6,350,400 |
 | 24 h | 6,350,400 | 12,700,800 |
+| **36 h** | **9,525,600** | **19,051,200** |
+| 50 h | 13,230,000 | 26,460,000 |
 
 `tools/base_plan.py` computes this, plus which builds are co-runnable and how long to bank for one
 that is not. Costs and times are entered by hand, since they cannot yet be attributed to rows.
 
-Build times in `_Tb_cfg_facility` run **150 s to 18,000 s** (2.5 min to 5 h), so the 5-hour row is the
-binding case: **any single upgrade over ~1.32M metal cannot be run two-at-a-time at this mining rate**,
-and over ~2.65M cannot be sustained even alone.
+**Correction (2026-10-22).** An earlier version of this section said build times top out at 5 h and
+concluded that "any single upgrade over ~1.32M metal cannot be run two-at-a-time". **Both were
+wrong.** The 18,000 s maximum came from `_Tb_cfg_facility`, which holds only the short/early times;
+per-level times live in `_Tb_cfg_facility_level_ex`, whose half-hour-aligned ladder runs **0.5 h to
+50 h** (24 h, 30 h, 34.5 h, 37.5 h, 40 h, 45 h, 50 h at the top, plus outliers near 85-92 h). Chris
+called this out from play experience - he expected 36 h at high levels, and the ladder brackets it.
+
+The correction inverts the conclusion: **long builds are EASIER to sustain, not harder**, because burn
+is cost divided by time and duration is the denominator. A 36 h upgrade can cost 9.5M and still share
+a slot pair. What breaks the budget is a high cost-to-TIME ratio, not a high cost - 20M over 50 h
+burns 400k/hr and is fine, while the same 20M over 5 h would need 4M/hr and is impossible.
 
 Enhancement costs are ignored by design - Chris reports them as trivial against the level upgrades.
 
