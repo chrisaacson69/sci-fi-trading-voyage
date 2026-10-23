@@ -305,3 +305,52 @@ rail is ahead from **armour 75**. Two caveats on that bracket - it depends on th
 (+15% vs CA+), without which the torpedo only leads below armour ~50, and it depends entirely on crit
 chance stacking. At the conservative reading (15% rather than 45%) **the rail wins at every armour
 value against every class**, so the torpedo's CA build is provisional until a capture settles it.
+
+---
+
+## Zircon: the two variants are opposites, and the escort boats are killable (2026-10-22)
+
+Chris, from play: the escort craft are classified as corvettes rather than UAVs, so **they can take
+damage**; they carry only **2,000 HP**, which is tiny for a corvette; and **they target aircraft
+first**, which helps against air but caps their anti-ship output. Against BC and CV they still beat
+the Reliat A, and they are about even against CA - except where the enemy CA is heavy anti-air, which
+costs him much of the firepower.
+
+Every part of that checks out, and two of them correct earlier notes here.
+
+### The craft are 2,000 HP, and the table cannot distinguish them from UAVs
+
+| craft | belongs to | `SHIP_TYPE` | HP |
+|---|---|---|---|
+| **11001 / 11002** | Zircon escort boats | 10 | **2,000** |
+| 12101 | XenoStinger UAV | 10 | **60** |
+| 10306 | M470 repair drone | 10 | **60** |
+
+`SHIP_TYPE` is **10 for all of them**, so type alone cannot tell an escort boat from a UAV - the
+distinguishing fact is a 33x HP gap. A 60 HP drone is effectively unkillable-or-instantly-replaced
+noise; a 2,000 HP escort boat is a real target that dies and stays dead.
+
+**Model limitation, named:** `matrix.py` treats these mounts as always firing, so their damage is
+credited unconditionally. Against an anti-air enemy they are shot off the hull and that damage never
+arrives - which is precisely the firepower loss Chris reports. Any Zircon number from this model is
+therefore an upper bound against AA-capable opponents.
+
+### The variants invert each other's targeting
+
+| | main mount | escort boats |
+|---|---|---|
+| **31901, base** (the hull actually fielded) | priority 1 = **corvette, craft, fighter** | priority 1 = **fighter** |
+| **31902, Zircon A** | priority 1 = **CA, BC, CV** | priority 1 = **BC, CV** |
+
+So the base Zircon is **anti-air on both mounts** and the A variant is **anti-capital on both**. That
+is why the fielded Zircon managed 310 damage to ships across a 162 s battle while its escort boat took
+the battle's first kill at t+25.5 s against an enemy fighter.
+
+**Correction to the 2026-10-19 armour curves.** Those were computed for **31902 (Zircon A) at 53 TP**
+and compared against the Reliat A. The hull Chris fields is **31901**, whose targeting is the opposite,
+so that comparison described a ship he does not have. The Reliat A side of it stands; the Zircon side
+should be read as applying to the A variant only.
+
+**Correction to the 2026-10-20 note** on the Zircon's 310 damage: it blamed "essentially no tech". The
+blueprint capture shows 17 TP on it, joint-highest on that account. The real cause is targeting - both
+mounts prioritise aircraft - not investment.
