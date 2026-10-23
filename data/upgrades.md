@@ -1023,3 +1023,54 @@ full comparison. The short version:
   prefix-`115` accuracy penalty are both ruled out as the Quaoar's cause.
 * `repair_pm` checked empirically for the first time: model capacity 30,612/min against 20,378 and
   17,382 measured, with the fleet ending at 89-100% HP — a floor under capacity, so consistent.
+
+---
+
+## The client holds 348 config tables, not 85 (2026-10-22)
+
+`lagrange-combat/tables/` is a **curated subset**. The decrypted client carries **348** tables in
+`decrypted/common/config/db/` (271 of them `_Tb_cfg_*` data tables), so nothing was ever missing from
+the game - only from the extract. That is why the whole base/facility side looked absent.
+
+### Reading them: constants yes, rows no
+
+The files are marshalled Python modules whose rows are built by their own bytecode. **That bytecode
+cannot be executed** - NeoX ships a modified Python, so `exec` on the code object segfaults 3.14 and
+hard-exits even the bundled matching `tools/py311/python.exe` with no traceback. `marshal.loads`
+itself works under 3.11 (it does not validate bytecode), so every **constant** is recoverable.
+
+One trap cost an hour: **code objects nest inside TUPLES in `co_consts`**, so a walker that only
+recurses on `CodeType` misses most of the data. It reported the facility costs as absent until a raw
+byte grep contradicted it. `tools/load_table.py` now deep-walks properly.
+
+Constants come out in emission order - which is row order - but **without column attribution**, so
+this recovers values, not tables. Finishing the job needs whatever produced the existing 85 CSVs, or
+a NeoX-aware disassembler.
+
+### Facility costs: found, and the resource ids are pinned
+
+`_Tb_cfg_facility_level_ex` (plus `_ex_3`, `_ex_4`, `_ex_7`, `_ex_8`, `_ex_62`) holds 728
+resource-cost strings in the form `type,amount;type,amount;...`:
+
+    1,120000;2,300;3,120;4,0
+    1,0;2,18600;3,7440;4,0
+
+**Type 2 is metal**, confirmed twice against Chris's in-game reading of Generic Port 1 - level 1 at
+**300** and level 2 at **18,600**. Type 1 and 3 are unidentified; on the rows where they co-vary the
+ratio is type1 = 400 x type2 and type3 = 0.4 x type2, and by Chris's resource values (metal 1,
+crystal 40, deuterium 100) a 120,000 / 300 / 120 split lands at 83% / 8% / 8% by value - close to the
+90/5/5 he recalls, which is consistent with type 1 being a bulk resource.
+
+The same table also carries effect strings in a different id space (`152,3000;153,90;154,90;` and
+`141,1200000;142,30000;143,15000;`), so costs and effects are co-located - good news for a planner
+once rows can be attributed.
+
+### Facility tree, from the subset we already had
+
+75 root facilities; 257 enhancement nodes in chains up to 6 deep; **exactly 4 choice points**
+(`1008014`, `1039013`, `1042011`, `1043013`), matching Chris's "only 4 real choices". `1006` is
+Generic Port 1 - lowest root, legacy id 11, two-node chain. Unlike the ship trees, the facility tree
+**does** carry explicit `PARENT_ENHANCE_ID` links, so prerequisites are available here.
+
+Correction to an earlier note: the root's second field is `2` on **all 75** roots, so it is a
+node-type marker, not a level count.
