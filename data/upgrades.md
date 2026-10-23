@@ -1117,3 +1117,37 @@ The names are readable after all: `_Tb_cfg_facility` carries them as `img_<name>
 `small_integrated_plant`, ..., `generic_port_1` at #7, ..., `advanced_habitat_46`) with blank cost and
 time columns to fill in. **The mapping from emission order to the tree's facility ids (1006-1083) is
 NOT verified** - 79 names against 75 tree roots - so treat the order as a name list, not an id map.
+
+### The away-window planner: "I'm going to sleep for 8 hours, what should I build?"
+
+That is the real question, and it is not the burn-rate question. `tools/base_plan.py --window 8h`
+answers it:
+
+```
+python tools/base_plan.py --rate 529748 --slots 2 --stock 800000 --window 8h --optimise \
+   --build "smelting_plant L7,2400000,12h" --build "warehouse_2 L6,1800000,6h"
+```
+
+**One assumption is load-bearing: when does the metal leave your account?**
+
+* `--payment upfront` (the default) - the whole cost is deducted when a build **starts**. Running out
+  then means being unable to *start* the next thing, and a long build is a virtue because it needs no
+  attention. Chris's remark that short of resources "you only have to upgrade what you can currently
+  afford" is start-gated, which is why this is the default.
+* `--payment drain` - cost spread over the duration, so burn rate governs and two individually
+  affordable builds can bankrupt you jointly.
+
+**Under the up-front model, ORDER matters more than selection.** An unaffordable build parks a slot
+until income catches up, so the planner tries every ordering and keeps the one committing the most
+metal with the least idle slot time. On a worked example with 800k banked at 529,748/hr, starting the
+1.8M build before the 2.4M one pulled the first start from 3h01m to **1h53m** - over an hour of slot
+time recovered purely from sequencing.
+
+It also names stalls usefully: *"needs 121,512 more, would not afford it inside the window"*.
+
+### Mining rate is an input, not a model
+
+Chris: the rate depends on miner count and type, shipper pairing, resource distance, miner upgrades,
+base output, and earned/bought/built bonuses - so it is treated as a parameter (`--rate`), currently
+**529,748/hr**, with a new miner due to add 12-15% and a round of miner upgrades worth nearly 20%
+after that. Modelling it is a separate exercise and is deliberately not attempted here.
