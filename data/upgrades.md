@@ -1204,3 +1204,38 @@ zlib envelope as `team_battle_data`.
 
 Not yet captured - the three captures on disk were taken in the battle-report screen and contain no
 facility commands, so the payload shape is unverified.
+
+### Solved: the base arrives in the login payload
+
+`USER_LOGIN_GAME_SERVER` (cmd 99991) carries the **whole account as ~513 named tables with column
+headers**, and `Tb_facility` is one of them. From `startupbase.pcapng`: **190 rows x 25 columns** -
+58 facilities, 132 enhancements, **131 carrying their next upgrade's cost** - with no transcription at
+all. `tools/base_state.py` decodes it; `data/base_countdemonet.csv` is the result.
+
+Per row: `facility_id` (4 digits = a facility, 7 = one of its enhancement nodes), `level` (current, so
+`res_cost` is the price of the NEXT one), `res_cost`, `begin_time`/`end_time`, `auto_level` (the
+auto-upgrade target), `productivity`.
+
+**Resource ids, settled.** Facility rows read `1,1300000,2,0,3,0,4,0` - pure type 1 - while
+enhancement rows read `1,0,2,45,3,15,4,0` - type 1 zero, types 2/3 small. So **type 1 = metal,
+2 = crystal, 3 = deuterium**, which is exactly Chris's account of the economy: upgrades all metal,
+enhancements the cheap crystal/deuterium ones at tens of units.
+
+**This overturns the earlier "type 2 = metal"** inferred from `_Tb_cfg_facility_level_ex`, where 300
+and 18,600 appeared in the type-2 slot. Those were coincidental matches in a table whose rows could
+not be attributed; this one has real column names and is authoritative.
+
+**Validated against hand-read figures**: facility 1049 at level 2 reads **3,600,000 metal over 78,000 s
+(21h 40m)**, matching the Resource Port 2 L3 numbers Chris read off the game. 1043 at level 3 reads
+1,200,000 over 18,960 s.
+
+### The one remaining gap: durations
+
+Costs come for all 131, but `begin_time`/`end_time` are only set while a build **runs**, so an upgrade
+you have not started carries no timing - and burn rate needs it. Two anchors exist (3.6M/78,000 s and
+1.2M/18,960 s) and they do not share a ratio, so duration is not a function of cost.
+
+Practically this still collapses the work: **all costs free from one capture, and a duration read off
+the game only for the few upgrades actually being compared.** The fuller fix is the batch-upgrade
+panel, cmd 4961, which should carry both - it was not open during this capture (cmd 4963 fired and
+returned only `{"iType": 3}`, the auto-upgrade strategy setting).
