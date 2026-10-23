@@ -1128,14 +1128,9 @@ python tools/base_plan.py --rate 529748 --slots 2 --stock 800000 --window 8h --o
    --build "smelting_plant L7,2400000,12h" --build "warehouse_2 L6,1800000,6h"
 ```
 
-**One assumption is load-bearing: when does the metal leave your account?**
-
-* `--payment upfront` (the default) - the whole cost is deducted when a build **starts**. Running out
-  then means being unable to *start* the next thing, and a long build is a virtue because it needs no
-  attention. Chris's remark that short of resources "you only have to upgrade what you can currently
-  afford" is start-gated, which is why this is the default.
-* `--payment drain` - cost spread over the duration, so burn rate governs and two individually
-  affordable builds can bankrupt you jointly.
+**Payment is UP FRONT, confirmed by Chris 2026-10-22**: "metal is consumed at the start of the
+level". So running out means being unable to *start* the next thing, a long build is a virtue while
+away, and the `--payment drain` alternative is retained only for comparison.
 
 **Under the up-front model, ORDER matters more than selection.** An unaffordable build parks a slot
 until income catches up, so the planner tries every ordering and keeps the one committing the most
@@ -1151,3 +1146,32 @@ Chris: the rate depends on miner count and type, shipper pairing, resource dista
 base output, and earned/bought/built bonuses - so it is treated as a parameter (`--rate`), currently
 **529,748/hr**, with a new miner due to add 12-15% and a round of miner upgrades worth nearly 20%
 after that. Modelling it is a separate exercise and is deliberately not attempted here.
+
+### What the planner is actually for: sorting burn on what is left
+
+Chris: *"I don't need the planner to be perfect.. I need it to sort burn rates of what is left so I
+can make better choices"*, and *"part of this is picking slow burn upgrades so you can build up the
+metal to afford the big ones"*. So the default output is a burn table sorted slow-burn first, with the
+column that drives the decision:
+
+    surplus/hr = mining rate - burn        banks = surplus x duration
+
+Two real level-7 upgrades he supplied, at 529,748/hr:
+
+| upgrade | metal | time | burn/hr | % income | surplus/hr | banks |
+|---|---|---|---|---|---|---|
+| **Resource Port 2 L3** | 3,600,000 | 21h 40m | **166,153** | 31% | 363,594 | **7,877,873** |
+| Military Port 2 L4 | 3,900,000 | 15h 50m | 246,315 | 46% | 283,432 | 4,487,676 |
+
+Together they burn **412,469/hr (78% of income)**, so they are co-runnable and still bank 117,279/hr.
+Running both: 1.86M banked over the first 15h 50m, then Resource Port continues alone for another
+2.12M - about **4M ahead after 21h 40m**, enough to start the next 4M upgrade with no wait.
+
+Note the inversion worth carrying: **the cheaper upgrade is the better slow-burn pick**, because it is
+longer. 3.6M over 21h 40m burns less per hour than 3.9M over 15h 50m. Cost alone does not rank
+upgrades; cost over time does.
+
+The duration ladder is not mined into the planner by design - Chris enters what the game shows him,
+since the costs cannot be attributed to rows without executing NeoX bytecode and he would rather do
+the arithmetic than mine the data. `--ceilings` adds the solvency-ceiling table, `--window 8h` runs
+the away-window simulation.
