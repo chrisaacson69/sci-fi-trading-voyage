@@ -1074,3 +1074,37 @@ Generic Port 1 - lowest root, legacy id 11, two-node chain. Unlike the ship tree
 
 Correction to an earlier note: the root's second field is `2` on **all 75** roots, so it is a
 node-type marker, not a level count.
+
+### Base build scheduling is a FLOW problem, not a budget one
+
+Chris's actual constraint: **529.2k metal/hr mined, 2 build slots, don't run dry.** A build is not a
+lump sum - it drains for its whole duration - so the only number that matters is
+
+    burn rate = metal cost / build time
+
+You are solvent while the active burns sum to under income. That gives a cost ceiling to check any
+upgrade against before starting it, at 529.2k/hr:
+
+| build length | ceiling, both slots busy | ceiling, sole build |
+|---|---|---|
+| 45 min | 198,450 | 396,900 |
+| 2h 30m | 661,500 | 1,323,000 |
+| **5 h** (the longest build time in the tables) | **1,323,000** | **2,646,000** |
+| 24 h | 6,350,400 | 12,700,800 |
+
+`tools/base_plan.py` computes this, plus which builds are co-runnable and how long to bank for one
+that is not. Costs and times are entered by hand, since they cannot yet be attributed to rows.
+
+Build times in `_Tb_cfg_facility` run **150 s to 18,000 s** (2.5 min to 5 h), so the 5-hour row is the
+binding case: **any single upgrade over ~1.32M metal cannot be run two-at-a-time at this mining rate**,
+and over ~2.65M cannot be sustained even alone.
+
+Enhancement costs are ignored by design - Chris reports them as trivial against the level upgrades.
+
+### 79 facility names recovered
+
+The names are readable after all: `_Tb_cfg_facility` carries them as `img_<name>` asset keys, so
+`data/facilities.csv` now lists all 79 in emission order (`trading_center`,
+`small_integrated_plant`, ..., `generic_port_1` at #7, ..., `advanced_habitat_46`) with blank cost and
+time columns to fill in. **The mapping from emission order to the tree's facility ids (1006-1083) is
+NOT verified** - 79 names against 75 tree roots - so treat the order as a name list, not an id map.
