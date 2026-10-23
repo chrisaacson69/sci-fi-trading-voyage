@@ -1239,3 +1239,29 @@ Practically this still collapses the work: **all costs free from one capture, an
 the game only for the few upgrades actually being compared.** The fuller fix is the batch-upgrade
 panel, cmd 4961, which should carry both - it was not open during this capture (cmd 4963 fired and
 returned only `{"iType": 3}`, the auto-upgrade strategy setting).
+
+### The login payload also carries every owned blueprint, with its real upgrades
+
+`Tb_ship_blueprint_game_play` - **73 rows** on the startupbase account - and the key column is
+`effects_enhanced`, which is in **exactly the format `matrix.parse_upgrades` already reads** (the same
+shape as a battle report's field 8). Verified: the Eris Heavy Cannon's captured string runs through
+`apply_upgrades` and yields hp 32,067 with its real mount damage.
+
+So the combat model can score the account's **actual ships** rather than a hypothetical maxed build,
+and `system_and_point_used` gives the TP genuinely committed per system. `Tb_ship` (74 rows, 72
+columns) carries the built ships alongside. `tools/base_state.py --ships` extracts it.
+
+TP committed on that account: Reliat A 17, Zircon 17, Eris Heavy Cannon 9, Taurus Pulse 9, Winged
+Hussar A 8, Quaoar Railgun 8, CV3000 2, AC721 Logistics 1 - and nothing on the other 64 blueprints.
+
+**Correction.** The 2026-10-20 note explained the Zircon's 310 damage over a 162 s battle as "the base
+Zircon at essentially no tech". The roster matches report18's exactly, so it is the same account, and
+the Zircon carries **17 TP - the joint-highest of any hull on it.** That explanation was wrong. What
+stands is the measurement itself and the narrower finding that the anomaly is the main cannon
+specifically, at ~4% of its stock potential while the escort boats beat theirs.
+
+### Costs ARE available before starting
+
+To correct an ambiguity: **139 facility rows carry a `res_cost` while NOT building.** The cost of an
+upgrade is known in advance; only `begin_time`/`end_time`, and therefore the duration, require the
+build to be running.
