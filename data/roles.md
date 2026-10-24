@@ -382,3 +382,60 @@ observation of "they survived" does not generalise.
 The kill log (`b[6]`) is **not** reliable for craft: its craft rows read `[11001, <instance>, 0]`,
 where the second field is an instance rather than a sid, and the same timestamps appear as both kills
 and deaths. Use the type-3 events and their team field instead.
+
+---
+
+## Inostrancevia B vs C (2026-10-23)
+
+31802 "B" and 31803 "C". Both front row (0), both hp 14,480, both six systems totalling 18,150 system
+HP - structurally identical hulls. Both fire an **energy UAV on a 10 s cycle with 60 HP craft**, so
+unlike the Zircon's 2,000 HP escort boats these are true UAVs and the attrition caveat does not apply.
+
+| | CP | DPM | EHP | DPM/CP | EHP/CP | BV/CP |
+|---|---|---|---|---|---|---|
+| **B** 31802 | 6 | 2,801 | 21,293 | 467 | **3,549** | **1,287** |
+| **C** 31803 | 8 | 3,977 | 21,230 | **497** | 2,654 | 1,149 |
+
+**Per CP their raw output is identical**: B is 110 x 5 = 550 per 10 s / 6 CP = 9.2/s/CP; C is
+370 x 2 = 740 / 8 CP = 9.25/s/CP. They carry the **same EHP** while C costs 33% more, so on BV/CP
+**B leads by 12%** - C buys +42% absolute damage for +33% CP.
+
+### Chris's three observations, all confirmed
+
+* **The cooldown split favours C.** B is 3,000 ms duration + 7,000 cooldown; C is 2,000 + 8,000. A
+  -40% cooldown cut therefore gives **C 1.471x against B's 1.389x** - 6% more from the same upgrade,
+  because cooldown is a larger share of C's cycle.
+* **C does system damage, and it comes from its STRATEGY not its weapon.** The two weapons are
+  identical in kind (Energy, type 4, same hit-table classes). B's `9165` grants
+  `PRIORITY_ATTACK_LOWEST_HP` (20 at 31-70% target HP, 100 at 0-30%) - it retargets onto wounded
+  enemies, pairing with 110-damage hits that waste little on a dying target. C's `9170` grants
+  `SYSTEM_BURST_DAMAGE_INC` (+20 at 61-90%, +50 at 0-60%) plus a permanent
+  `SHIP_DO_SYSTEM_DAMAGE_WHEN_REMOVE` death-explosion - its crits are **system** crits, which disables
+  rather than kills. Each strategy is tuned to its own weapon profile.
+* **The command upgrades are real, and one is decisive.** System `3180x06` has `LIMIT=2` of three:
+
+| prefix | cost | effect |
+|---|---|---|
+| **`9911`** | **12 TP** | **`EFFECT_BATTLE_SHIP_ROW_INDEX` 1 - moves the ship OFF the front row** |
+| `8623` | 20 TP | `MAIN_TARGET_AND_SELF_TEAM_RETREAT_DELAY` 20 |
+| `8302` | 5 TP | `SYSTEM_BURST_DAMAGE_SHIP_LOCK` |
+
+  and `3180x03` carries the HP: `3180310` is a 7-rung ladder for 14 TP (+100/rung, so +7% by the
+  hundredths-of-a-percent convention) plus `1121`/`1122` and an unmodelled `SYSTEM_BURST_INJURY_DEC 30`.
+
+### `9911` inverts the verdict
+
+Battle7 measured a row-0 Eris HC taking **1,543 damage per ship** while the row-1 Reliat A took
+**zero**. B's whole advantage is EHP/CP - survivability that a mid-row hull never cashes. C's advantage
+is absolute DPM, which it keeps at any row.
+
+**So: on the front line B wins on BV/CP by 12%. Buy `9911` for 12 TP and C becomes the better hull** -
+2 extra CP for 42% more damage on a platform whose hit points stop mattering. It also explains why C
+carries the system-damage strategy: a mid-row disabler does not need to tank.
+
+**The model sees none of this.** `ROW_INDEX` is read from `Tb_cfg_ship` and never modified, so every
+EHP figure above assumes front-row exposure for both hulls. Also unmodelled and equal across the pair:
+`HIT_RATE_INC 20` x2 (+40% hit), `FLIGHT_TIME_DEC 20` x2, and the damage prefixes `3111`/`3107`.
+Because almost every gap applies to both hulls identically the **relative** comparison is far more
+trustworthy than the absolute numbers - the exception being the strategies, where C has three granted
+skills against B's two, so C's 1,149 BV/CP is more of a floor.
