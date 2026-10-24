@@ -483,3 +483,58 @@ But the strategies are not DPM plays. B's kills stragglers sooner, so fewer enem
 survivability, invisible in DPM. C's amplifies disabling - it denies the enemy's output and escape.
 **The hit prefix is the DPM buy; the strategies are the control buys**, and which matters is
 situational, as Chris says.
+
+---
+
+## The model has no concept of target priority - and it has now misled three times (2026-10-24)
+
+`dpm_out` computes damage against a target it is *handed*. It never asks whether the weapon would
+*choose* that target. `Tb_cfg_weapon_priority` holds the answer and the model reads only its hit
+rates, never its tiers. Chris has corrected three separate conclusions that came from this:
+
+| hull | the model said | priority says | reality |
+|---|---|---|---|
+| Quaoar Torpedo | strong vs CA below armour 150 | main prio1 = CA/BC/CV, **secondary = aircraft** | nothing at tier 1 vs an all-FF/DD enemy, main drops to 55% hit |
+| Zircon (base 31901) | ~860 DPM/CP at 53 TP | **both** mounts prio1 = aircraft | 310 damage to ships in 162 s |
+| **Light Cone Composite A** | **361 DPM/CP vs armour 240**, best scaler of the six | **no mount wants a BC** | Chris: "pretty useless against those BC even when fully upgraded" |
+
+The Light Cone case is the clearest. Its four mounts:
+
+| mount | dmg | cycle | priority 1 |
+|---|---|---|---|
+| `15051` | 280 x2 | 32,000 | **DD, FF** (BC only at tier 2) |
+| `15052` | 160 x2 | 7,000 | corvette, craft, fighter |
+| `15053` | 25 x4 | 4,000 | corvette, craft, fighter |
+| `11050` | 25 x4 | 2,000 | fighter - and **no hit-table entry for any ship class** |
+
+91% of the model's anti-Spear DPM came from `15051`, a gun whose priority sends it at frigates. By
+contrast the **066 General** (`15021`, 420 dmg, prio1 = BC/CA/CV) and the **KCPV Railgun** (`15015`,
+**700 dmg**, prio1 = BC/CA/CV, tier 2 BS, floors only at armour 630) each carry a dedicated
+anti-capital main gun.
+
+`11050` also exposes a smaller bug: with no ship entries in its hit table the model substitutes a
+**default 10% hit** rather than zero, inventing DPM for a mount that physically cannot engage ships.
+Only 1.3% of the total here, but it is pure fiction.
+
+**Rule to apply until priority is modelled: read the tier-1 list before trusting any DPM/CP figure.**
+A hull with no tier-1 match for the enemy class will not deliver its modelled damage, however good
+the arithmetic.
+
+### The 320 CP cruiser fleet (season 2, new account)
+
+Six cruiser blueprints owned, all 100% ballistic, against an enemy at armour 120-240 (CV3000, 2x
+ST59, 3x Spear of Uranus). Caps are **12** for the 066 General and the KCPV family, and the Alioth
+real BP ships with 20 TP.
+
+**2x Alioth + 12x 066 General + 4x KCPV Railgun = 320 CP exactly**, and the mix is stable as TP
+arrives: 53,008 DPM / 1,555,130 EHP / 14,000 heal per minute now, rising to 72,550 / 1,903,038 /
+18,421 at Alioth 50 and guns 32.
+
+Notes that decided it:
+* The optimiser takes **two** Alioths unprompted - its healing is worth more than a third KCPV.
+* The Alioth's 20 starting TP buys **no extra healing**: 7,000/min at both 0 and 20 TP, reaching
+  9,211 only at 50.
+* Spend free TP on the **066 General**, not the KCPV: 22 TP is worth +7,776 fleet DPM there against
+  +2,304 on the KCPV, purely because it is 12 ships rather than 4.
+* Even at 50 TP the best cruiser trails the **measured** Taurus Pulse (720 DPM/CP). These are
+  frontage and sustain, not a damage upgrade.
