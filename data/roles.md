@@ -439,3 +439,47 @@ EHP figure above assumes front-row exposure for both hulls. Also unmodelled and 
 Because almost every gap applies to both hulls identically the **relative** comparison is far more
 trustworthy than the absolute numbers - the exception being the strategies, where C has three granted
 skills against B's two, so C's 1,149 BV/CP is more of a floor.
+
+### Correction: C's system damage is its WEAPON, not its strategy
+
+`Tb_cfg_weapon` carries a `SYSTEM_BURST_*` family the model never reads, and it separates the pair:
+
+| | `11242` (B) | `11243` (C) |
+|---|---|---|
+| `SYSTEM_BURST_PRIORITY` | - | **`1,5`** |
+
+So system damage is **intrinsic to C's UAV**; the strategy's `SYSTEM_BURST_DAMAGE_INC` only amplifies
+what the weapon already does. An earlier note here credited the strategy for it - wrong.
+
+The values are **ordered preference lists** (`1`, `1,3,5`, `1,5`, `5,2,1` ...), present on **69 of 601
+weapons**, so C's `1,5` reads as **weapon first, then propulsion** - exactly Chris's account of what it
+disables, and why it is good for stopping a large ship escaping. Also unread by the model:
+`SYSTEM_BURST_DECAY_RATIO` (69 weapons), `SYSTEM_BURST_MODE` (59), and **`DESTROY_COEF` on 399** -
+two thirds of all weapons.
+
+A standing consequence: **a portion of C's DPM never lands on hull HP.** It disables instead, so its
+497 DPM/CP overstates its killing power and understates its control.
+
+### Hit rate versus strategy: the cap decides it
+
+`HIT_RATE_INC` is multiplicative and capped at 100%, so one maxed prefix (12 TP) is worth:
+
+| target | B | C |
+|---|---|---|
+| FF / DD | **+17.6%** | +17.6% |
+| CA | +5.3% | +5.3% |
+| BC | **+0%** (already at 100%) | +11.1% |
+| CV | +20% | +20% |
+
+**The second prefix is a trap** - every class except carriers is already capped by the first, so the
+extra 12 TP buys only a CV gain (70 -> 98).
+
+Chris's read holds: on DPM the hit prefix beats the strategy, being **cheaper (12 vs 18 TP)** and
+landing +17.6% for B against the FF/DD it prioritises and +11.1%/+20% for C against its BC/CV. That
+B's version is worth **nothing** against battlecruisers - already 100% - independently confirms B is
+built for the small end.
+
+But the strategies are not DPM plays. B's kills stragglers sooner, so fewer enemy guns keep firing -
+survivability, invisible in DPM. C's amplifies disabling - it denies the enemy's output and escape.
+**The hit prefix is the DPM buy; the strategies are the control buys**, and which matters is
+situational, as Chris says.
