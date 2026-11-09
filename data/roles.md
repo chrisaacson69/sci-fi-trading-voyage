@@ -538,3 +538,75 @@ Notes that decided it:
   +2,304 on the KCPV, purely because it is 12 ships rather than 4.
 * Even at 50 TP the best cruiser trails the **measured** Taurus Pulse (720 DPM/CP). These are
   frontage and sustain, not a damage upgrade.
+
+---
+
+## DelA5Hades small-ship roles, and a 5 CP front-row healer the model scored at zero (2026-11-09)
+
+Calibrated against Chris's measured baseline: the model reads his 82 TP Mare Imbrium at 625 DPM/CP at
+armour 50 where he measures **510**, so model x **0.82** below. His Mare Serenitatis cross-checks the
+method - calibrated 640 against a measured **330 anti-ship**, i.e. 48% going to systems, which matches
+his own ~40% estimate and his conclusion that it is not worth wanting.
+
+Calibrated real DPM/CP, all at 30 TP (Zircon 35, Imbrium 82, Serenitatis 80):
+
+| hull | CP | row | 0 | 50 | 120 | 240 | tier-1 | relock |
+|---|---|---|---|---|---|---|---|---|
+| Quaoar Railgun | 6 | 1 | 1134 | 846 | 690 | 447 | BC,CA,CV,DD,FF | **5.2 s** |
+| Mare Serenitatis A | 5 | 2 | 817 | 640 | 528 | 335 | BC,CA,CV+air | 0 |
+| Aldabra A | 8 | 0 | 777 | 529 | 421 | 238 | DD,FF+air | 0 |
+| **Mare Imbrium (baseline)** | 5 | 0 | 674 | **510** | 396 | 200 | DD,FF+air | 0 |
+| Inostrancevia 8 CP (31803) | 8 | 0 | 646 | **594** | **594** | **594** | **BC,CV**+air | 0 |
+| Inostrancevia 6 CP (31802) | 6 | 0 | 627 | 558 | 558 | 558 | **DD,FF**+air | 0 |
+| Ruby Ion Cannon | 8 | 1 | 584 | **584** | **584** | **584** | **BC,CA,CV** | 0 |
+| Ruby Railgun | 5 | 1 | 601 | 459 | 365 | 203 | DD,FF | **0** |
+| Winged Hussar A | 6 | 1 | 589 | 461 | 283 | 162 | DD,FF | 0 |
+| Zircon 31902 | 8 | 1 | 584 | 573 | 558 | 532 | BC,CA,CV | 0 |
+| Alkaid (either) | 6 | 2 | 315 | 254 | 169 | **29** | - | 0 |
+
+### Roles, Chris's taxonomy with three corrections
+
+Confirmed: **Q Rail is anti-large *because* of the aim time** (a 10 s lock wants a target that will not
+die or move, which is what a capital is); **Aldabra A** front tank, anti-small; **Mare Imbrium** the
+short-battle hull via the 120 s Firepower Assault - his 15-20% gain over spending those TP on damage
+is what that window predicts; **the Inos favour large, the 6 CP wants small**; **Winged Hussar**
+anti-small with missile reach into back rows; **Zircon 31902** anti-heavy but its 2,000 HP corvettes
+do not survive (7 of 12 lost in 147 s, and losses carry over).
+
+Corrections:
+
+* **The Ruby Railgun does NOT suffer from aim time.** Its 5,000 ms lock sits inside a 10,200 ms cycle,
+  so relocks cost **0.0 s**. Its only weakness is ballistic falloff, 601 -> 203.
+* **The energy Ruby is the mirror of the wish.** Ruby Ion Cannon, 8 CP, ion type 3, **flat 584 DPM/CP
+  at every armour** - but tier-1 **BC, CA, CV**. Armour-immune and anti-capital, so it cannot fill the
+  anti-small slot Chris wanted a "Pulse Ruby" for.
+* **The Alkaids are the clearest cut on the account**: 254 DPM/CP at armour 50 collapsing to **29** at
+  240, and their +25% shield is energy resistance that does nothing against a ballistic enemy.
+
+### Bug: the Ruby Defense is a front-row healer scored at zero
+
+Mount `13056` is `ACTION: 4, ACTION_PARAM: 800` - the same action code as the M470's 500 and the
+Alioth's 350 - but `hull()` labels its action **"Operation"** instead of "Repair", and `repair_pm`
+filters on the literal string, so it returns 0. **It is the only hull in the game affected.**
+
+Corrected: 800 x 60000/25000 = **1,920 repair/min at 5 CP = 384 repair/CP, ROW 0**.
+
+| healer | CP | row | repair/min | repair/CP |
+|---|---|---|---|---|
+| M470 Support | 6 | 2 | 2,727 | 455 |
+| **Ruby Defense** | **5** | **0 front** | **1,920** | **384** |
+| Alioth-class Type A | 20 | 0 | 7,000 | 350 |
+
+So it is the **cheapest front-row healer in the game and better per CP than the Alioth** - on an
+account whose measured problem is front-row attrition.
+
+### The 80 CP fill
+
+**10x Inostrancevia 8 CP = exactly 80 CP**, flat 594 from armour 50 to 240: +16% on the baseline at
+50, +50% at 120, ~3x at 240. But the 8 CP variant has **no tier-1 match for FF/DD**, so against a
+small-ship enemy the 6 CP version (tier-1 DD/FF, flat 558) is the correct hull - 13x = 78 CP.
+
+**Do not take the Quaoar Railgun here.** It tops the table at 846 but carries a 5.2 s relock, and we
+measured it at ~52% of nominal in a 109 s fight with 7.6 target switches. Chris's battles are
+*shorter*, which makes the 13 s opening lock a larger share, not smaller - so 846 becomes ~440, below
+both Inos and below his own baseline. No lock-on reduction exists anywhere on its tree.
